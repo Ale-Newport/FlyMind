@@ -115,10 +115,11 @@ function OdorHeatmap({ field }: { field: { x_mm: number[]; y_mm: number[]; attra
   );
 }
 
+/** Path of the thorax. Live frames carry [x, y, z]; replays may carry [x, y] (drawn on the floor). */
 function Trail({ points }: { points: number[][] }) {
   const geom = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(points.flatMap((p) => [p[0], p[1], 0.03])), 3));
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(points.flatMap((p) => [p[0], p[1], p[2] != null && p[2] > 1.6 ? p[2] : 0.03])), 3));
     return g;
   }, [points]);
   return (
@@ -126,6 +127,43 @@ function Trail({ points }: { points: number[][] }) {
       <primitive object={geom} attach="geometry" />
       <lineBasicMaterial color="#5eead4" />
     </line>
+  );
+}
+
+/** Vertical drop line and ground shadow under an airborne fly, so altitude is readable. */
+function FlightGuide({ source }: { source: React.RefObject<PoseSource> }) {
+  const group = useRef<THREE.Group>(null);
+  const line = useRef<THREE.Group>(null);
+  const shadow = useRef<THREE.Mesh>(null);
+  useFrame(() => {
+    const pos = source.current?.pos;
+    const g = group.current;
+    if (!g) return;
+    if (!pos || pos[2] < 2.0) { g.visible = false; return; }
+    g.visible = true;
+    const h = pos[2];
+    g.position.set(pos[0], pos[1], 0);
+    line.current?.position.set(0, 0, h / 2);
+    line.current?.scale.set(1, 1, h);
+    if (shadow.current) {
+      const s = 1 + Math.min(h, 30) * 0.05;
+      shadow.current.scale.set(s, s, 1);
+      (shadow.current.material as THREE.MeshBasicMaterial).opacity = Math.max(0.08, 0.5 - h * 0.015);
+    }
+  });
+  return (
+    <group ref={group} visible={false}>
+      <group ref={line}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.025, 0.025, 1, 6]} />
+          <meshBasicMaterial color="#5eead4" transparent opacity={0.45} />
+        </mesh>
+      </group>
+      <mesh ref={shadow} position={[0, 0, 0.02]}>
+        <circleGeometry args={[1.1, 28]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.4} depthWrite={false} />
+      </mesh>
+    </group>
   );
 }
 
@@ -139,7 +177,10 @@ function Follow({ source, follow, controls }: { source: React.RefObject<PoseSour
     // pos is MuJoCo (z-up); scene is rotated so world = (x, z, -y)
     const target = new THREE.Vector3(pos[0], pos[2], -pos[1]);
     if (follow) {
-      if (last.current) camera.position.add(target.clone().sub(last.current));
+      // keep the camera-to-fly offset; reset it when the fly jumped far away (restart, first frame)
+      const offset = camera.position.clone().sub(c.target);
+      if (!last.current || offset.length() > 40 || target.distanceTo(last.current) > 60) offset.set(-8, 6, 8);
+      camera.position.copy(target).add(offset);
       c.target.copy(target);
       c.update();
     }
@@ -174,6 +215,7 @@ export function FlyScene({ parts, source, objects, odor, trail, follow, ambient 
         <OdorHeatmap field={odor} />
         <Objects objects={objects} />
         {trail.length > 1 && <Trail points={trail} />}
+        <FlightGuide source={source} />
         {parts && <Fly parts={parts} source={source} />}
       </group>
       <Grid position={[0, 0.005, 0]} args={[200, 200]} cellSize={1} cellColor="#1f2944" sectionSize={10} sectionColor="#2c3859" fadeDistance={120} infiniteGrid />
