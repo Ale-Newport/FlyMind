@@ -1,0 +1,389 @@
+{
+  "experiment_id": "flywire783_sugar_silencing",
+  "name": "Silencing intervention",
+  "template": "silencing",
+  "created_at": "2026-11-06T16:12:31Z",
+  "evidence": "simulation_output",
+  "dataset": {
+    "dataset_id": "flywire_fafb_783",
+    "version": "783",
+    "synthetic": false,
+    "files": [
+      {
+        "name": "Completeness_783.csv",
+        "role": "shiu_completeness",
+        "sha256": "bbb847a4cc2caaa7a16349722d220c087317b946d148d4d592d94d250617a311",
+        "size_bytes": 3327347,
+        "detected_format": "csv",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/Completeness_783.csv"
+      },
+      {
+        "name": "Connectivity_783.parquet",
+        "role": "shiu_connectivity",
+        "sha256": "efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+        "size_bytes": 100804642,
+        "detected_format": "parquet",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/Connectivity_783.parquet"
+      },
+      {
+        "name": "Supplemental_file1_neuron_annotations.tsv",
+        "role": "annotations_tsv",
+        "sha256": "30be6c73975a70c56d930e27911f36455d3886e15abf383b78edd2a5d679e0b6",
+        "size_bytes": 27015208,
+        "detected_format": "tsv",
+        "url": "https://raw.githubusercontent.com/flyconnectome/flywire_annotations/c294fba426f5abe861289bdc1171188026646b04/supplemental_files/Supplemental_file1_neuron_annotations.tsv"
+      },
+      {
+        "name": "per_neuron_neuropil_count_pre_783.feather",
+        "role": "zenodo_neuropil_pre",
+        "sha256": "35442a46f076892dff91bd6e55fa1489b3acc64fda1d35cee7dbbbbc509a3dff",
+        "size_bytes": 16853770,
+        "detected_format": "feather",
+        "url": "https://zenodo.org/records/10676866/files/per_neuron_neuropil_count_pre_783.feather"
+      },
+      {
+        "name": "proofread_root_ids_783.npy",
+        "role": "zenodo_root_ids",
+        "sha256": "7c7b7e818e9232e5ab64793d52ba20574dbe9da3a6509fbc74193b0f259a01be",
+        "size_bytes": 1114168,
+        "detected_format": "npy",
+        "url": "https://zenodo.org/records/10676866/files/proofread_root_ids_783.npy"
+      }
+    ],
+    "n_neurons": 139255,
+    "n_edges": 15091983
+  },
+  "network": {
+    "mode": "full",
+    "n_neurons": 139255,
+    "n_edges": 15091983
+  },
+  "seeds": {
+    "base": 0,
+    "trial_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "rule": "trial k uses seed base+k in every condition (common random numbers)"
+  },
+  "model": "LIF (Shiu et al. 2024 equations), FlyMind engine backend=numba",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ],
+  "resolved_neurons": {
+    "readouts": {
+      "mn9": [
+        720575940618238523,
+        720575940660219265
+      ]
+    },
+    "intact": {
+      "stimuli": [
+        {
+          "label": "",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    },
+    "silenced": {
+      "stimuli": [
+        {
+          "label": "",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [
+        {
+          "label": "silenced",
+          "root_ids": [
+            720575940617937543,
+            720575940621754367
+          ]
+        }
+      ],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    }
+  },
+  "summary": {
+    "intact": {
+      "spikes_per_trial": 8920.6,
+      "active_neurons_any_trial": 381,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 53.65,
+          "std_hz": 4.313061557640929,
+          "n_neurons": 2
+        }
+      }
+    },
+    "silenced": {
+      "spikes_per_trial": 8623.5,
+      "active_neurons_any_trial": 383,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 51.95,
+          "std_hz": 4.058632774716136,
+          "n_neurons": 2
+        }
+      }
+    }
+  },
+  "expected_checks": [],
+  "timing": [
+    {
+      "condition": "intact",
+      "trial": 0,
+      "wall_s": 2.2462550830096006,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44518541440991183
+    },
+    {
+      "condition": "intact",
+      "trial": 1,
+      "wall_s": 2.2324664590414613,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4479350612189547
+    },
+    {
+      "condition": "intact",
+      "trial": 2,
+      "wall_s": 2.2391843749792315,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4465911834568223
+    },
+    {
+      "condition": "intact",
+      "trial": 3,
+      "wall_s": 2.218827916018199,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.45068839849218745
+    },
+    {
+      "condition": "intact",
+      "trial": 4,
+      "wall_s": 2.224335709004663,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44957242557935473
+    },
+    {
+      "condition": "intact",
+      "trial": 5,
+      "wall_s": 2.22873004199937,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44868601452642093
+    },
+    {
+      "condition": "intact",
+      "trial": 6,
+      "wall_s": 2.233160207979381,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44779590663798585
+    },
+    {
+      "condition": "intact",
+      "trial": 7,
+      "wall_s": 2.2279259999631904,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.448847941994717
+    },
+    {
+      "condition": "intact",
+      "trial": 8,
+      "wall_s": 2.254092750023119,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4436374678858017
+    },
+    {
+      "condition": "intact",
+      "trial": 9,
+      "wall_s": 2.227702957985457,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.448892881528655
+    },
+    {
+      "condition": "silenced",
+      "trial": 0,
+      "wall_s": 2.2249697920051403,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44944430418482273
+    },
+    {
+      "condition": "silenced",
+      "trial": 1,
+      "wall_s": 2.2516645409632474,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44411588929326323
+    },
+    {
+      "condition": "silenced",
+      "trial": 2,
+      "wall_s": 2.245253916014917,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44538392422666023
+    },
+    {
+      "condition": "silenced",
+      "trial": 3,
+      "wall_s": 2.250799665984232,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44428654185121313
+    },
+    {
+      "condition": "silenced",
+      "trial": 4,
+      "wall_s": 2.232240792014636,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4479803449418567
+    },
+    {
+      "condition": "silenced",
+      "trial": 5,
+      "wall_s": 2.2177499589743093,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.45090745958687406
+    },
+    {
+      "condition": "silenced",
+      "trial": 6,
+      "wall_s": 2.2448746250011027,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4454591756987359
+    },
+    {
+      "condition": "silenced",
+      "trial": 7,
+      "wall_s": 2.2447197909932584,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44548990213050754
+    },
+    {
+      "condition": "silenced",
+      "trial": 8,
+      "wall_s": 2.2489470840082504,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44465252522425797
+    },
+    {
+      "condition": "silenced",
+      "trial": 9,
+      "wall_s": 2.2096974159940146,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4525506491349894
+    }
+  ],
+  "wall_total_s": 45.5108125419938,
+  "runtime": {
+    "flymind_version": "0.1.0",
+    "git_commit": "a4e2bcdde4dbd767ce3e2be7f75d1708c8f8886d",
+    "packages": {
+      "flymind": "0.1.0",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "duckdb": "2.0.0",
+      "brian2": "2.11.0",
+      "numba": "0.68.1",
+      "mujoco": "3.16.0",
+      "flygym": "2.1.1",
+      "fastapi": "0.162.0"
+    },
+    "machine": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.16",
+      "cpu_count": 12,
+      "cpu_model": "Apple M2 Max",
+      "memory_bytes": 68719476736
+    },
+    "timestamp": "2026-11-06T16:12:31Z"
+  }
+}

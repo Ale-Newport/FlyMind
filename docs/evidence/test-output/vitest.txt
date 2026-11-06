@@ -4,6 +4,6 @@
 
  Test Files  2 passed (2)
       Tests  9 passed (9)
-   Start at  16:02:15
-   Duration  859ms (environment 61%, import 20%, setup 11%, transform 4%, tests 3%)
+   Start at  16:16:29
+   Duration  716ms (environment 62%, import 22%, setup 11%, tests 3%, transform 2%)
 
