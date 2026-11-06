@@ -25,6 +25,7 @@ nav:
       - Connectome sources: scientific/connectome-sources.md
       - Interventions: scientific/interventions.md
       - Neural–body interface: scientific/neural-body-interface.md
+      - Flight model: scientific/flight.md
       - Validation: scientific/validation.md
       - Limitations: scientific/limitations.md
       - References: scientific/references.md

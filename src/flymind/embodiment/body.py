@@ -9,8 +9,10 @@ Physics, body geometry and the walking controller are FlyGym 2.x components
   two-value descending command into joint targets (an external motor-control
   algorithm, not part of the connectome model).
 
-The MuJoCo state is authoritative: the browser only renders the geom poses
-streamed from here.
+The MuJoCo state is authoritative while walking: the browser only renders the geom poses
+streamed from here. FlyGym has no flight, so while airborne the body is integrated by
+:class:`flymind.embodiment.flight.FlightSim` (a FlyMind model) and its pose is written into
+the MuJoCo root joint, so sensors, recording and rendering use one code path.
 """
 
 from __future__ import annotations
@@ -22,6 +24,21 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from flymind.embodiment.arena import ArenaConfig, build_world, odor_intensity
+from flymind.embodiment.flight import (
+    MM,
+    Box,
+    FlightCommand,
+    FlightSim,
+    Morphology,
+    mat_to_quat,
+    wing_frame,  # noqa: F401  (re-exported for tests)
+)
+from flymind.embodiment.flight_pose import (
+    TUCK_POSE,
+    smoothstep,
+    wing_display_rotation,
+    wing_rest_frame,
+)
 
 FLY_NAME = "fly"
 _ANTENNA = ("l_funiculus", "r_funiculus")
@@ -91,6 +108,7 @@ class FlyBody:
             if (mj.mj_id2name(m, mj.mjtObj.mjOBJ_BODY, b) or "").startswith(f"{FLY_NAME}/")
         }
         self._fly_geom_mask = np.isin(m.geom_bodyid, list(fly_bodies))
+        self._init_flight_rig()
         self._luminance = (0.0, 0.0)
         self.vision_error: str | None = None
         self._vision_age = np.inf
@@ -100,6 +118,8 @@ class FlyBody:
     def reset(self) -> None:
         from flygym_demo.complex_terrain import LocomotionAction, apply_locomotion_action
 
+        self.flying = False
+        self.flight.reset()
         self.sim.reset()
         self.controller.reset(seed=self.seed)
         apply_locomotion_action(
@@ -118,6 +138,8 @@ class FlyBody:
     def step(self, descending: np.ndarray) -> None:
         from flygym_demo.complex_terrain import HybridControllerObservation, apply_locomotion_action
 
+        if self.flying:
+            raise RuntimeError("walking step requested while airborne; use fly_step")
         obs = HybridControllerObservation.from_sim(self.sim, FLY_NAME)
         action = self.controller.step(np.asarray(descending, dtype=float), obs)
         apply_locomotion_action(self.sim, FLY_NAME, action)
@@ -136,16 +158,145 @@ class FlyBody:
     def joint_angles(self) -> np.ndarray:
         return np.asarray(self.sim.get_joint_angles(FLY_NAME), dtype=np.float32)
 
-    def geom_poses(self) -> np.ndarray:
+    def geom_poses(self, wing_phase: float | None = None) -> np.ndarray:
         """(n_mesh_geoms, 7) float32: x, y, z, qw, qx, qy, qz in the world frame (mm)."""
-        pos = self.data.geom_xpos[self.mesh_geoms]
-        mats = self.data.geom_xmat[self.mesh_geoms].reshape(-1, 3, 3)
+        pos = self.data.geom_xpos[self.mesh_geoms].copy()
+        mats = self.data.geom_xmat[self.mesh_geoms].reshape(-1, 3, 3).copy()
+        if self.flying and self.flight.state.engaged:
+            self._pose_wings(pos, mats, self.wing_phase if wing_phase is None else wing_phase)
         q = Rotation.from_matrix(mats).as_quat(scalar_first=True)
         return np.hstack([pos, q]).astype(np.float32)
+
+    # ------------------------------------------------------------------- flight
+    def _init_flight_rig(self) -> None:
+        m, d = self.model, self.data
+        self.flying = False
+        self.wing_phase = 0.0
+        self.morphology = Morphology()
+        self.flight = FlightSim(self.morphology)
+        self.flight.obstacles = [
+            Box(
+                o.x_mm * MM,
+                o.y_mm * MM,
+                o.half_x_mm * MM,
+                o.half_y_mm * MM,
+                o.height_mm * MM,
+                math.radians(o.yaw_deg),
+            )
+            for o in self.arena.obstacles
+        ]
+        names = [
+            f"{FLY_NAME}/{dof.parent.name}-{dof.child.name}-{dof.axis.value}"
+            for dof in self.dof_order
+        ]
+        adr = np.array(
+            [m.jnt_qposadr[mj.mj_name2id(m, mj.mjtObj.mjOBJ_JOINT, n)] for n in names],
+            dtype=np.int64,
+        )
+        self._leg_adr = adr
+        self._leg_tuck = np.array([TUCK_POSE[n.removeprefix(f"{FLY_NAME}/")] for n in names])
+        self._leg_walk = np.asarray(
+            self.preprogrammed.default_pose_by_dof_order(self.dof_order), dtype=float
+        )
+        # wing rest frames and hinges in the thorax body frame (mm), from the meshes
+        mj.mj_forward(m, d)
+        th_p, th_r = d.xpos[1].copy(), d.xmat[1].reshape(3, 3).copy()
+        self._wing_rows, self._wing_rest, self._wing_hinge = [], [], []
+        self._wing_geom_pos, self._wing_geom_mat = [], []
+        com_local_mm = -self.morphology.thorax_from_com_m / MM
+        for sigma, gname in ((1.0, "l_wing"), (-1.0, "r_wing")):
+            gi = mj.mj_name2id(m, mj.mjtObj.mjOBJ_GEOM, f"{FLY_NAME}/{gname}")
+            self._wing_rows.append(int(np.nonzero(self.mesh_geoms == gi)[0][0]))
+            mid = int(m.geom_dataid[gi])
+            va, vn = int(m.mesh_vertadr[mid]), int(m.mesh_vertnum[mid])
+            w = d.geom_xpos[gi] + m.mesh_vert[va : va + vn] @ d.geom_xmat[gi].reshape(3, 3).T
+            v = (w - th_p) @ th_r
+            self._wing_rest.append(wing_rest_frame(v, sigma))
+            self._wing_hinge.append(
+                (self.morphology.hinge_left_m / MM) * np.array([1.0, sigma, 1.0]) + com_local_mm
+            )
+            self._wing_geom_pos.append(m.geom_pos[gi].copy())
+            self._wing_geom_mat.append(
+                Rotation.from_quat(m.geom_quat[gi], scalar_first=True).as_matrix()
+            )
+
+    def enter_flight(self) -> None:
+        """Take off: initialise the flight model from the walking state."""
+        if self.flying:
+            return
+        d = self.data
+        thorax = self.position()
+        vel = np.asarray(d.qvel[0:3], dtype=float) * MM  # mm/s -> m/s
+        self.flight.reset(thorax * MM, self.heading_rad(), velocity=np.array([vel[0], vel[1], 0.0]))
+        self.flying = True
+        self.wing_phase = 0.0
+
+    def fly_step(self, cmd: FlightCommand, duration_s: float) -> None:
+        """Advance the flight model by ``duration_s`` (1 ms sub-steps) and sync the MuJoCo pose."""
+        dt = 1e-3
+        n = max(1, int(round(duration_s / dt)))
+        for _ in range(n):
+            self.flight.step(cmd, dt)
+        self.t_s += n * dt
+        self._sync_flight_pose()
+
+    def _sync_flight_pose(self) -> None:
+        fl = self.flight
+        d = self.data
+        d.qpos[0:3] = fl.thorax_position() / MM
+        d.qpos[3:7] = mat_to_quat(fl.state.R)
+        h = (fl.altitude() - self.morphology.stand_height_m) / MM
+        tuck = smoothstep((h - 0.6) / 2.0)
+        d.qpos[self._leg_adr] = self._leg_walk + tuck * (self._leg_tuck - self._leg_walk)
+        mj.mj_kinematics(self.model, d)
+
+    def _pose_wings(self, pos: np.ndarray, mats: np.ndarray, phase: float) -> None:
+        fl = self.flight
+        root_r = self.data.xmat[1].reshape(3, 3)
+        root_p = self.data.xpos[1]
+        for side, sigma in ((0, 1.0), (1, -1.0)):
+            rw = wing_display_rotation(
+                self._wing_rest[side], sigma, fl.state.wing, side, fl.state.beta, phase
+            )
+            hinge = self._wing_hinge[side]
+            p_local = hinge + rw @ (self._wing_geom_pos[side] - hinge)
+            r_local = rw @ self._wing_geom_mat[side]
+            row = self._wing_rows[side]
+            pos[row] = root_p + root_r @ p_local
+            mats[row] = root_r @ r_local
+
+    def land(self) -> None:
+        """Touch down: hand the body back to the walking physics at the flight position."""
+        if not self.flying:
+            return
+        from flygym_demo.complex_terrain import LocomotionAction, apply_locomotion_action
+
+        pos = self.position()
+        yaw = self.heading_rad()
+        self.flying = False
+        d = self.data
+        d.qpos[0:3] = [pos[0], pos[1], 1.0]
+        d.qpos[3:7] = [math.cos(yaw / 2), 0.0, 0.0, math.sin(yaw / 2)]
+        d.qvel[:] = 0.0
+        d.qpos[self._leg_adr] = self._leg_walk
+        self.controller.reset(seed=self.seed)
+        apply_locomotion_action(
+            self.sim,
+            FLY_NAME,
+            LocomotionAction(
+                joint_angles=self._leg_walk.copy(), adhesion_onoff=np.ones(6, dtype=bool)
+            ),
+        )
+        self.sim.forward()
+        self.sim.warmup(0.04)
+        self._prev_xy = self.position()[:2].copy()
 
     # ----------------------------------------------------------------- sensors
     def obstacle_contacts(self) -> tuple[float, float, int]:
         """Contact force magnitude with obstacles on the left/right of the body axis."""
+        if self.flying:
+            left, right = self.flight.state.contact
+            return left, right, int(left > 0) + int(right > 0)
         if len(self.obstacle_geoms) == 0 or self.data.ncon == 0:
             return 0.0, 0.0, 0
         ncon = self.data.ncon
@@ -204,11 +355,13 @@ class FlyBody:
         xy = bp[self._thorax][:2]
         out["on_food"] = (
             1.0
-            if any(
+            if bp[self._thorax][2] < 2.0  # standing; a fly passing over the patch does not feed
+            and any(
                 math.hypot(xy[0] - f.x_mm, xy[1] - f.y_mm) <= f.radius_mm for f in self.arena.food
             )
             else 0.0
         )
+        out["airborne"] = 1.0 if self.flying else 0.0
         return out
 
     # -------------------------------------------------------------- geometry

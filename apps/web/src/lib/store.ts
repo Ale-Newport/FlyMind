@@ -2,6 +2,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Neuron, StimulusSpec, InterventionSpec } from "./types";
 
+// Colour theme state lives in ./theme (own storage key); re-exported here for convenience.
+export { useTheme, useThemeStore } from "./theme";
+export type { ThemePref, ResolvedTheme } from "./theme";
+
 export type ColorField = "super_class" | "primary_neuropil" | "nt_type" | "cell_type" | "side" | "activity";
 
 interface PendingAction {

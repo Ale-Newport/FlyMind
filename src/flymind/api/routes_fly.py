@@ -11,14 +11,14 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from flymind.api.common import jsonable
 from flymind.brain.session import SimulationSession
 from flymind.common.paths import experiments_dir, safe_join, validate_identifier
 from flymind.embodiment.arena import ArenaConfig, arena_preset, odor_grid
 from flymind.embodiment.bridge import BRIDGE_PRESETS
-from flymind.embodiment.session import BaselineCommand, FlySessionConfig
+from flymind.embodiment.session import BaselineCommand, FlySessionConfig, LocomotionMode
 
 router = APIRouter(prefix="/api/fly")
 ws_router = APIRouter()
@@ -121,6 +121,20 @@ def control(request: Request, sid: str, body: FlyControl):
         getattr(s, body.action)()
     except RuntimeError as exc:
         raise HTTPException(409, str(exc)) from None
+    return s.summary()
+
+
+class LocomotionRequest(BaseModel):
+    mode: LocomotionMode
+    altitude_mm: float | None = Field(None, ge=2, le=40)
+
+
+@router.post("/sessions/{sid}/locomotion")
+def set_locomotion(request: Request, sid: str, body: LocomotionRequest):
+    s = _fly(request, sid)
+    if s.config.controller == "autonomous":
+        raise HTTPException(409, "the autonomous policy chooses walking or flying by itself")
+    s.set_locomotion(body.mode, body.altitude_mm)
     return s.summary()
 
 
