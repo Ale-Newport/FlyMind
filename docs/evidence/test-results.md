@@ -71,3 +71,14 @@ Executed at commit `a4e2bcd` on macOS 27.0.1 (Apple M2 Max). Raw output is in
 4. Lock starvation delayed controls by >1.5 s on the full brain (found while capturing screenshots; now 2–10 ms).
 5. A descending neuron silenced by output block still counted in the motor readout (found in the embodied FlyWire experiment).
 6. Unknown `/api/*` paths returned the web app instead of 404.
+7. `make dev` exited immediately on macOS because `scripts/setup/dev.sh` used `wait -n`
+   (unsupported by the bundled bash 3.2) — found by the fresh-clone check below.
+
+## Fresh-clone check
+
+`git clone --branch feature/flymind-v0.1 <repo> fresh && cd fresh && make setup && make test`
+on the same machine (warm uv/npm caches): `make setup` 19 s; `make test` **31 passed,
+13 deselected** (physics/Brian2/full-data markers); `uv run flymind data info` lists the
+synthetic dataset with validation `passed`; `make dev API_PORT=8020 WEB_PORT=5190` serves
+the API directly and through the web proxy. With the default ports occupied, `make dev`
+stops with the documented port-conflict message.
