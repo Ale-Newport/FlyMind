@@ -16,11 +16,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14]
-    env:
-      MUJOCO_GL: egl
+        os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
+      - name: Headless OpenGL (EGL, Mesa software rendering) for MuJoCo vision
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libegl1 libegl-mesa0 libgl1 libgles2
+          echo "MUJOCO_GL=egl" >> "$GITHUB_ENV"
+          echo "PYOPENGL_PLATFORM=egl" >> "$GITHUB_ENV"
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
@@ -29,13 +34,26 @@ jobs:
       - name: Lint
         run: uv run ruff check src tests scripts
       - name: Tests (fixture only; full-data tests are skipped without the dataset)
-        run: uv run pytest -m "not fulldata" --timeout=600 -ra
+        run: |
+          set -o pipefail
+          uv run pytest -m "not fulldata" --timeout=600 -ra --color=no 2>&1 | tee pytest.log
+      - name: Publish failure details as an annotation
+        if: failure()
+        run: bash scripts/ci/annotate_failure.sh pytest.log "pytest on ${{ matrix.os }}" 80
 
   web:
     name: Web (type check, unit, e2e)
     runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: "0"
     steps:
       - uses: actions/checkout@v4
+      - name: Headless OpenGL for MuJoCo
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libegl1 libegl-mesa0 libgl1 libgles2
+          echo "MUJOCO_GL=egl" >> "$GITHUB_ENV"
+          echo "PYOPENGL_PLATFORM=egl" >> "$GITHUB_ENV"
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
@@ -47,19 +65,25 @@ jobs:
       - run: uv python install 3.13 && uv sync --frozen
       - run: npm ci
         working-directory: apps/web
-      - run: npx tsc -b && npm test
+      - name: Type check and unit tests
         working-directory: apps/web
+        run: |
+          set -o pipefail
+          (npx tsc -b && npm test) 2>&1 | tee ../../web-unit.log
       - run: npx playwright install --with-deps chromium
         working-directory: apps/web
       - name: Playwright end-to-end (Chromium)
-        run: npx playwright test
         working-directory: apps/web
-        env:
-          MUJOCO_GL: egl
+        run: |
+          set -o pipefail
+          npx playwright test 2>&1 | tee ../../e2e.log
+      - name: Publish failure details as an annotation
+        if: failure()
+        run: |
+          bash scripts/ci/annotate_failure.sh web-unit.log "type check / unit tests" 60
+          bash scripts/ci/annotate_failure.sh e2e.log "Playwright e2e" 80
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-results
-          path: |
-            apps/web/test-results
-            docs/evidence/screenshots/e2e-*.png
+          path: apps/web/test-results
