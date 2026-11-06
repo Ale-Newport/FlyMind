@@ -221,6 +221,7 @@ export interface FlySummary {
   wall_s: number;
   sim_wall_ratio: number | null;
   vision: boolean;
+  vision_error?: string | null;
   brain_session_id: string | null;
   bridge: BridgeConfig | null;
   missing_groups: string[];

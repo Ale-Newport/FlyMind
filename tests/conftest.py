@@ -40,6 +40,17 @@ def group(store):
 
 
 @pytest.fixture(scope="session")
+def rendering():
+    """Skip a test when MuJoCo cannot create an OpenGL context (e.g. GPU-less CI VMs)."""
+    import mujoco
+
+    try:
+        mujoco.Renderer(mujoco.MjModel.from_xml_string("<mujoco/>"), 8, 8).close()
+    except Exception as exc:  # pragma: no cover - environment specific
+        pytest.skip(f"no OpenGL context for MuJoCo rendering: {type(exc).__name__}: {exc}")
+
+
+@pytest.fixture(scope="session")
 def real_store():
     """The real FlyWire v783 dataset, if the developer has imported it."""
     from flymind.connectome.store import ConnectomeStore, DatasetNotFoundError
