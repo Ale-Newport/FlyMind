@@ -103,15 +103,22 @@ Node 26, Chromium (Playwright 1.65).
   * CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, CITATION, LICENSE (MIT) and THIRD_PARTY_NOTICES.
   * CI and Pages workflows, Dependabot.
   * Static demo build verified locally.
+* **CI**
+  * Pushed and merged as PR #1. The first CI run exposed four problems, fixed in PR #8:
+    * the retired `macos-14` runner;
+    * missing headless OpenGL on Linux;
+    * a GNU/BSD `mktemp` difference;
+    * a flaky e2e test.
+  * GitHub's macOS VMs cannot create an OpenGL context, so vision now degrades explicitly there.
+  * CI passes on ubuntu-latest and macos-latest.
 * **Blocked**
-  * The repository was not pushed (no authorisation to publish), so GitHub Actions and Pages have **not** run.
+  * GitHub Pages deployment fails until Pages is enabled in the repository settings.
   * Fresh-clone setup was verified by cloning into a new directory on the same machine (`make setup`, `make test`, `make dev`); this found and fixed a bash 3.2 incompatibility in the launcher. It has not been tried on a second machine.
 
 ## Next steps
 
-1. Push to GitHub, let CI run on Ubuntu and macOS, and fix any platform issues.
-2. Validate on Linux (EGL rendering for vision).
-3. Investigate the SD difference against the reference trials.
-4. Add a BANC adapter, which would allow VNC-based motor readouts.
-5. Explore a FlyVis integration in a separate Python 3.12 process.
-6. Add a multithreaded kernel and an optional GPU backend, validated against Brian2.
+1. Enable GitHub Pages and confirm the static demo deploys.
+2. Investigate the SD difference against the reference trials.
+3. Add a BANC adapter, which would allow VNC-based motor readouts.
+4. Explore a FlyVis integration in a separate Python 3.12 process.
+5. Add a multithreaded kernel and an optional GPU backend, validated against Brian2.

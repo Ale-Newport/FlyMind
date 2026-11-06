@@ -63,8 +63,8 @@ All verification was done at commit `a4e2bcd` on macOS 27.0.1, Apple M2 Max.
 | Fresh-clone demo without credentials | verified | e2e runs against a fresh data root with only the fixture |
 | One-command setup and launch | verified (fresh clone) | [test results → fresh-clone check](test-results.md) |
 | Pinned dependencies and lockfiles | verified | `uv.lock`, `apps/web/package-lock.json` |
-| CI | configured, **not executed** | `.github/workflows/ci.yml`: workflows have not run because the repository was not pushed |
-| GitHub Pages static demo | built locally | `make pages-build` output inspected in the browser; deployment needs a push |
+| CI | verified (GitHub Actions) | PR #8 at `6f88593`: Python on ubuntu-latest and macos-latest, and Web (type check, unit, Playwright e2e), all passing. On macOS runners (no OpenGL) the vision test is designed to skip with a reason; the passing job's log was not read |
+| GitHub Pages static demo | built (CI), **not deployed** | the Pages build job succeeds; deployment fails until Pages is enabled in the repository settings |
 | Safari | **not tested** | only Chromium is automated |
-| Linux | **not tested here** | CI matrix includes ubuntu-latest; not executed |
+| Linux | verified in CI | ubuntu-latest: full non-data suite including MuJoCo vision via Mesa EGL, and Playwright e2e |
 | BANC / male CNS | planned | adapters refuse imports until validated |
