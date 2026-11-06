@@ -41,3 +41,4 @@ apps/web/public/demo/
 apps/web/dist-pages/
 !experiments/README.md
 .claude/
+site/

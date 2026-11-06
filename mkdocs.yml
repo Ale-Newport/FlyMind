@@ -53,6 +53,7 @@ nav:
       - Overview: evidence/index.md
       - Feature matrix: evidence/feature-matrix.md
       - Reproduction of Shiu et al. 2024: evidence/reproduction-shiu2024.md
+      - FlyWire v783 experiments: evidence/flywire783-experiments.md
       - Embodied FlyWire runs: evidence/embodied-flywire.md
       - Benchmarks: evidence/benchmarks.md
       - Test results: evidence/test-results.md

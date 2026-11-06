@@ -1,0 +1,232 @@
+{
+  "name": "Population stimulation frequency sweep",
+  "template": "population_stimulation",
+  "description": "Sugar-sensing GRNs driven at increasing Poisson rates (cf. Shiu et al. 2024 Fig. 1d); readout of the feeding motor neuron MN9.",
+  "dataset_id": "flywire_fafb_783",
+  "network": {
+    "mode": "full",
+    "selection": null,
+    "expand_depth": 0,
+    "expand_direction": "downstream",
+    "expand_min_syn": 5,
+    "neuropils": [],
+    "max_neurons": 50000
+  },
+  "params": {
+    "v_rest_mV": -52.0,
+    "v_reset_mV": -52.0,
+    "v_threshold_mV": -45.0,
+    "tau_m_ms": 20.0,
+    "tau_syn_ms": 5.0,
+    "t_refractory_ms": 2.2,
+    "delay_ms": 1.8,
+    "w_syn_mV": 0.275,
+    "poisson_weight_factor": 250.0,
+    "dt_ms": 0.1,
+    "hold_g_during_refractory": true,
+    "reset_g": true,
+    "drop_input_during_refractory": true,
+    "stimulated_refractory_zero": true,
+    "precision": "float64"
+  },
+  "conditions": [
+    {
+      "name": "25 Hz",
+      "stimuli": [
+        {
+          "kind": "poisson",
+          "selector": {
+            "root_ids": [],
+            "group": "sugar_grn_shiu",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "rate_hz": 25.0,
+          "frequency_hz": 50.0,
+          "amplitude_mV": 10.0,
+          "start_ms": 0.0,
+          "stop_ms": null,
+          "repeats": 1,
+          "interval_ms": 0.0,
+          "weight_factor": null,
+          "label": "sugar GRNs"
+        }
+      ],
+      "interventions": [],
+      "params": {}
+    },
+    {
+      "name": "50 Hz",
+      "stimuli": [
+        {
+          "kind": "poisson",
+          "selector": {
+            "root_ids": [],
+            "group": "sugar_grn_shiu",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "rate_hz": 50.0,
+          "frequency_hz": 50.0,
+          "amplitude_mV": 10.0,
+          "start_ms": 0.0,
+          "stop_ms": null,
+          "repeats": 1,
+          "interval_ms": 0.0,
+          "weight_factor": null,
+          "label": "sugar GRNs"
+        }
+      ],
+      "interventions": [],
+      "params": {}
+    },
+    {
+      "name": "100 Hz",
+      "stimuli": [
+        {
+          "kind": "poisson",
+          "selector": {
+            "root_ids": [],
+            "group": "sugar_grn_shiu",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "rate_hz": 100.0,
+          "frequency_hz": 50.0,
+          "amplitude_mV": 10.0,
+          "start_ms": 0.0,
+          "stop_ms": null,
+          "repeats": 1,
+          "interval_ms": 0.0,
+          "weight_factor": null,
+          "label": "sugar GRNs"
+        }
+      ],
+      "interventions": [],
+      "params": {}
+    },
+    {
+      "name": "150 Hz",
+      "stimuli": [
+        {
+          "kind": "poisson",
+          "selector": {
+            "root_ids": [],
+            "group": "sugar_grn_shiu",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "rate_hz": 150.0,
+          "frequency_hz": 50.0,
+          "amplitude_mV": 10.0,
+          "start_ms": 0.0,
+          "stop_ms": null,
+          "repeats": 1,
+          "interval_ms": 0.0,
+          "weight_factor": null,
+          "label": "sugar GRNs"
+        }
+      ],
+      "interventions": [],
+      "params": {}
+    },
+    {
+      "name": "200 Hz",
+      "stimuli": [
+        {
+          "kind": "poisson",
+          "selector": {
+            "root_ids": [],
+            "group": "sugar_grn_shiu",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "rate_hz": 200.0,
+          "frequency_hz": 50.0,
+          "amplitude_mV": 10.0,
+          "start_ms": 0.0,
+          "stop_ms": null,
+          "repeats": 1,
+          "interval_ms": 0.0,
+          "weight_factor": null,
+          "label": "sugar GRNs"
+        }
+      ],
+      "interventions": [],
+      "params": {}
+    }
+  ],
+  "readouts": [
+    {
+      "name": "mn9",
+      "selector": {
+        "root_ids": [],
+        "group": "mn9",
+        "cell_types": [],
+        "cell_type_regex": null,
+        "hemibrain_types": [],
+        "super_class": [],
+        "cell_class": [],
+        "side": [],
+        "nt_type": [],
+        "neuropils": [],
+        "connected": null,
+        "limit": null
+      }
+    }
+  ],
+  "duration_ms": 1000.0,
+  "n_trials": 5,
+  "seed": 0,
+  "backend": "numba",
+  "bin_ms": 10.0,
+  "embodiment": null,
+  "expected": [],
+  "evidence": "simulation_output",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ]
+}

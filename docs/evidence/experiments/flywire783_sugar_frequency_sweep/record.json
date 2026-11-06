@@ -1,0 +1,585 @@
+{
+  "experiment_id": "flywire783_sugar_frequency_sweep",
+  "name": "Population stimulation frequency sweep",
+  "template": "population_stimulation",
+  "created_at": "2026-11-06T16:11:45Z",
+  "evidence": "simulation_output",
+  "dataset": {
+    "dataset_id": "flywire_fafb_783",
+    "version": "783",
+    "synthetic": false,
+    "files": [
+      {
+        "name": "Completeness_783.csv",
+        "role": "shiu_completeness",
+        "sha256": "bbb847a4cc2caaa7a16349722d220c087317b946d148d4d592d94d250617a311",
+        "size_bytes": 3327347,
+        "detected_format": "csv",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/Completeness_783.csv"
+      },
+      {
+        "name": "Connectivity_783.parquet",
+        "role": "shiu_connectivity",
+        "sha256": "efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+        "size_bytes": 100804642,
+        "detected_format": "parquet",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/Connectivity_783.parquet"
+      },
+      {
+        "name": "Supplemental_file1_neuron_annotations.tsv",
+        "role": "annotations_tsv",
+        "sha256": "30be6c73975a70c56d930e27911f36455d3886e15abf383b78edd2a5d679e0b6",
+        "size_bytes": 27015208,
+        "detected_format": "tsv",
+        "url": "https://raw.githubusercontent.com/flyconnectome/flywire_annotations/c294fba426f5abe861289bdc1171188026646b04/supplemental_files/Supplemental_file1_neuron_annotations.tsv"
+      },
+      {
+        "name": "per_neuron_neuropil_count_pre_783.feather",
+        "role": "zenodo_neuropil_pre",
+        "sha256": "35442a46f076892dff91bd6e55fa1489b3acc64fda1d35cee7dbbbbc509a3dff",
+        "size_bytes": 16853770,
+        "detected_format": "feather",
+        "url": "https://zenodo.org/records/10676866/files/per_neuron_neuropil_count_pre_783.feather"
+      },
+      {
+        "name": "proofread_root_ids_783.npy",
+        "role": "zenodo_root_ids",
+        "sha256": "7c7b7e818e9232e5ab64793d52ba20574dbe9da3a6509fbc74193b0f259a01be",
+        "size_bytes": 1114168,
+        "detected_format": "npy",
+        "url": "https://zenodo.org/records/10676866/files/proofread_root_ids_783.npy"
+      }
+    ],
+    "n_neurons": 139255,
+    "n_edges": 15091983
+  },
+  "network": {
+    "mode": "full",
+    "n_neurons": 139255,
+    "n_edges": 15091983
+  },
+  "seeds": {
+    "base": 0,
+    "trial_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "rule": "trial k uses seed base+k in every condition (common random numbers)"
+  },
+  "model": "LIF (Shiu et al. 2024 equations), FlyMind engine backend=numba",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ],
+  "resolved_neurons": {
+    "readouts": {
+      "mn9": [
+        720575940618238523,
+        720575940660219265
+      ]
+    },
+    "25 Hz": {
+      "stimuli": [
+        {
+          "label": "sugar GRNs",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    },
+    "50 Hz": {
+      "stimuli": [
+        {
+          "label": "sugar GRNs",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    },
+    "100 Hz": {
+      "stimuli": [
+        {
+          "label": "sugar GRNs",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    },
+    "150 Hz": {
+      "stimuli": [
+        {
+          "label": "sugar GRNs",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    },
+    "200 Hz": {
+      "stimuli": [
+        {
+          "label": "sugar GRNs",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    }
+  },
+  "summary": {
+    "25 Hz": {
+      "spikes_per_trial": 807.2,
+      "active_neurons_any_trial": 64,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 0.0,
+          "std_hz": 0.0,
+          "n_neurons": 2
+        }
+      }
+    },
+    "50 Hz": {
+      "spikes_per_trial": 2854.6,
+      "active_neurons_any_trial": 329,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 14.6,
+          "std_hz": 4.993996395673509,
+          "n_neurons": 2
+        }
+      }
+    },
+    "100 Hz": {
+      "spikes_per_trial": 8874.4,
+      "active_neurons_any_trial": 379,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 52.7,
+          "std_hz": 2.1118712081942874,
+          "n_neurons": 2
+        }
+      }
+    },
+    "150 Hz": {
+      "spikes_per_trial": 12852.8,
+      "active_neurons_any_trial": 390,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 66.1,
+          "std_hz": 2.2671568097509267,
+          "n_neurons": 2
+        }
+      }
+    },
+    "200 Hz": {
+      "spikes_per_trial": 16068.8,
+      "active_neurons_any_trial": 432,
+      "readouts": {
+        "mn9": {
+          "mean_rate_hz": 76.0,
+          "std_hz": 3.8600518131237567,
+          "n_neurons": 2
+        }
+      }
+    }
+  },
+  "expected_checks": [],
+  "timing": [
+    {
+      "condition": "25 Hz",
+      "trial": 0,
+      "wall_s": 2.2429587920196354,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4458396665859235
+    },
+    {
+      "condition": "25 Hz",
+      "trial": 1,
+      "wall_s": 2.1922388339880854,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.45615467826596984
+    },
+    {
+      "condition": "25 Hz",
+      "trial": 2,
+      "wall_s": 2.244448708021082,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44554370809466814
+    },
+    {
+      "condition": "25 Hz",
+      "trial": 3,
+      "wall_s": 2.1933553330018185,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.455922478658031
+    },
+    {
+      "condition": "25 Hz",
+      "trial": 4,
+      "wall_s": 2.2115348749794066,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4521746463570066
+    },
+    {
+      "condition": "50 Hz",
+      "trial": 0,
+      "wall_s": 2.2030261249747127,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4539210809456372
+    },
+    {
+      "condition": "50 Hz",
+      "trial": 1,
+      "wall_s": 2.2428003329550847,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44587116619624045
+    },
+    {
+      "condition": "50 Hz",
+      "trial": 2,
+      "wall_s": 2.204747750016395,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4535666268363643
+    },
+    {
+      "condition": "50 Hz",
+      "trial": 3,
+      "wall_s": 2.2345134579809383,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4475247156951921
+    },
+    {
+      "condition": "50 Hz",
+      "trial": 4,
+      "wall_s": 2.1942695420002565,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.45573252549840254
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 0,
+      "wall_s": 2.215982833004091,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.45126703379933353
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 1,
+      "wall_s": 2.27638316701632,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.43929335556926946
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 2,
+      "wall_s": 2.4591749160317704,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.40664045224308104
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 3,
+      "wall_s": 2.232408374955412,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.447946715851204
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 4,
+      "wall_s": 2.462604583997745,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4060741243227198
+    },
+    {
+      "condition": "150 Hz",
+      "trial": 0,
+      "wall_s": 2.249613207997754,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4445208609394857
+    },
+    {
+      "condition": "150 Hz",
+      "trial": 1,
+      "wall_s": 2.2414406670141034,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44614163324346784
+    },
+    {
+      "condition": "150 Hz",
+      "trial": 2,
+      "wall_s": 2.2230841669952497,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4498255238584212
+    },
+    {
+      "condition": "150 Hz",
+      "trial": 3,
+      "wall_s": 2.2293742499896325,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4485563606041697
+    },
+    {
+      "condition": "150 Hz",
+      "trial": 4,
+      "wall_s": 2.235549833974801,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44731724822345065
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 0,
+      "wall_s": 2.4695573750068434,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.40493086336867506
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 1,
+      "wall_s": 2.2326792500098236,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44789236967002766
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 2,
+      "wall_s": 2.256999250035733,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44306616406016436
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 3,
+      "wall_s": 2.252971583046019,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44385823928058576
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 4,
+      "wall_s": 2.2384752920479514,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4467326503680607
+    }
+  ],
+  "wall_total_s": 57.51931574998889,
+  "runtime": {
+    "flymind_version": "0.1.0",
+    "git_commit": "a4e2bcdde4dbd767ce3e2be7f75d1708c8f8886d",
+    "packages": {
+      "flymind": "0.1.0",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "duckdb": "2.0.0",
+      "brian2": "2.11.0",
+      "numba": "0.68.1",
+      "mujoco": "3.16.0",
+      "flygym": "2.1.1",
+      "fastapi": "0.162.0"
+    },
+    "machine": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.16",
+      "cpu_count": 12,
+      "cpu_model": "Apple M2 Max",
+      "memory_bytes": 68719476736
+    },
+    "timestamp": "2026-11-06T16:11:45Z"
+  }
+}

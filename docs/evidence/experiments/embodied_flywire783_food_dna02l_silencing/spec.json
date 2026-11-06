@@ -1,0 +1,130 @@
+{
+  "name": "Virtual fly: locomotion after neuronal silencing",
+  "template": "embodied_silencing",
+  "description": "Neural controller in the food arena, intact vs with a steering descending group silenced (output blocked).",
+  "dataset_id": "flywire_fafb_783",
+  "network": {
+    "mode": "full",
+    "selection": null,
+    "expand_depth": 0,
+    "expand_direction": "downstream",
+    "expand_min_syn": 5,
+    "neuropils": [],
+    "max_neurons": 50000
+  },
+  "params": {
+    "v_rest_mV": -52.0,
+    "v_reset_mV": -52.0,
+    "v_threshold_mV": -45.0,
+    "tau_m_ms": 20.0,
+    "tau_syn_ms": 5.0,
+    "t_refractory_ms": 2.2,
+    "delay_ms": 1.8,
+    "w_syn_mV": 0.275,
+    "poisson_weight_factor": 250.0,
+    "dt_ms": 0.1,
+    "hold_g_during_refractory": true,
+    "reset_g": true,
+    "drop_input_during_refractory": true,
+    "stimulated_refractory_zero": true,
+    "precision": "float64"
+  },
+  "conditions": [
+    {
+      "name": "intact",
+      "stimuli": [],
+      "interventions": [],
+      "params": {}
+    },
+    {
+      "name": "silenced",
+      "stimuli": [],
+      "interventions": [
+        {
+          "kind": "silence",
+          "selector": {
+            "root_ids": [],
+            "group": "dna02_left",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "post_selector": null,
+          "mode": "block_output",
+          "factor": 0.0,
+          "label": "steering DN silenced"
+        }
+      ],
+      "params": {}
+    }
+  ],
+  "readouts": [],
+  "duration_ms": 2000.0,
+  "n_trials": 1,
+  "seed": 0,
+  "backend": "numba",
+  "bin_ms": 10.0,
+  "embodiment": {
+    "arena": {
+      "kind": "food",
+      "name": "Food arena",
+      "description": "A food patch emitting an attractive odour, ahead and to the left.",
+      "odor_sources": [
+        {
+          "x_mm": 18.0,
+          "y_mm": 8.0,
+          "peak": 1.0,
+          "scale_mm": 8.0,
+          "valence": "attractive",
+          "label": "vinegar-like"
+        }
+      ],
+      "obstacles": [],
+      "lights": [],
+      "food": [
+        {
+          "x_mm": 18.0,
+          "y_mm": 8.0,
+          "radius_mm": 2.5,
+          "label": "sucrose"
+        }
+      ],
+      "ambient": 0.6,
+      "spawn_x_mm": 0.0,
+      "spawn_y_mm": 0.0,
+      "spawn_heading_deg": 0.0
+    },
+    "controller": "neural",
+    "baseline": {
+      "forward": 1.0,
+      "turn": 0.0,
+      "turn_gain": 0.8,
+      "schedule": []
+    },
+    "brain": null,
+    "bridge": "flywire_literature",
+    "bridge_config": null,
+    "duration_s": 3.0,
+    "vision": null,
+    "stream_hz": 30.0,
+    "record_hz": 100.0,
+    "speed": null,
+    "seed": 0,
+    "label": ""
+  },
+  "expected": [],
+  "evidence": "hypothesis",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ]
+}

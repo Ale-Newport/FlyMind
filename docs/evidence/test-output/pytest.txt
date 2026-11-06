@@ -60,4 +60,4 @@ tests/unit/test_lif_dynamics.py::test_repeated_stimulus_windows PASSED   [100%]
     from starlette.testclient import TestClient as TestClient  # noqa
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 44 passed, 1 warning in 25.70s ========================
+======================== 44 passed, 1 warning in 24.71s ========================

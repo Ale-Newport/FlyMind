@@ -1,0 +1,5 @@
+condition,readout,n_neurons,mean_rate_hz,std_hz,per_trial_hz
+odor pulse,orn_dm1_left,35,59.394285714285715,1.4633927590865479,"[57.4286, 61.6, 60.4571, 58.7429, 58.7429]"
+odor pulse,p9_left,1,0.0,0.0,"[0.0, 0.0, 0.0, 0.0, 0.0]"
+odor pulse,dna02_left,1,40.4,3.4409301068170506,"[42.0, 40.0, 36.0, 46.0, 38.0]"
+odor pulse,dna02_right,1,0.0,0.0,"[0.0, 0.0, 0.0, 0.0, 0.0]"
