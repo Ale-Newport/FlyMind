@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Headless OpenGL (EGL, Mesa software rendering) for MuJoCo vision
         if: runner.os == 'Linux'
         run: |
@@ -47,7 +47,7 @@ jobs:
     env:
       FORCE_COLOR: "0"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Headless OpenGL for MuJoCo
         run: |
           sudo apt-get update -q
