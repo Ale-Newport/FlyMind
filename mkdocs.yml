@@ -1,0 +1,61 @@
+site_name: FlyMind
+site_description: Connectome-constrained Drosophila brain simulation, virtual fly and 3D brain explorer
+repo_url: https://github.com/Ale-Newport/FlyMind
+edit_uri: edit/main/docs/
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: teal
+    accent: pink
+  features: [navigation.sections, navigation.top, content.code.copy, search.highlight]
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.superfences
+  - pymdownx.arithmatex: { generic: true }
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js
+nav:
+  - Home: index.md
+  - Implementation status: IMPLEMENTATION_STATUS.md
+  - Scientific methods:
+      - Neuron model: scientific/neuron-model.md
+      - Connectome sources: scientific/connectome-sources.md
+      - Interventions: scientific/interventions.md
+      - Neural–body interface: scientific/neural-body-interface.md
+      - Validation: scientific/validation.md
+      - Limitations: scientific/limitations.md
+      - References: scientific/references.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - "ADR 0001 single distribution": architecture/adr/0001-single-python-distribution.md
+      - "ADR 0002 engines": architecture/adr/0002-numba-engine-with-brian2-reference.md
+      - "ADR 0003 connectivity source": architecture/adr/0003-default-connectivity-shiu-table.md
+      - "ADR 0004 data redistribution": architecture/adr/0004-no-flywire-data-in-repository.md
+      - "ADR 0005 motor layer": architecture/adr/0005-flygym-locomotion-controller.md
+      - "ADR 0006 streaming": architecture/adr/0006-streaming-and-ids.md
+      - "ADR 0007 FlyVis": architecture/adr/0007-flyvis-not-integrated.md
+  - API: api/index.md
+  - Tutorials:
+      - Installation: tutorials/01-installation.md
+      - Importing FlyWire data: tutorials/02-importing-flywire.md
+      - Exploring a neuron: tutorials/03-exploring-a-neuron.md
+      - Simulating a circuit: tutorials/04-simulating-a-circuit.md
+      - Full-brain simulation: tutorials/05-full-brain.md
+      - Activation and silencing: tutorials/06-activation-silencing.md
+      - Virtual Fly: tutorials/07-virtual-fly.md
+      - Custom arena: tutorials/08-custom-arena.md
+      - Reproducible experiments: tutorials/09-reproducible-experiments.md
+      - Extending FlyMind: tutorials/10-extending.md
+  - Evidence:
+      - Overview: evidence/index.md
+      - Feature matrix: evidence/feature-matrix.md
+      - Reproduction of Shiu et al. 2024: evidence/reproduction-shiu2024.md
+      - Embodied FlyWire runs: evidence/embodied-flywire.md
+      - Benchmarks: evidence/benchmarks.md
+      - Test results: evidence/test-results.md
+  - Research:
+      - Reference repositories: research/reference-repositories.md
+  - Troubleshooting: troubleshooting/index.md

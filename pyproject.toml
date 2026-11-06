@@ -1,0 +1,70 @@
+[project]
+name = "flymind"
+version = "0.1.0"
+description = "FlyMind: connectome-constrained Drosophila brain simulation, embodied virtual fly and 3D brain explorer."
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+authors = [{ name = "Alejandro Newport Diaz" }]
+dependencies = [
+    "numpy>=2.2,<2.6",
+    "scipy>=1.15,<1.19",
+    "pandas>=2.2,<3.2",
+    "pyarrow>=19,<27",
+    "duckdb>=1.2,<2.1",
+    "brian2>=2.9,<2.12",
+    "fastapi>=0.115,<0.163",
+    "uvicorn[standard]>=0.34,<0.55",
+    "pydantic>=2.10,<2.15",
+    "typer>=0.15,<0.29",
+    "httpx>=0.28,<0.29",
+    "flygym==2.1.1",
+]
+
+[project.optional-dependencies]
+anatomy = ["navis>=1.10,<1.13"]
+torch = ["torch>=2.6,<2.16"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3,<9.3",
+    "pytest-cov>=6,<8",
+    "pytest-timeout>=2.3,<3",
+    "ruff>=0.11,<0.18",
+]
+docs = ["mkdocs-material>=9.6,<9.9"]
+
+[project.scripts]
+flymind = "flymind.cli:app"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flymind"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "NPY", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003", "RUF046", "RUF007"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/flymind/cli.py" = ["B008"]
+"src/flymind/brain/kernels.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "fulldata: requires the real FlyWire v783 dataset to be imported (skipped otherwise)",
+    "physics: runs MuJoCo/FlyGym physics (slower)",
+    "brian2: runs the Brian2 reference engine (slower; compiles code)",
+]
