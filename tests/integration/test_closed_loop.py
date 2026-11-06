@@ -137,3 +137,74 @@ def test_vision_degrades_explicitly_without_opengl(store, monkeypatch):
     assert s.status == "finished" and not s.body.vision
     assert "invalid pixel format" in s.summary()["vision_error"]
     assert (s.trajectory()["sensor_luminance_left"] == 0).all()
+
+
+# ------------------------------------------------------------------------------- flight
+def test_flight_cycle_walk_takeoff_fly_land_walk(store):
+    from flymind.embodiment.session import CommandStep
+
+    s = FlySession(
+        FlySessionConfig(
+            arena=arena_preset("empty"),
+            duration_s=2.6,
+            baseline=BaselineCommand(
+                forward=0.5,
+                turn=0.0,
+                schedule=[
+                    CommandStep(t_s=0.1, forward=0.5, turn=0.0, locomotion="fly", altitude_mm=9),
+                    CommandStep(t_s=1.4, forward=0.0, turn=0.0, locomotion="walk"),
+                ],
+            ),
+        )
+    )
+    s.run_blocking()
+    m = s.metrics()
+    assert m["n_takeoffs"] == 1 and m["n_touchdowns"] == 1
+    assert 4 < m["max_altitude_mm"] < 14
+    assert m["airborne_time_s"] > 0.8
+    assert s.loco.state == "ground" and not s.body.flying
+    assert s.body.position()[2] < 2.0  # standing again on the walking physics
+    kinds = [a["action"] for a in s.actions]
+    assert kinds.index("takeoff") < kinds.index("landing") < kinds.index("touchdown")
+
+
+def test_streamed_poses_flap_the_real_wing_meshes_during_flight(store):
+    s = FlySession(FlySessionConfig(arena=arena_preset("empty"), duration_s=0.5, locomotion="fly"))
+    s.run_blocking()
+    b = s.body
+    assert b.flying and b.flight.state.engaged
+    a, c = b.geom_poses(wing_phase=0.0), b.geom_poses(wing_phase=math.pi)
+    wings = b._wing_rows
+    other = [i for i in range(len(a)) if i not in wings]
+    assert not np.allclose(a[wings], c[wings], atol=1e-3)  # wings moved
+    assert np.allclose(a[other], c[other], atol=1e-6)  # the rest of the body did not
+    # airborne legs are folded: no mesh below the thorax by more than the body height
+    assert (a[:, 2].min()) > 0.0
+
+
+def test_flight_sensors_report_airborne_and_never_feed_in_the_air(store):
+    s = FlySession(FlySessionConfig(arena=arena_preset("food"), duration_s=0.4, locomotion="fly"))
+    s.run_blocking()
+    sens = s.body.sensors()
+    assert sens["airborne"] == 1.0 and sens["on_food"] == 0.0
+
+
+def test_autonomous_policy_runs_end_to_end(store):
+    cfg = FlySessionConfig(
+        arena=arena_preset("food"), controller="autonomous", duration_s=1.0, record_hz=100
+    )
+    s = FlySession(cfg)
+    s.run_blocking()
+    df = s.trajectory()
+    assert set(df["behavior"]) <= {
+        "resting",
+        "walking",
+        "tracking odour on foot",
+        "searching near the odour source",
+        "returning to the arena",
+        "taking off",
+        "feeding",
+        "leaving the food",
+    }
+    assert s.provenance()["evidence"] == "demonstration"
+    assert "flight" in s.provenance()["components"]

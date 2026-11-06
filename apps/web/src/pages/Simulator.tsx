@@ -4,7 +4,7 @@ import { useApp } from "../lib/store";
 import type { Activity, InterventionSpec, Selector, SimFrame, SimSummary, StimulusSpec } from "../lib/types";
 import { Plot } from "../components/Plot";
 import { Empty, ErrorBox, EvidenceBadge, Field, Section, SelectorInput, Stat, SyntheticBanner, fmt, useAsync, useDatasets, useInterval } from "../components/ui";
-import { categoryColor } from "../lib/colors";
+import { useChartColors } from "../lib/colors";
 
 type Mode = "full" | "circuit" | "region" | "demo";
 const RASTER_WINDOW_MS = 500;
@@ -52,15 +52,15 @@ export default function Simulator() {
   }, [pending, session, setPending, act]);
 
   if (STATIC_DEMO) {
-    return <div className="p-6"><Empty title="The Brain Simulator needs the local backend">The LIF engine runs in Python (Numba/Brian2). Run <code className="mono">make dev</code> locally to use it.</Empty></div>;
+    return <div className="mx-auto max-w-3xl p-8"><Empty title="The Brain Simulator needs the local backend">The LIF engine runs in Python (Numba/Brian2). Run <code className="mono">make dev</code> locally to use it.</Empty></div>;
   }
 
   return (
-    <div className="grid h-full grid-cols-[22rem_1fr] gap-3 p-3">
-      <div className="space-y-3 overflow-y-auto">
+    <div className="grid h-full min-w-[900px] grid-cols-[21rem_minmax(0,1fr)] gap-4 p-4">
+      <div className="space-y-4 overflow-y-auto pr-1">
         <SyntheticBanner show={!!meta?.synthetic} />
         {pending && (!session || pending.datasetId !== session.dataset_id) && (
-          <div role="status" className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-accent">
+          <div role="status" className="rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-xs leading-snug text-accent">
             Pending from Explorer: {pending.kind} {pending.label} ({pending.rootIds.length} neuron{pending.rootIds.length > 1 ? "s" : ""}). Create a session to apply it.
           </div>
         )}
@@ -73,7 +73,7 @@ export default function Simulator() {
         {session && <StimulusPanel session={session} act={act} />}
         {session && <InterventionPanel session={session} act={act} />}
       </div>
-      <div className="min-w-0 space-y-3 overflow-y-auto">
+      <div className="min-w-0 space-y-4 overflow-y-auto pr-1">
         <ErrorBox error={err} />
         {!session ? (
           <Empty title="No simulation session">Configure a network on the left and press <b>Create session</b>. Demo mode runs the small synthetic network; full-brain mode uses the imported FlyWire dataset.</Empty>
@@ -107,10 +107,10 @@ function SetupPanel({ datasetId, hasSession, onCreate, busy }: { datasetId: stri
   });
   return (
     <Section title="Network & model">
-      <div className="space-y-2 text-sm">
-        <div className="grid grid-cols-4 gap-1" role="radiogroup" aria-label="Simulation mode">
+      <div className="space-y-3 text-sm">
+        <div className="seg flex w-full" role="radiogroup" aria-label="Simulation mode">
           {(["full", "circuit", "region", "demo"] as Mode[]).map((m) => (
-            <button key={m} role="radio" aria-checked={mode === m} className={`btn px-1 py-1 text-xs ${mode === m ? "btn-primary" : ""}`} onClick={() => setMode(m)}
+            <button key={m} role="radio" aria-checked={mode === m} className={`btn flex-1 px-1 py-1 text-xs ${mode === m ? "btn-primary" : ""}`} onClick={() => setMode(m)}
               disabled={(m === "demo") !== !!meta?.synthetic && (m === "demo" || m === "region")}
               title={{ full: "Entire imported graph", circuit: "Selected neurons (+k-hop neighbourhood)", region: "Neurons whose primary neuropil is selected", demo: "Synthetic fixture only" }[m]}>
               {m}
@@ -138,8 +138,8 @@ function SetupPanel({ datasetId, hasSession, onCreate, busy }: { datasetId: stri
           <Field label="Max duration (ms)"><input type="number" className="input" value={duration} min={10} max={600000} onChange={(e) => setDuration(+e.target.value)} /></Field>
         </div>
         <details className="text-xs">
-          <summary className="cursor-pointer text-ink-300">Model parameters (Shiu et al. 2024 defaults)</summary>
-          <div className="mt-2 space-y-1.5">
+          <summary className="text-ink-300 hover:text-ink-100">Model parameters (Shiu et al. 2024 defaults)</summary>
+          <div className="mt-3 space-y-2">
             {params.data && editable.map((k) => {
               const info = params.data!.info[k];
               return (
@@ -166,7 +166,7 @@ function StimulusPanel({ session, act }: { session: SimSummary; act: (fn: () => 
   const [relative, setRelative] = useState(true);
   return (
     <Section title="Stimulation">
-      <div className="space-y-2 text-xs">
+      <div className="space-y-3 text-xs">
         <SelectorInput datasetId={session.dataset_id} value={spec.selector} onChange={(s) => setSpec({ ...spec, selector: s })} />
         <div className="grid grid-cols-2 gap-2">
           <Field label="Type" hint="Poisson ≈ optogenetic activation (reference method); pulse train = frequency-locked; current = injected drive (FlyMind extension)">
@@ -185,9 +185,9 @@ function StimulusPanel({ session, act }: { session: SimSummary; act: (fn: () => 
         <label className="flex items-center gap-2"><input type="checkbox" checked={relative} onChange={(e) => setRelative(e.target.checked)} /> Times relative to now (t = {fmt.ms(session.t_ms)})</label>
         <button className="btn btn-primary w-full" disabled={!spec.selector.group && !spec.selector.root_ids?.length && !spec.selector.cell_types?.length}
           onClick={() => act(() => api.addStimulus(session.id, { ...spec, relative, label: spec.selector.group ?? spec.selector.cell_types?.join(",") ?? `${spec.selector.root_ids?.length} neurons` }))}>Add stimulus</button>
-        <ul className="space-y-1" data-testid="stimulus-list">
+        <ul className="space-y-1.5" data-testid="stimulus-list">
           {session.stimuli.map((s) => (
-            <li key={s.id} className="flex items-center gap-2 rounded border border-ink-700 px-2 py-1">
+            <li key={s.id} className="flex items-center gap-2 rounded-md border border-ink-700 bg-ink-850 px-2.5 py-1.5">
               <span className="flex-1">{s.label || s.kind} · {s.kind === "poisson" ? `${s.rate_hz} Hz` : s.kind === "pulse_train" ? `${s.frequency_hz} Hz pulses` : `${s.amplitude_mV} mV`} · {s.start_ms}–{s.stop_ms ?? "∞"} ms{(s.repeats ?? 1) > 1 ? ` ×${s.repeats}` : ""}</span>
               <button className="btn btn-danger px-1.5 py-0 text-[11px]" aria-label="Remove stimulus" onClick={() => act(() => api.removeStimulus(session.id, s.id))}>✕</button>
             </li>
@@ -203,7 +203,7 @@ function InterventionPanel({ session, act }: { session: SimSummary; act: (fn: ()
   const [post, setPost] = useState<Selector>({});
   return (
     <Section title="Silencing & perturbation">
-      <div className="space-y-2 text-xs">
+      <div className="space-y-3 text-xs">
         <SelectorInput datasetId={session.dataset_id} value={spec.selector} onChange={(s) => setSpec({ ...spec, selector: s })} />
         <select className="input" aria-label="Intervention type" value={spec.kind === "silence" ? spec.mode : "scale"} onChange={(e) => setSpec(e.target.value === "scale" ? { ...spec, kind: "synaptic_scaling" } : { ...spec, kind: "silence", mode: e.target.value as "block_output" | "clamp" })}>
           <option value="block_output">Silence: block synaptic output (≈ tetanus toxin; reference method)</option>
@@ -219,9 +219,9 @@ function InterventionPanel({ session, act }: { session: SimSummary; act: (fn: ()
         )}
         <button className="btn w-full" disabled={!spec.selector.group && !spec.selector.root_ids?.length && !spec.selector.cell_types?.length}
           onClick={() => act(() => api.addIntervention(session.id, { ...spec, post_selector: spec.kind === "synaptic_scaling" && (post.group || post.root_ids?.length || post.cell_types?.length) ? post : null, label: spec.selector.group ?? spec.selector.cell_types?.join(",") ?? `${spec.selector.root_ids?.length} neurons` }))}>Apply intervention</button>
-        <ul className="space-y-1" data-testid="intervention-list">
+        <ul className="space-y-1.5" data-testid="intervention-list">
           {session.interventions.map((s) => (
-            <li key={s.id} className="flex items-center gap-2 rounded border border-ink-700 px-2 py-1">
+            <li key={s.id} className="flex items-center gap-2 rounded-md border border-ink-700 bg-ink-850 px-2.5 py-1.5">
               <span className="flex-1">{s.label} · {s.kind === "silence" ? s.mode : `×${s.factor}`}</span>
               <button className="btn btn-danger px-1.5 py-0 text-[11px]" aria-label="Remove intervention" onClick={() => act(() => api.removeIntervention(session.id, s.id))}>✕</button>
             </li>
@@ -237,6 +237,7 @@ function InterventionPanel({ session, act }: { session: SimSummary; act: (fn: ()
 interface SpikeBuf { t: number[]; idx: number[] }
 
 function Running({ session, act, onPickNeuron }: { session: SimSummary; act: (fn: () => Promise<SimSummary>) => Promise<SimSummary | null>; onPickNeuron: (rid: string) => void }) {
+  const colors = useChartColors();
   const [live, setLive] = useState<{ t_ms: number; ratio: number | null; wall: number; total: number; truncated: boolean }>({ t_ms: session.t_ms, ratio: session.sim_wall_ratio, wall: session.wall_running_s, total: session.n_spikes, truncated: false });
   const buf = useRef<SpikeBuf>({ t: [], idx: [] });
   const [rasterTick, setRasterTick] = useState(0);
@@ -346,7 +347,7 @@ function Running({ session, act, onPickNeuron }: { session: SimSummary; act: (fn
             <button className="btn text-xs" onClick={() => api.saveSim(session.id).then((r) => alert(`Saved as experiment ${r.experiment_id}`))}>Save experiment</button>
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-6">
+        <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
           <Stat label="Status" value={<span data-testid="sim-status">{session.status}</span>} />
           <Stat label="Simulated time" value={<span data-testid="sim-time">{fmt.ms(t)}</span>} />
           <Stat label="Wall time (running)" value={`${live.wall.toFixed(2)} s`} hint="Measured wall-clock time spent integrating" />
@@ -356,8 +357,8 @@ function Running({ session, act, onPickNeuron }: { session: SimSummary; act: (fn
         </div>
         {session.error && <ErrorBox error={new Error(session.error)} />}
       </Section>
-      <div className="grid gap-3 xl:grid-cols-2">
-        <Section title={`Spike raster (${RASTER_WINDOW_MS} ms window, ${raster.n} active neurons)`} right={live.truncated ? <span className="chip text-amber-300">stream truncated</span> : null}>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Section title={`Spike raster (${RASTER_WINDOW_MS} ms window, ${raster.n} active neurons)`} right={live.truncated ? <span className="chip border-amber-500/50 text-amber-300">stream truncated</span> : null}>
           {!running && session.t_ms > 0 && (
             <label className="mb-1 flex items-center gap-2 text-[11px] text-ink-400">Window end
               <input aria-label="Raster window end" type="range" className="flex-1" min={Math.min(RASTER_WINDOW_MS, session.t_ms)} max={session.t_ms} step={10}
@@ -367,14 +368,14 @@ function Running({ session, act, onPickNeuron }: { session: SimSummary; act: (fn
           )}
           {raster.x.length === 0 ? <Empty title={session.t_ms > 0 ? "No spikes in this window" : "No spikes yet"}>{session.t_ms > 0 ? "Move the window to a stimulated period." : "Add a stimulus and start the simulation."}</Empty> : (
             <Plot testId="raster" height={260} onClick={(p) => api.neuronAt(session.dataset_id, p.customdata as number).then((n) => onPickNeuron(n.root_id))}
-              data={[{ type: "scattergl", mode: "markers", x: raster.x, y: raster.y, customdata: raster.ids, marker: { size: 2.5, color: "#5eead4" }, hovertemplate: "t=%{x:.1f} ms<br>idx %{customdata}<extra></extra>" }]}
+              data={[{ type: "scattergl", mode: "markers", x: raster.x, y: raster.y, customdata: raster.ids, marker: { size: 2.5, color: colors.accent }, hovertemplate: "t=%{x:.1f} ms<br>idx %{customdata}<extra></extra>" }]}
               layout={{ xaxis: { title: { text: "time (ms)" }, range: [Math.max(0, t - RASTER_WINDOW_MS), t] }, yaxis: { title: { text: "active neuron (rank)" } }, showlegend: false }} />
           )}
         </Section>
         <Section title="Population firing rate of stimulated groups (10 ms bins)">
           {Object.keys(pop).length === 0 ? <Empty title="No stimulated groups" /> : (
             <Plot testId="population" height={260}
-              data={Object.entries(pop).map(([k, v], i) => ({ type: "scatter", mode: "lines", name: session.stimuli.find((s) => `stim:${s.id}` === k)?.label ?? k, x: v.t_ms, y: v.rate_hz, line: { width: 1.5, color: categoryColor("x", `${i}${k}`) } }))}
+              data={Object.entries(pop).map(([k, v], i) => ({ type: "scatter", mode: "lines", name: session.stimuli.find((s) => `stim:${s.id}` === k)?.label ?? k, x: v.t_ms, y: v.rate_hz, line: { width: 1.5, color: colors.category("x", `${i}${k}`) } }))}
               layout={{ xaxis: { title: { text: "time (ms)" } }, yaxis: { title: { text: "Hz per neuron" } } }} />
           )}
         </Section>
@@ -394,8 +395,8 @@ function Running({ session, act, onPickNeuron }: { session: SimSummary; act: (fn
           {!activity || activity.regions.length === 0 ? <Empty title="No activity in window" /> : (
             <Plot testId="regions" height={260}
               data={[
-                ...(snapshot ? [{ type: "bar" as const, name: "before", x: snapshot.regions.slice(0, 15).map((r) => r.label), y: snapshot.regions.slice(0, 15).map((r) => r.mean_rate_hz), marker: { color: "#64748b" } }] : []),
-                { type: "bar" as const, name: snapshot ? "now" : "mean rate", x: activity.regions.slice(0, 15).map((r) => r.label), y: activity.regions.slice(0, 15).map((r) => r.mean_rate_hz), marker: { color: "#f472b6" } },
+                ...(snapshot ? [{ type: "bar" as const, name: "before", x: snapshot.regions.slice(0, 15).map((r) => r.label), y: snapshot.regions.slice(0, 15).map((r) => r.mean_rate_hz), marker: { color: colors.neutral } }] : []),
+                { type: "bar" as const, name: snapshot ? "now" : "mean rate", x: activity.regions.slice(0, 15).map((r) => r.label), y: activity.regions.slice(0, 15).map((r) => r.mean_rate_hz), marker: { color: colors.accent2 } },
               ]}
               layout={{ barmode: "group", yaxis: { title: { text: "mean Hz / neuron" } }, showlegend: !!snapshot }} />
           )}
