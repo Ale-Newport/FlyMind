@@ -1,0 +1,216 @@
+{
+  "experiment_id": "embodied_flywire783_food_dna02l_silencing",
+  "name": "Virtual fly: locomotion after neuronal silencing",
+  "template": "embodied_silencing",
+  "created_at": "2026-11-06T16:13:57Z",
+  "evidence": "hypothesis",
+  "dataset": {
+    "dataset_id": "flywire_fafb_783",
+    "version": "783",
+    "synthetic": false,
+    "files": [
+      {
+        "name": "Completeness_783.csv",
+        "role": "shiu_completeness",
+        "sha256": "bbb847a4cc2caaa7a16349722d220c087317b946d148d4d592d94d250617a311",
+        "size_bytes": 3327347,
+        "detected_format": "csv",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/Completeness_783.csv"
+      },
+      {
+        "name": "Connectivity_783.parquet",
+        "role": "shiu_connectivity",
+        "sha256": "efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+        "size_bytes": 100804642,
+        "detected_format": "parquet",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/Connectivity_783.parquet"
+      },
+      {
+        "name": "Supplemental_file1_neuron_annotations.tsv",
+        "role": "annotations_tsv",
+        "sha256": "30be6c73975a70c56d930e27911f36455d3886e15abf383b78edd2a5d679e0b6",
+        "size_bytes": 27015208,
+        "detected_format": "tsv",
+        "url": "https://raw.githubusercontent.com/flyconnectome/flywire_annotations/c294fba426f5abe861289bdc1171188026646b04/supplemental_files/Supplemental_file1_neuron_annotations.tsv"
+      },
+      {
+        "name": "per_neuron_neuropil_count_pre_783.feather",
+        "role": "zenodo_neuropil_pre",
+        "sha256": "35442a46f076892dff91bd6e55fa1489b3acc64fda1d35cee7dbbbbc509a3dff",
+        "size_bytes": 16853770,
+        "detected_format": "feather",
+        "url": "https://zenodo.org/records/10676866/files/per_neuron_neuropil_count_pre_783.feather"
+      },
+      {
+        "name": "proofread_root_ids_783.npy",
+        "role": "zenodo_root_ids",
+        "sha256": "7c7b7e818e9232e5ab64793d52ba20574dbe9da3a6509fbc74193b0f259a01be",
+        "size_bytes": 1114168,
+        "detected_format": "npy",
+        "url": "https://zenodo.org/records/10676866/files/proofread_root_ids_783.npy"
+      }
+    ],
+    "n_neurons": 139255,
+    "n_edges": 15091983
+  },
+  "network": {
+    "mode": "full",
+    "n_neurons": 139255,
+    "n_edges": 15091983
+  },
+  "seeds": {
+    "base": 0,
+    "trial_seeds": [
+      0
+    ],
+    "rule": "trial k uses seed base+k in every condition (common random numbers)"
+  },
+  "model": "LIF (Shiu et al. 2024 equations), FlyMind engine backend=numba",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ],
+  "resolved_neurons": {
+    "readouts": {},
+    "intact": {
+      "stimuli": [],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      },
+      "embodied": {
+        "metrics": {
+          "duration_s": 3.0000000000019065,
+          "distance_travelled_mm": 43.206123076081745,
+          "net_displacement_mm": 2.232310339395195,
+          "mean_speed_mm_s": 14.406843306453577,
+          "heading_change_deg": 859.8780065536312,
+          "total_abs_turning_deg": 1189.9814986268818,
+          "collision_onsets": 0,
+          "time_in_contact_s": 0.0,
+          "time_on_food_s": 0.0,
+          "final_x_mm": -0.5693845966323763,
+          "final_y_mm": 1.9301428640162703,
+          "mean_abs_descending": 0.6481222302726188,
+          "min_dist_attractive_source_mm": 18.046595023772735,
+          "final_dist_attractive_source_mm": 19.536253733735656,
+          "initial_dist_attractive_source_mm": 19.194729993105035,
+          "brain_spikes_total": 1429565,
+          "mean_readout_hz_p9_left": 0.0,
+          "mean_readout_hz_p9_right": 0.0,
+          "mean_readout_hz_dna02_left": 52.936643004425655,
+          "mean_readout_hz_dna02_right": 1.0397051070281622,
+          "mean_readout_hz_mdn_left": 0.0,
+          "mean_readout_hz_mdn_right": 0.0,
+          "mean_readout_hz_mn9": 0.0
+        },
+        "dir": "fly_intact",
+        "missing_groups": []
+      }
+    },
+    "silenced": {
+      "stimuli": [],
+      "interventions": [
+        {
+          "label": "steering DN silenced",
+          "root_ids": [
+            720575940629327659
+          ]
+        }
+      ],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      },
+      "embodied": {
+        "metrics": {
+          "duration_s": 3.0000000000019065,
+          "distance_travelled_mm": 0.2452319609790898,
+          "net_displacement_mm": 0.06849708909863728,
+          "mean_speed_mm_s": 0.08177124407433609,
+          "heading_change_deg": 0.2386692052507563,
+          "total_abs_turning_deg": 1.9940933764059725,
+          "collision_onsets": 0,
+          "time_in_contact_s": 0.0,
+          "time_on_food_s": 0.0,
+          "final_x_mm": 0.616410326737371,
+          "final_y_mm": 0.02294320762863201,
+          "mean_abs_descending": 0.0,
+          "min_dist_attractive_source_mm": 19.12649013794955,
+          "final_dist_attractive_source_mm": 19.12649013794955,
+          "initial_dist_attractive_source_mm": 19.194729993105035,
+          "brain_spikes_total": 1428549,
+          "mean_readout_hz_p9_left": 0.0,
+          "mean_readout_hz_p9_right": 0.0,
+          "mean_readout_hz_dna02_left": 0.0,
+          "mean_readout_hz_dna02_right": 0.0,
+          "mean_readout_hz_mdn_left": 0.0,
+          "mean_readout_hz_mdn_right": 0.0,
+          "mean_readout_hz_mn9": 0.0
+        },
+        "dir": "fly_silenced",
+        "missing_groups": []
+      }
+    }
+  },
+  "summary": {},
+  "expected_checks": [],
+  "timing": [],
+  "wall_total_s": 45.346710917016026,
+  "runtime": {
+    "flymind_version": "0.1.0",
+    "git_commit": "a4e2bcdde4dbd767ce3e2be7f75d1708c8f8886d",
+    "packages": {
+      "flymind": "0.1.0",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "duckdb": "2.0.0",
+      "brian2": "2.11.0",
+      "numba": "0.68.1",
+      "mujoco": "3.16.0",
+      "flygym": "2.1.1",
+      "fastapi": "0.162.0"
+    },
+    "machine": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.16",
+      "cpu_count": 12,
+      "cpu_model": "Apple M2 Max",
+      "memory_bytes": 68719476736
+    },
+    "timestamp": "2026-11-06T16:13:57Z"
+  }
+}

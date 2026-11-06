@@ -1,0 +1,681 @@
+{
+  "experiment_id": "reproduction_shiu2024_sugar_mn9_v630",
+  "name": "Sugar GRN -> MN9 (reproduction of Shiu et al. 2024)",
+  "template": "sensory_circuit",
+  "created_at": "2026-11-06T16:10:47Z",
+  "evidence": "reproduced",
+  "dataset": {
+    "dataset_id": "flywire_fafb_630_shiu",
+    "version": "630",
+    "synthetic": false,
+    "files": [
+      {
+        "name": "2023_03_23_completeness_630_final.csv",
+        "role": "shiu_completeness",
+        "sha256": "e6b71e17671a9bdb05f55e4bc6774640a1418cb7a05125e0fc994ad40f9bfdfb",
+        "size_bytes": 3057611,
+        "detected_format": "csv",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/2023_03_23_completeness_630_final.csv"
+      },
+      {
+        "name": "2023_03_23_connectivity_630_final.parquet",
+        "role": "shiu_connectivity",
+        "sha256": "94db8c650533bc36ffa3223f2e62325d5648b8d6bd31c3a4e1c804628c7557b3",
+        "size_bytes": 86630944,
+        "detected_format": "parquet",
+        "url": "https://raw.githubusercontent.com/philshiu/Drosophila_brain_model/91bdd1e7dcf193f3e7ca5a8933497fcef63b7960/2023_03_23_connectivity_630_final.parquet"
+      }
+    ],
+    "n_neurons": 127400,
+    "n_edges": 14687178
+  },
+  "network": {
+    "mode": "full",
+    "n_neurons": 127400,
+    "n_edges": 14687178
+  },
+  "seeds": {
+    "base": 0,
+    "trial_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+    ],
+    "rule": "trial k uses seed base+k in every condition (common random numbers)"
+  },
+  "model": "LIF (Shiu et al. 2024 equations), FlyMind engine backend=numba",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ],
+  "resolved_neurons": {
+    "readouts": {
+      "mn9_shiu": [
+        720575940660219265
+      ]
+    },
+    "200 Hz": {
+      "stimuli": [
+        {
+          "label": "sugarR",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940620900446,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    },
+    "100 Hz": {
+      "stimuli": [
+        {
+          "label": "sugarR",
+          "root_ids": [
+            720575940611875570,
+            720575940612670570,
+            720575940616885538,
+            720575940617000768,
+            720575940617937543,
+            720575940620900446,
+            720575940621502051,
+            720575940621754367,
+            720575940624963786,
+            720575940628853239,
+            720575940629176663,
+            720575940630233916,
+            720575940630797113,
+            720575940632425919,
+            720575940632889389,
+            720575940633143833,
+            720575940637568838,
+            720575940638202345,
+            720575940639198653,
+            720575940639332736,
+            720575940640649691
+          ]
+        }
+      ],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      }
+    }
+  },
+  "summary": {
+    "200 Hz": {
+      "spikes_per_trial": 17014.966666666667,
+      "active_neurons_any_trial": 456,
+      "readouts": {
+        "mn9_shiu": {
+          "mean_rate_hz": 93.4,
+          "std_hz": 4.834597535817571,
+          "n_neurons": 1
+        }
+      }
+    },
+    "100 Hz": {
+      "spikes_per_trial": 9662.066666666668,
+      "active_neurons_any_trial": 406,
+      "readouts": {
+        "mn9_shiu": {
+          "mean_rate_hz": 67.6,
+          "std_hz": 4.909854037205858,
+          "n_neurons": 1
+        }
+      }
+    }
+  },
+  "expected_checks": [
+    {
+      "readout": "mn9_shiu",
+      "condition": "200 Hz",
+      "value_hz": 93.3,
+      "tolerance_hz": 3.0,
+      "source": "Shiu et al. 2024 reference results (results/example/sugarR*.parquet in philshiu/Drosophila_brain_model @91bdd1e7; mean of 30 trials, v630)",
+      "note": "reference SD across trials 3.2 Hz; tolerance ~5 standard errors",
+      "observed_hz": 93.4,
+      "observed_std_hz": 4.834597535817571,
+      "status": "pass"
+    },
+    {
+      "readout": "mn9_shiu",
+      "condition": "100 Hz",
+      "value_hz": 67.0,
+      "tolerance_hz": 4.0,
+      "source": "Shiu et al. 2024 reference results (results/example/sugarR*.parquet in philshiu/Drosophila_brain_model @91bdd1e7; mean of 30 trials, v630)",
+      "note": "reference SD across trials 6.6 Hz",
+      "observed_hz": 67.6,
+      "observed_std_hz": 4.909854037205858,
+      "status": "pass"
+    }
+  ],
+  "timing": [
+    {
+      "condition": "200 Hz",
+      "trial": 0,
+      "wall_s": 2.2053127090330236,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.453450431725157
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 1,
+      "wall_s": 2.064060333999805,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4844819618533953
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 2,
+      "wall_s": 2.0952883329591714,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.47726128393398826
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 3,
+      "wall_s": 2.0666735830018297,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4838693484181022
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 4,
+      "wall_s": 2.077270290988963,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48140100223737
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 5,
+      "wall_s": 2.0681786249624565,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48351723005461045
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 6,
+      "wall_s": 2.070123541983776,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4830629572193123
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 7,
+      "wall_s": 2.441546458983794,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.40957647818678583
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 8,
+      "wall_s": 2.2304954169667326,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4483308920490442
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 9,
+      "wall_s": 2.1540844999835826,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4642343417853949
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 10,
+      "wall_s": 2.0431578749557957,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4894384385355612
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 11,
+      "wall_s": 2.041177791019436,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4899132277451269
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 12,
+      "wall_s": 2.019928916997742,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49506692616011394
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 13,
+      "wall_s": 2.0245693750330247,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49393219730180304
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 14,
+      "wall_s": 2.0864196670008823,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.47928996060387363
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 15,
+      "wall_s": 2.0686259160283953,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4834126809742015
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 16,
+      "wall_s": 2.0531315419939347,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48706085291974643
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 17,
+      "wall_s": 2.081633125024382,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48039204794470547
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 18,
+      "wall_s": 2.716767834033817,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.3680844522202748
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 19,
+      "wall_s": 2.2561215829919092,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44323852381832657
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 20,
+      "wall_s": 2.389208083972335,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.418548726127439
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 21,
+      "wall_s": 2.301439374976326,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.43451068530114406
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 22,
+      "wall_s": 2.27867187501397,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.43885212740156776
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 23,
+      "wall_s": 2.419712624978274,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4132722165752963
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 24,
+      "wall_s": 2.2548231660039164,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.44349375821441384
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 25,
+      "wall_s": 2.052030124992598,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4873222804190593
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 26,
+      "wall_s": 2.0456062500015832,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48885263231828024
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 27,
+      "wall_s": 2.0347114170435816,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4914701866926129
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 28,
+      "wall_s": 2.0579095000284724,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48593001780990097
+    },
+    {
+      "condition": "200 Hz",
+      "trial": 29,
+      "wall_s": 2.0536812089849263,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4869304912685403
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 0,
+      "wall_s": 2.0235001249820925,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49419319902876196
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 1,
+      "wall_s": 2.0263399169780314,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49350061735512935
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 2,
+      "wall_s": 2.0417084590299055,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4897858925828904
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 3,
+      "wall_s": 2.0439367910148576,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4892519203118209
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 4,
+      "wall_s": 2.016542416997254,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49589832158802627
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 5,
+      "wall_s": 2.042342667002231,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4896337995365925
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 6,
+      "wall_s": 2.053446499980055,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.48698614744027324
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 7,
+      "wall_s": 2.0309196659945883,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4923877673469063
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 8,
+      "wall_s": 2.027331665973179,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4932592021246659
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 9,
+      "wall_s": 2.0216355830198154,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.494648990351788
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 10,
+      "wall_s": 2.030304250016343,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4925370175390957
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 11,
+      "wall_s": 2.0361752080498263,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4911168724806168
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 12,
+      "wall_s": 2.0620283339521848,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4849593885469803
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 13,
+      "wall_s": 2.030652291025035,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4924525997974862
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 14,
+      "wall_s": 2.037776749988552,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49073089091119415
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 15,
+      "wall_s": 2.0290014159982093,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49285327852175465
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 16,
+      "wall_s": 2.0233567919931374,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49422820728267863
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 17,
+      "wall_s": 2.0342619579751045,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4915787743459528
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 18,
+      "wall_s": 2.0263933750102296,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49348759837657474
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 19,
+      "wall_s": 2.0432510829996318,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4894161115685948
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 20,
+      "wall_s": 2.021094208001159,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4947814881865351
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 21,
+      "wall_s": 2.0448329580249265,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4890375011198396
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 22,
+      "wall_s": 2.0247285420191474,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4938933685415214
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 23,
+      "wall_s": 2.0337602499639615,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.491700041840094
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 24,
+      "wall_s": 2.017437416012399,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4956783254156986
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 25,
+      "wall_s": 2.0595126249827445,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4855517698068874
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 26,
+      "wall_s": 2.0356346250046045,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.49124729345657403
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 27,
+      "wall_s": 2.0320636249962263,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4921105755248471
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 28,
+      "wall_s": 2.0290606659837067,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.4928388868625528
+    },
+    {
+      "condition": "100 Hz",
+      "trial": 29,
+      "wall_s": 2.0535345840035006,
+      "sim_s": 1.0,
+      "sim_wall_ratio": 0.486965258725
+    }
+  ],
+  "wall_total_s": 128.26951058302075,
+  "runtime": {
+    "flymind_version": "0.1.0",
+    "git_commit": "a4e2bcdde4dbd767ce3e2be7f75d1708c8f8886d",
+    "packages": {
+      "flymind": "0.1.0",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "duckdb": "2.0.0",
+      "brian2": "2.11.0",
+      "numba": "0.68.1",
+      "mujoco": "3.16.0",
+      "flygym": "2.1.1",
+      "fastapi": "0.162.0"
+    },
+    "machine": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.16",
+      "cpu_count": 12,
+      "cpu_model": "Apple M2 Max",
+      "memory_bytes": 68719476736
+    },
+    "timestamp": "2026-11-06T16:10:47Z"
+  }
+}

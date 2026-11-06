@@ -1,0 +1,8 @@
+Running 6 tests using 1 worker
+  ✓  1 [chromium] › tests/e2e/workflows.spec.ts:12:1 › navigation reaches every module and the backend is online (1.5s)
+  ✓  2 [chromium] › tests/e2e/workflows.spec.ts:25:1 › datasets page shows provenance and passing validation (774ms)
+  ✓  3 [chromium] › tests/e2e/workflows.spec.ts:33:1 › explorer: search, inspect, and send a neuron to the simulator (1.6s)
+  ✓  4 [chromium] › tests/e2e/workflows.spec.ts:53:1 › simulator: demo session, stimulation, start/stop, live raster (2.9s)
+  ✓  5 [chromium] › tests/e2e/workflows.spec.ts:82:1 › virtual fly: baseline session streams MuJoCo poses (7.4s)
+  ✓  6 [chromium] › tests/e2e/workflows.spec.ts:94:1 › experiments: run a template and inspect results (1.5s)
+  6 passed (18.9s)

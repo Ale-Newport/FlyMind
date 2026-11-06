@@ -1,0 +1,162 @@
+{
+  "experiment_id": "embodied_fixture_food_baseline_vs_neural",
+  "name": "Virtual fly: baseline vs neural controller (food arena)",
+  "template": "embodied_controller_comparison",
+  "created_at": "2026-11-06T16:14:21Z",
+  "evidence": "demonstration",
+  "dataset": {
+    "dataset_id": "synthetic_demo_v1",
+    "version": "1",
+    "synthetic": true,
+    "files": [],
+    "n_neurons": 1114,
+    "n_edges": 12185
+  },
+  "network": {
+    "mode": "demo",
+    "n_neurons": 1114,
+    "n_edges": 12185
+  },
+  "seeds": {
+    "base": 0,
+    "trial_seeds": [
+      0
+    ],
+    "rule": "trial k uses seed base+k in every condition (common random numbers)"
+  },
+  "model": "LIF (Shiu et al. 2024 equations), FlyMind engine backend=numba",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network).",
+    "Leg kinematics come from FlyGym's HybridTurningController, not from the connectome.",
+    "Odour field is an analytic FlyMind model."
+  ],
+  "resolved_neurons": {
+    "readouts": {},
+    "baseline": {
+      "stimuli": [],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      },
+      "embodied": {
+        "metrics": {
+          "duration_s": 3.0000000000019065,
+          "distance_travelled_mm": 55.401254955166706,
+          "net_displacement_mm": 41.503379759792736,
+          "mean_speed_mm_s": 18.47324273262137,
+          "heading_change_deg": 13.31574472327434,
+          "total_abs_turning_deg": 772.5622405375894,
+          "collision_onsets": 0,
+          "time_in_contact_s": 0.0,
+          "time_on_food_s": 0.0,
+          "final_x_mm": 40.883209908149745,
+          "final_y_mm": 9.79408147830073,
+          "mean_abs_descending": 1.0,
+          "min_dist_attractive_source_mm": 3.4668580258086146,
+          "final_dist_attractive_source_mm": 22.95343163997977,
+          "initial_dist_attractive_source_mm": 19.19462391461608
+        },
+        "dir": "fly_baseline",
+        "missing_groups": []
+      }
+    },
+    "neural": {
+      "stimuli": [],
+      "interventions": [],
+      "params": {
+        "v_rest_mV": -52.0,
+        "v_reset_mV": -52.0,
+        "v_threshold_mV": -45.0,
+        "tau_m_ms": 20.0,
+        "tau_syn_ms": 5.0,
+        "t_refractory_ms": 2.2,
+        "delay_ms": 1.8,
+        "w_syn_mV": 0.275,
+        "poisson_weight_factor": 250.0,
+        "dt_ms": 0.1,
+        "hold_g_during_refractory": true,
+        "reset_g": true,
+        "drop_input_during_refractory": true,
+        "stimulated_refractory_zero": true,
+        "precision": "float64"
+      },
+      "embodied": {
+        "metrics": {
+          "duration_s": 3.0000000000019065,
+          "distance_travelled_mm": 18.66070537134094,
+          "net_displacement_mm": 10.879428866746535,
+          "mean_speed_mm_s": 6.2223092268519755,
+          "heading_change_deg": -100.52684282122763,
+          "total_abs_turning_deg": 332.34567696109804,
+          "collision_onsets": 0,
+          "time_in_contact_s": 0.0,
+          "time_on_food_s": 0.0,
+          "final_x_mm": 6.6758123674074294,
+          "final_y_mm": -8.992325708318015,
+          "mean_abs_descending": 0.36430211875902585,
+          "min_dist_attractive_source_mm": 17.160918572813973,
+          "final_dist_attractive_source_mm": 20.419998984224456,
+          "initial_dist_attractive_source_mm": 19.194729993105035,
+          "brain_spikes_total": 9702,
+          "mean_readout_hz_dn_fwd_l": 8.914176436052003,
+          "mean_readout_hz_dn_fwd_r": 7.338095760395942,
+          "mean_readout_hz_dn_turn_l": 8.673031442321784,
+          "mean_readout_hz_dn_turn_r": 16.45996457950055,
+          "mean_readout_hz_dn_back_l": 0.0,
+          "mean_readout_hz_dn_back_r": 0.0,
+          "mean_readout_hz_mn_feed": 0.0
+        },
+        "dir": "fly_neural",
+        "missing_groups": []
+      }
+    }
+  },
+  "summary": {},
+  "expected_checks": [],
+  "timing": [],
+  "wall_total_s": 23.524522292020265,
+  "runtime": {
+    "flymind_version": "0.1.0",
+    "git_commit": "a4e2bcdde4dbd767ce3e2be7f75d1708c8f8886d",
+    "packages": {
+      "flymind": "0.1.0",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "duckdb": "2.0.0",
+      "brian2": "2.11.0",
+      "numba": "0.68.1",
+      "mujoco": "3.16.0",
+      "flygym": "2.1.1",
+      "fastapi": "0.162.0"
+    },
+    "machine": {
+      "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "processor": "arm",
+      "python": "3.13.16",
+      "cpu_count": 12,
+      "cpu_model": "Apple M2 Max",
+      "memory_bytes": 68719476736
+    },
+    "timestamp": "2026-11-06T16:14:21Z"
+  }
+}

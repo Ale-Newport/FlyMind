@@ -1,0 +1,134 @@
+{
+  "command": "uv run python scripts/benchmarks/run_benchmarks.py ",
+  "date": "2026-11-06T16:14:30+00:00",
+  "machine": {
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.13.16",
+    "cpu_count": 12,
+    "cpu_model": "Apple M2 Max",
+    "memory_bytes": 68719476736
+  },
+  "packages": {
+    "flymind": "0.1.0",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pandas": "3.1.1",
+    "pyarrow": "26.0.1",
+    "duckdb": "2.0.0",
+    "brian2": "2.11.0",
+    "numba": "0.68.1",
+    "mujoco": "3.16.0",
+    "flygym": "2.1.1",
+    "fastapi": "0.162.0"
+  },
+  "measurements": {
+    "fixture_build_s": 0.10211583302589133,
+    "flywire_783_load_s": 0.018,
+    "flywire_783_import_s": 18.12407683301717,
+    "flywire_783_import_note": "includes validation; raw files already downloaded",
+    "lif": [
+      {
+        "label": "synthetic fixture (demo mode)",
+        "backend": "numba",
+        "neurons": 1114,
+        "edges": 12185,
+        "simulated_s": 1.0,
+        "wall_s": 0.0218,
+        "steps_per_s": 459287.1,
+        "sim_s_per_wall_s": 45.9287,
+        "spikes": 13972,
+        "active_neurons": 115
+      },
+      {
+        "label": "synthetic fixture (demo mode)",
+        "backend": "numpy",
+        "neurons": 1114,
+        "edges": 12185,
+        "simulated_s": 1.0,
+        "wall_s": 0.6104,
+        "steps_per_s": 16382.5,
+        "sim_s_per_wall_s": 1.6382,
+        "spikes": 13972,
+        "active_neurons": 115
+      },
+      {
+        "label": "FlyWire v783 full brain, sugar GRNs 200 Hz",
+        "backend": "numba",
+        "neurons": 139255,
+        "edges": 15091983,
+        "simulated_s": 1.0,
+        "wall_s": 2.2372,
+        "steps_per_s": 4469.8,
+        "sim_s_per_wall_s": 0.447,
+        "spikes": 15830,
+        "active_neurons": 404
+      },
+      {
+        "label": "FlyWire v783 region mode (AL + LH)",
+        "backend": "numba",
+        "neurons": 4433,
+        "edges": 347857,
+        "simulated_s": 1.0,
+        "wall_s": 0.261,
+        "steps_per_s": 38312.8,
+        "sim_s_per_wall_s": 3.8313,
+        "spikes": 188705,
+        "active_neurons": 2074
+      },
+      {
+        "label": "FlyWire v783 full brain, DM1 ORNs 200 Hz",
+        "backend": "numba",
+        "neurons": 139255,
+        "edges": 15091983,
+        "simulated_s": 1.0,
+        "wall_s": 2.7603,
+        "steps_per_s": 3622.8,
+        "sim_s_per_wall_s": 0.3623,
+        "spikes": 488737,
+        "active_neurons": 8491
+      }
+    ],
+    "peak_rss_mb_after_brain": 4102.8,
+    "brian2_fixture": {
+      "build_s": 0.263,
+      "run_s": 0.343,
+      "simulated_s": 1.0,
+      "codegen": "cython"
+    },
+    "virtual_fly": [
+      {
+        "label": "baseline controller, empty arena",
+        "model_build_s": 0.41,
+        "simulated_s": 1.0,
+        "wall_s": 3.79,
+        "sim_s_per_wall_s": 0.264,
+        "physics_steps_per_s": 2639.5
+      },
+      {
+        "label": "baseline controller, light arena (compound-eye vision at 20 Hz)",
+        "simulated_s": 1.0,
+        "wall_s": 4.2,
+        "sim_s_per_wall_s": 0.238
+      },
+      {
+        "label": "neural controller, synthetic network, food arena",
+        "simulated_s": 1.0,
+        "wall_s": 4.06,
+        "sim_s_per_wall_s": 0.246,
+        "bridge_interval_ms": 1.0,
+        "wall_ms_per_bridge_interval": 4.062
+      },
+      {
+        "label": "neural controller, FlyWire v783 full brain, food arena",
+        "simulated_s": 1.0,
+        "wall_s": 7.0,
+        "sim_s_per_wall_s": 0.143,
+        "bridge_interval_ms": 1.0,
+        "wall_ms_per_bridge_interval": 7.002
+      }
+    ],
+    "peak_rss_mb_total": 4102.8
+  }
+}
