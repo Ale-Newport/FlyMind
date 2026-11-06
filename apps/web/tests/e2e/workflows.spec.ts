@@ -67,30 +67,30 @@ test("simulator: demo session, stimulation, start/stop, live raster", async ({ p
     page.waitForResponse((r) => r.url().includes("/control") && r.request().postData()?.includes("speed") === true),
     page.getByLabel("Speed").selectOption("1"),
   ]);
-  await page.getByRole("button", { name: "▶ Start" }).click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect(page.getByTestId("raster")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("population")).toBeVisible();
-  await page.getByRole("button", { name: "❚❚ Pause" }).click();
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
   await expect(page.getByTestId("sim-status")).toHaveText("paused");
   const t = await page.getByTestId("sim-time").textContent();
   expect(t).not.toBe("0.0 ms");
   await shot(page, "simulator");
-  await page.getByRole("button", { name: "Step" }).click();
+  await page.getByRole("button", { name: "Step", exact: true }).click();
   await page.getByLabel("Raster window end").fill("400"); // scrub recorded activity
   await expect(page.getByTestId("raster")).toBeVisible();
-  await page.getByRole("button", { name: "■ Stop" }).click();
+  await page.getByRole("button", { name: "Stop", exact: true }).click();
   await expect(page.getByTestId("sim-status")).toHaveText("stopped");
-  await page.getByRole("button", { name: "↺ Reset" }).click();
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(page.getByTestId("sim-status")).toHaveText("ready");
 });
 
 test("virtual fly: baseline session streams MuJoCo poses", async ({ page }) => {
   await page.goto("/#/fly");
   await page.getByLabel("Arena").selectOption("obstacle");
-  await page.getByRole("spinbutton").last().fill("1.5");
+  await page.getByLabel("Duration").fill("1.5");
   await page.getByRole("button", { name: "Create fly session" }).click();
-  await expect(page.getByRole("button", { name: "▶ Start" })).toBeEnabled({ timeout: 60_000 });
-  await page.getByRole("button", { name: "▶ Start" }).click();
+  await expect(page.getByRole("button", { name: "Start", exact: true })).toBeEnabled({ timeout: 60_000 });
+  await page.getByRole("button", { name: "Start", exact: true }).click();
   await expect.poll(async () => parseFloat((await page.getByTestId("fly-time").textContent()) ?? "0"), { timeout: 60_000 }).toBeGreaterThan(0.3);
   await expect(page.getByTestId("fly-canvas")).toBeVisible();
   await shot(page, "virtual-fly");
@@ -99,7 +99,7 @@ test("virtual fly: baseline session streams MuJoCo poses", async ({ page }) => {
 test("experiments: run a template and inspect results", async ({ page }) => {
   await page.goto("/#/experiments");
   await page.getByLabel("Template").selectOption("intact_vs_lesioned");
-  await page.getByRole("spinbutton").first().fill("2");
+  await page.getByLabel("Trials").fill("2");
   await page.getByRole("button", { name: "Run experiment" }).click();
   await expect(page.getByTestId("job-status")).toContainText("done", { timeout: 90_000 });
   await expect(page.getByTestId("readout-bars")).toBeVisible();

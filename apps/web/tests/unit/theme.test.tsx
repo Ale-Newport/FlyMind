@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { act, render, renderHook, screen } from "@testing-library/react";
 import { chartColors, categoryColor, hashColor, hexToRgb, rateColor } from "../../src/lib/colors";
 import { THEME_STORAGE_KEY, useTheme, useThemeStore } from "../../src/lib/theme";
@@ -42,7 +44,7 @@ describe("theme state", () => {
 
 describe("theme-aware colours", () => {
   it("keeps the dark defaults unchanged", () => {
-    expect(categoryColor("nt_type", "GABA", "dark")).toBe("#f43f5e");
+    expect(categoryColor("nt_type", "GABA", "dark")).toBe("#e5654f");
     expect(hashColor("AL_L", "dark")).toBe(hashColor("AL_L"));
   });
   it("light categorical colours are visible on a white background", () => {
@@ -53,7 +55,10 @@ describe("theme-aware colours", () => {
     const d = chartColors("dark"), l = chartColors("light");
     expect(contrast(d.accent, d.scene.bg)).toBeGreaterThan(7);
     expect(contrast(l.accent, "#ffffff")).toBeGreaterThan(4.5);
-    expect(contrast(l.text, "#ffffff")).toBeGreaterThan(7);
+    expect(contrast(l.accent, "#f5f2ea")).toBeGreaterThan(4.5); // on the warm paper page tone
+    expect(contrast(l.text, "#f5f2ea")).toBeGreaterThan(7);
+    expect(contrast(l.textMuted, "#f5f2ea")).toBeGreaterThan(4.5);
+    expect(contrast(d.textMuted, "#151412")).toBeGreaterThan(4.5);
     expect(l.scene.additiveOk).toBe(false);
   });
   it("light rate ramp gets darker with rate (salient on light backgrounds)", () => {
@@ -61,4 +66,27 @@ describe("theme-aware colours", () => {
     expect(sum(rateColor(1, "light"))).toBeLessThan(sum(rateColor(0.5, "light")));
     expect(sum(rateColor(0.5, "light"))).toBeLessThan(sum(rateColor(0, "light")));
   });
+});
+
+describe("css tokens (src/index.css)", () => {
+  const css = readFileSync(path.resolve(__dirname, "../../src/index.css"), "utf8");
+  const block = (selector: string) => {
+    const i = css.indexOf(selector);
+    const body = css.slice(css.indexOf("{", i) + 1, css.indexOf("}", i));
+    return Object.fromEntries([...body.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})/g)].map((m) => [m[1], m[2]]));
+  };
+  for (const [name, sel] of [["dark", ":root[data-theme=\"dark\"],"], ["light", ":root[data-theme=\"light\"] {"]] as const) {
+    it(`${name}: text tokens reach AA on every surface they are used on`, () => {
+      const t = block(sel);
+      for (const surface of ["paper", "paper-2", "paper-3", "field"]) {
+        expect(contrast(t["ink"], t[surface])).toBeGreaterThan(7);
+        expect(contrast(t["ink-2"], t[surface])).toBeGreaterThan(4.5);
+        expect(contrast(t["ink-3"], t[surface])).toBeGreaterThan(4.5);
+        expect(contrast(t["accent"], t[surface])).toBeGreaterThan(4.5);
+      }
+      expect(contrast(t["on-accent"], t["accent"])).toBeGreaterThan(4.5);
+      expect(contrast(t["control"], t["paper"])).toBeGreaterThan(3); // form control borders (WCAG 1.4.11)
+      for (const k of ["ok", "warn", "danger", "info"]) expect(contrast(t[k], t["paper"])).toBeGreaterThan(4.5);
+    });
+  }
 });
