@@ -1,0 +1,151 @@
+{
+  "name": "Propagation across regions",
+  "template": "propagation",
+  "description": "A 200 ms olfactory receptor neuron stimulus; activity spreads across neuropils (see regions.csv and timecourse.csv).",
+  "dataset_id": "flywire_fafb_783",
+  "network": {
+    "mode": "full",
+    "selection": null,
+    "expand_depth": 0,
+    "expand_direction": "downstream",
+    "expand_min_syn": 5,
+    "neuropils": [],
+    "max_neurons": 50000
+  },
+  "params": {
+    "v_rest_mV": -52.0,
+    "v_reset_mV": -52.0,
+    "v_threshold_mV": -45.0,
+    "tau_m_ms": 20.0,
+    "tau_syn_ms": 5.0,
+    "t_refractory_ms": 2.2,
+    "delay_ms": 1.8,
+    "w_syn_mV": 0.275,
+    "poisson_weight_factor": 250.0,
+    "dt_ms": 0.1,
+    "hold_g_during_refractory": true,
+    "reset_g": true,
+    "drop_input_during_refractory": true,
+    "stimulated_refractory_zero": true,
+    "precision": "float64"
+  },
+  "conditions": [
+    {
+      "name": "odor pulse",
+      "stimuli": [
+        {
+          "kind": "poisson",
+          "selector": {
+            "root_ids": [],
+            "group": "orn_dm1_left",
+            "cell_types": [],
+            "cell_type_regex": null,
+            "hemibrain_types": [],
+            "super_class": [],
+            "cell_class": [],
+            "side": [],
+            "nt_type": [],
+            "neuropils": [],
+            "connected": null,
+            "limit": null
+          },
+          "rate_hz": 150.0,
+          "frequency_hz": 50.0,
+          "amplitude_mV": 10.0,
+          "start_ms": 100.0,
+          "stop_ms": 300.0,
+          "repeats": 1,
+          "interval_ms": 0.0,
+          "weight_factor": null,
+          "label": "ORN pulse"
+        }
+      ],
+      "interventions": [],
+      "params": {}
+    }
+  ],
+  "readouts": [
+    {
+      "name": "orn_dm1_left",
+      "selector": {
+        "root_ids": [],
+        "group": "orn_dm1_left",
+        "cell_types": [],
+        "cell_type_regex": null,
+        "hemibrain_types": [],
+        "super_class": [],
+        "cell_class": [],
+        "side": [],
+        "nt_type": [],
+        "neuropils": [],
+        "connected": null,
+        "limit": null
+      }
+    },
+    {
+      "name": "p9_left",
+      "selector": {
+        "root_ids": [],
+        "group": "p9_left",
+        "cell_types": [],
+        "cell_type_regex": null,
+        "hemibrain_types": [],
+        "super_class": [],
+        "cell_class": [],
+        "side": [],
+        "nt_type": [],
+        "neuropils": [],
+        "connected": null,
+        "limit": null
+      }
+    },
+    {
+      "name": "dna02_left",
+      "selector": {
+        "root_ids": [],
+        "group": "dna02_left",
+        "cell_types": [],
+        "cell_type_regex": null,
+        "hemibrain_types": [],
+        "super_class": [],
+        "cell_class": [],
+        "side": [],
+        "nt_type": [],
+        "neuropils": [],
+        "connected": null,
+        "limit": null
+      }
+    },
+    {
+      "name": "dna02_right",
+      "selector": {
+        "root_ids": [],
+        "group": "dna02_right",
+        "cell_types": [],
+        "cell_type_regex": null,
+        "hemibrain_types": [],
+        "super_class": [],
+        "cell_class": [],
+        "side": [],
+        "nt_type": [],
+        "neuropils": [],
+        "connected": null,
+        "limit": null
+      }
+    }
+  ],
+  "duration_ms": 500.0,
+  "n_trials": 5,
+  "seed": 0,
+  "backend": "numba",
+  "bin_ms": 5.0,
+  "embodiment": null,
+  "expected": [],
+  "evidence": "simulation_output",
+  "assumptions": [
+    "Synaptic weight = predicted-transmitter sign x synapse count x w_syn (w_syn tuned, not measured).",
+    "Transmitter signs: GABA and glutamate inhibitory, all others excitatory.",
+    "Point neurons; no dendritic compartments, gap junctions, neuromodulation or plasticity.",
+    "Uniform 1.8 ms synaptic delay; no spontaneous activity (only stimulated inputs drive the network)."
+  ]
+}

@@ -1,0 +1,3 @@
+condition,label,spikes,neurons,mean_rate_hz
+200 Hz,unassigned,17014,127400,0.13355546834118262
+100 Hz,unassigned,9662,127400,0.07584039769754056

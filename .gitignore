@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Data (never commit raw/processed datasets; FlyWire data is CC BY-NC and large)
+data/raw/
+data/processed/
+data/cache/
+!data/**/.gitkeep
+
+# Experiments produced locally (examples are kept under examples/)
+experiments/*
+!experiments/.gitkeep
+!experiments/README.md
+
+# Web
+node_modules/
+apps/web/dist/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.vite/
+
+# Docs build
+site/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+.env
+apps/web/public/demo/
+apps/web/dist-pages/
+!experiments/README.md
+.claude/
+site/

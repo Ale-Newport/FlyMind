@@ -1,0 +1,259 @@
+{
+  "dataset_id": "flywire_fafb_783",
+  "groups": {
+    "sugar_grn_shiu": {
+      "root_ids": [
+        720575940624963786,
+        720575940630233916,
+        720575940637568838,
+        720575940638202345,
+        720575940617000768,
+        720575940630797113,
+        720575940632889389,
+        720575940621754367,
+        720575940621502051,
+        720575940640649691,
+        720575940639332736,
+        720575940616885538,
+        720575940639198653,
+        720575940617937543,
+        720575940632425919,
+        720575940633143833,
+        720575940612670570,
+        720575940628853239,
+        720575940629176663,
+        720575940611875570
+      ],
+      "description": "Labellar sugar-sensing gustatory receptor neurons used as 'sugarR' in the Shiu et al. reference code (20 of 21 v630 IDs exist in v783; the v783 annotations label them side=left, cell_type LB3).",
+      "source": "Shiu et al. 2024 (Nature 634:210); IDs from github.com/philshiu/Drosophila_brain_model @91bdd1e7 (example.ipynb, figures.ipynb)",
+      "evidence": "published"
+    },
+    "mn9": {
+      "root_ids": [
+        720575940660219265,
+        720575940618238523
+      ],
+      "description": "MN9 proboscis motor neurons (annotated hemibrain type CB0701, right and left). 720575940660219265 is the MN9 ID used by Shiu et al.; the left partner is the other CB0701 neuron.",
+      "source": "Shiu et al. 2024 (Nature 634:210); IDs from github.com/philshiu/Drosophila_brain_model @91bdd1e7 (example.ipynb, figures.ipynb); left partner from v783 annotations",
+      "evidence": "published"
+    },
+    "p9_left": {
+      "selector": {
+        "cell_types": [
+          "DNp09"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "P9 (DNp09) descending neurons; activation drives forward walking (Bidaye et al. 2020, Neuron 108:469).",
+      "source": "v783 annotations (Schlegel et al. 2024)",
+      "evidence": "published"
+    },
+    "p9_right": {
+      "selector": {
+        "cell_types": [
+          "DNp09"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "P9 (DNp09), right.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "dna02_left": {
+      "selector": {
+        "cell_types": [
+          "DNa02"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "DNa02 descending neuron; activity predicts ipsilateral steering (Rayshubskiy et al. 2025, Neuron; bioRxiv 2020).",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "dna02_right": {
+      "selector": {
+        "cell_types": [
+          "DNa02"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "DNa02, right.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "dna01_left": {
+      "selector": {
+        "cell_types": [
+          "DNa01"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "DNa01 descending neuron, associated with steering (Rayshubskiy et al. 2025; Chen et al. 2018).",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "dna01_right": {
+      "selector": {
+        "cell_types": [
+          "DNa01"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "DNa01, right.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "mdn_left": {
+      "selector": {
+        "hemibrain_types": [
+          "MDN"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "Moonwalker descending neurons; activation drives backward walking (Bidaye et al. 2014, Science 344:97).",
+      "source": "v783 annotations (hemibrain_type MDN)",
+      "evidence": "published"
+    },
+    "mdn_right": {
+      "selector": {
+        "hemibrain_types": [
+          "MDN"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "MDN, right.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "giant_fiber": {
+      "selector": {
+        "cell_types": [
+          "DNp01"
+        ]
+      },
+      "description": "Giant fiber (DNp01) escape descending neurons (von Reyn et al. 2014).",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "orn_dm1_left": {
+      "selector": {
+        "cell_types": [
+          "ORN_DM1"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "Or42b olfactory receptor neurons (DM1 glomerulus); required for attraction to vinegar (Semmelhack & Wang 2009, Nature 459:218).",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "orn_dm1_right": {
+      "selector": {
+        "cell_types": [
+          "ORN_DM1"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "ORN_DM1, right.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "orn_da2_left": {
+      "selector": {
+        "cell_types": [
+          "ORN_DA2"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "Or56a olfactory receptor neurons (DA2); geosmin-sensing, aversive (Stensmyr et al. 2012, Cell 151:1345).",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "orn_da2_right": {
+      "selector": {
+        "cell_types": [
+          "ORN_DA2"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "ORN_DA2, right.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "r7_left": {
+      "selector": {
+        "cell_types": [
+          "R7"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "R7 photoreceptor terminals (UV/colour), left eye.",
+      "source": "v783 annotations (Matsliah et al. 2024)",
+      "evidence": "published"
+    },
+    "r7_right": {
+      "selector": {
+        "cell_types": [
+          "R7"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "R7, right eye.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "r8_left": {
+      "selector": {
+        "cell_types": [
+          "R8"
+        ],
+        "side": [
+          "left"
+        ]
+      },
+      "description": "R8 photoreceptor terminals, left eye.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    },
+    "r8_right": {
+      "selector": {
+        "cell_types": [
+          "R8"
+        ],
+        "side": [
+          "right"
+        ]
+      },
+      "description": "R8, right eye.",
+      "source": "v783 annotations",
+      "evidence": "published"
+    }
+  }
+}
