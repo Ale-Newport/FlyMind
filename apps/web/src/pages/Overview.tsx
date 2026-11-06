@@ -1,38 +1,41 @@
 import { Link } from "react-router-dom";
 import { STATIC_DEMO, api } from "../lib/api";
 import { useApp } from "../lib/store";
-import { EvidenceBadge, Section, fmt, useAsync, useDatasets } from "../components/ui";
-import type { Evidence } from "../lib/types";
+import { EVIDENCE_KINDS, EvidenceBadge, Figure, KV, Section, fmt, useAsync, useDatasets } from "../components/ui";
+import { Icon } from "../components/Icon";
+import { WingFigure } from "../components/WingFigure";
 
-const MODULES = [
-  {
-    to: "/explorer", title: "Brain Explorer 3D", shot: "explorer.png", kicker: "Anatomy",
-    text: "All 139,255 proofread FlyWire v783 neurons in anatomical space. Search by ID or cell type, inspect inputs and outputs, trace pathways, load reconstructed skeletons and overlay simulated activity.",
-  },
-  {
-    to: "/simulator", title: "Brain Simulator", shot: "simulator.png", kicker: "Dynamics",
-    text: "Leaky integrate-and-fire dynamics on the real connectome (Shiu et al. 2024 model), with full-brain, region, circuit and demonstration modes, live stimulation, silencing and reversible lesions.",
-  },
-  {
-    to: "/fly", title: "Virtual Fly", shot: "fly.png", kicker: "Embodiment",
-    text: "The official NeuroMechFly body in MuJoCo (FlyGym 2.x). Sensors feed the neural model through a documented interface; descending-neuron activity drives a CPG walking controller.",
-  },
-];
+const IMG = (name: string) => `${import.meta.env.BASE_URL}screenshots/${name}`;
 
-function Arrow() {
+/** A coloured square plus text: how installation status is written (no pills). */
+function Status({ tone, children }: { tone: "ok" | "warn" | "danger" | "muted"; children: React.ReactNode }) {
+  const c = { ok: "var(--ok)", warn: "var(--warn)", danger: "var(--danger)", muted: "var(--ink-4)" }[tone];
   return (
-    <svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none">
-      <path d="M3 8h10M9 4l4 4-4 4" />
-    </svg>
+    <span className="inline-flex items-baseline gap-2 text-right">
+      <span aria-hidden className="relative top-[-1px] inline-block h-[7px] w-[7px] shrink-0 self-center" style={{ background: c }} />
+      <span>{children}</span>
+    </span>
   );
 }
 
-function StatusRow({ label, children }: { label: string; children: React.ReactNode }) {
+function Shot({ src, alt }: { src: string; alt: string }) {
   return (
-    <li className="flex items-baseline justify-between gap-4 border-b border-ink-800 py-1.5 last:border-b-0">
-      <span className="shrink-0 text-ink-400">{label}</span>
-      <span className="min-w-0 text-right">{children}</span>
-    </li>
+    <div className="overflow-hidden border border-rule bg-[#121110]" style={{ aspectRatio: "5 / 3" }}>
+      <img src={IMG(src)} alt={alt} loading="lazy" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.visibility = "hidden"; }} />
+    </div>
+  );
+}
+
+function InstrumentText({ n, title, to, children }: { n: string; title: string; to: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="idx mb-2">{n}</div>
+      <h3 className="t-head"><Link to={to} className="no-underline hover:text-ink">{title}</Link></h3>
+      <p className="t-body mt-3 text-ink-2">{children}</p>
+      <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm text-ink" aria-label={`Open ${title.toLowerCase()}`}>
+        Open <Icon name="arrow-right" size={14} />
+      </Link>
+    </div>
   );
 }
 
@@ -45,102 +48,135 @@ export default function Overview() {
   const fullBrain = ds.data?.find((d) => d.dataset_id === "flywire_fafb_783");
   const active = ds.data?.find((d) => d.dataset_id === datasetId) ?? ds.data?.[0];
   return (
-    <div className="mx-auto max-w-6xl space-y-12 px-6 py-10">
-      <section aria-labelledby="hero-title" className="max-w-3xl">
-        <p className="eyebrow mb-3">Virtual Drosophila laboratory</p>
-        <h1 id="hero-title" className="text-3xl font-semibold leading-[1.15] tracking-tight text-ink-100 md:text-[2.5rem]">
-          Simulate, embody and explore the fruit-fly connectome.
-        </h1>
-        <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-ink-300">
-          FlyMind connects the FlyWire whole-brain wiring diagram of an adult female <i>Drosophila melanogaster</i> to a
-          reproducible spiking-network model, a physics-based body and an interactive 3D anatomy viewer, and keeps the
-          difference between reconstructed data, model assumptions and simulation output visible throughout.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Link to="/explorer" className="btn btn-primary px-4 py-2">Open the Brain Explorer</Link>
-          <Link to="/experiments" className="btn px-4 py-2">Run an experiment</Link>
-          <Link to="/docs" className="btn px-4 py-2">Read the methods</Link>
+    <div className="mx-auto max-w-[1280px] px-8 pb-24">
+      {/* ------------------------------------------------------------ opening */}
+      <section aria-labelledby="hero-title" className="grid grid-cols-12 gap-x-6 gap-y-10 pb-16 pt-14">
+        <div className="col-span-12 lg:col-span-6">
+          <p className="mb-6 text-sm text-ink-3">A virtual laboratory for the adult fruit-fly brain</p>
+          <h1 id="hero-title" className="t-display text-ink" style={{ textWrap: "balance" }}>
+            The fruit-fly connectome, simulated and embodied.
+          </h1>
+          <p className="t-lead mt-6 max-w-[46ch] text-ink-2">
+            FlyMind runs a spiking-network model on the FlyWire wiring diagram of an adult female <i>Drosophila melanogaster</i>,
+            couples it to a physics-based body, and keeps reconstructed data, model assumptions and simulation output visibly apart.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <Link to="/explorer" className="btn btn-primary h-9 px-4 text-sm no-underline hover:text-[var(--on-accent)]">
+              Open the brain explorer <Icon name="arrow-right" size={14} />
+            </Link>
+            <Link to="/experiments" className="text-sm">Run an experiment</Link>
+            <Link to="/docs" className="text-sm">Read the methods</Link>
+          </div>
+          <KV className="mt-12 max-w-[420px] border-t border-rule-strong" rows={[
+            ["Active dataset", active ? (active.synthetic ? "Synthetic fixture" : `${active.name} v${active.version}`) : "–"],
+            ["Neurons", fmt.int(active?.n_neurons)],
+            ["Connections", fmt.int(active?.n_edges)],
+            ["Synapses", fmt.int(active?.n_synapses)],
+          ]} />
+        </div>
+        <div className="col-span-12 lg:col-span-6 lg:-mr-6">
+          <Figure n={1} caption="Venation of the Drosophila wing: longitudinal veins L1 to L5, the anterior and posterior cross-veins (acv, pcv) and margin bristles. A schematic drawn for this interface, not data.">
+            <WingFigure className="h-auto w-full" />
+          </Figure>
         </div>
       </section>
 
-      {active && (
-        <dl className="panel grid grid-cols-2 overflow-hidden md:grid-cols-4">
-          {[
-            ["Active dataset", active.synthetic ? "Synthetic fixture" : `${active.name} v${active.version}`],
-            ["Neurons", fmt.int(active.n_neurons)],
-            ["Connections", fmt.int(active.n_edges)],
-            ["Synapses", fmt.int(active.n_synapses)],
-          ].map(([k, v]) => (
-            <div key={k} className="border-ink-700 px-4 py-3 [&:nth-child(n+3)]:border-t md:[&:nth-child(n+3)]:border-t-0 md:[&:not(:first-child)]:border-l [&:nth-child(even)]:border-l">
-              <dt className="text-[11px] font-medium text-ink-400">{k}</dt>
-              <dd className="mono mt-0.5 truncate text-base font-medium text-ink-100">{v}</dd>
+      {/* ------------------------------------------------------------ instruments */}
+      <Section n="01" title="Three instruments" className="!pt-6">
+        <div className="space-y-16 pt-4">
+          <div className="grid grid-cols-12 items-start gap-x-6 gap-y-6">
+            <div className="col-span-12 md:col-span-4">
+              <InstrumentText n="Anatomy" title="Brain explorer" to="/explorer">
+                All 139,255 proofread neurons of FlyWire v783 in anatomical space. Search by root ID or cell type, read a neuron's inputs
+                and outputs, trace the shortest pathway between two cells, load reconstructed skeletons, and colour the brain by simulated activity.
+              </InstrumentText>
             </div>
-          ))}
-        </dl>
-      )}
+            <Figure n={2} className="col-span-12 md:col-span-8" caption="Brain explorer with FlyWire v783 loaded. Neurons are coloured by super class; the descending neuron DNa02 is selected and its reconstructed skeleton drawn.">
+              <Shot src="explorer.png" alt="Brain explorer: neuron point cloud with a selected neuron and its skeleton" />
+            </Figure>
+          </div>
+          <div className="grid grid-cols-12 items-start gap-x-6 gap-y-6">
+            <Figure n={3} className="order-2 col-span-12 md:order-1 md:col-span-7" caption="Brain simulator, full-brain mode, with the sugar-sensing receptor group driven at 200 Hz. The raster and rates are simulation output of the leaky integrate-and-fire model.">
+              <Shot src="simulator.png" alt="Brain simulator: spike raster and population firing rates" />
+            </Figure>
+            <div className="order-1 col-span-12 md:order-2 md:col-span-4 md:col-start-9">
+              <InstrumentText n="Dynamics" title="Brain simulator" to="/simulator">
+                Leaky integrate-and-fire dynamics on the real wiring diagram, following Shiu et al. (2024). Run the full brain, one region or a
+                circuit you select, and stimulate, silence or partly lesion neurons while it runs.
+              </InstrumentText>
+            </div>
+          </div>
+          <div className="grid grid-cols-12 items-start gap-x-6 gap-y-6">
+            <div className="col-span-12 md:col-span-4">
+              <InstrumentText n="Embodiment" title="Virtual fly" to="/fly">
+                The NeuroMechFly body in MuJoCo (FlyGym 2.x). Sensors feed the neural model through a documented interface, and descending-neuron
+                activity drives a central-pattern-generator walking controller. A separate FlyMind flight model lets the body take off and land.
+              </InstrumentText>
+            </div>
+            <Figure n={4} className="col-span-12 md:col-span-6 md:col-start-6" caption="Virtual fly in the food arena. The body pose is streamed from MuJoCo; walking comes from FlyGym's controller.">
+              <Shot src="fly.png" alt="Virtual fly walking in the food arena" />
+            </Figure>
+          </div>
+        </div>
+      </Section>
 
-      <section aria-label="Tools" className="grid gap-5 md:grid-cols-3">
-        {MODULES.map((m) => (
-          <Link key={m.to} to={m.to} aria-label={m.title} className="panel group flex flex-col overflow-hidden rounded-[10px] no-underline transition-colors duration-150 hover:border-accent/60">
-            <div className="aspect-video overflow-hidden border-b border-ink-700 bg-[#080b12]">
-              <img src={`${import.meta.env.BASE_URL}screenshots/${m.shot}`} alt={`${m.title} screenshot`} loading="lazy" className="h-full w-full object-cover opacity-90 transition-[opacity,transform] duration-300 group-hover:scale-[1.02] group-hover:opacity-100 motion-reduce:transition-none"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-            </div>
-            <div className="flex flex-1 flex-col p-5">
-              <div className="eyebrow !text-ink-400">{m.kicker}</div>
-              <h2 className="mt-1 text-base font-semibold text-ink-100">{m.title}</h2>
-              <p className="mt-2 flex-1 text-[13px] leading-relaxed text-ink-300">{m.text}</p>
-              <span aria-hidden className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-accent">Open <Arrow /></span>
-            </div>
-          </Link>
-        ))}
-      </section>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <Section title="System status">
-          {STATIC_DEMO ? (
-            <p className="text-sm leading-relaxed text-ink-300">Static demo build: only the synthetic fixture is available, rendered in your browser. Simulation and physics need the local backend.</p>
-          ) : (
-            <ul className="text-sm" data-testid="system-status">
-              <StatusRow label="Backend">{sys.error ? <span className="text-rose-300">offline — run <code className="mono">make dev</code></span> : sys.data ? <span className="text-emerald-300">online (v{String(sys.data.version)})</span> : <span className="text-ink-400">checking…</span>}</StatusRow>
-              <StatusRow label="Full FlyWire v783 brain">{fullBrain ? <span className="text-emerald-300">installed ({fullBrain.n_neurons.toLocaleString()} neurons, validation {fullBrain.validation_status})</span> : <span className="text-amber-300">not installed — <code className="mono">uv run flymind data fetch flywire-783</code></span>}</StatusRow>
-              <StatusRow label="Neuron skeletons">{caps.skeletons_installed ? <span className="text-emerald-300">installed</span> : <span className="text-amber-300">not installed (optional, 5.4 GB)</span>}</StatusRow>
-              <StatusRow label="MuJoCo / FlyGym">{caps.flygym ? <span className="text-emerald-300">available</span> : <span className="text-rose-300">missing</span>}</StatusRow>
-              <StatusRow label="Brian2 reference engine">{caps.brian2 ? <span className="text-emerald-300">available</span> : <span className="text-ink-400">missing</span>}</StatusRow>
+      {/* ------------------------------------------------------------ reading results, with marginalia */}
+      <div className="mt-24 grid grid-cols-12 gap-x-6 gap-y-16">
+        <div className="col-span-12 space-y-16 lg:col-span-7">
+          <Section n="02" title="How to read a result">
+            <ul className="border-t border-rule">
+              {EVIDENCE_KINDS.map((k) => (
+                <li key={k} className="grid grid-cols-[9.5rem_1fr] items-baseline gap-4 border-b border-rule py-3">
+                  <EvidenceBadge kind={k} />
+                  <span className="text-sm text-ink-2">{ev.data?.[k] ?? ""}</span>
+                </li>
+              ))}
             </ul>
-          )}
-        </Section>
-        <Section title="How to read results">
-          <ul className="space-y-2.5 text-sm">
-            {Object.entries(ev.data ?? {}).map(([k, v]) => (
-              <li key={k} className="grid grid-cols-[8.5rem_1fr] items-start gap-3">
-                <span><EvidenceBadge kind={k as Evidence} /></span>
-                <span className="text-[13px] leading-snug text-ink-300">{v}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      </div>
+          </Section>
 
-      <section aria-labelledby="scope-title">
-        <h2 id="scope-title" className="panel-title mb-4">Scientific scope</h2>
-        <div className="grid gap-x-8 gap-y-6 text-[13px] leading-relaxed text-ink-300 md:grid-cols-3">
-          <div className="border-t border-ink-700 pt-3"><h3 className="mb-1.5 text-sm font-semibold text-ink-100">What is real</h3>Neuron identities, positions, cell-type annotations, synapse counts and reconstructed morphology come from the FlyWire FAFB v783 release (Dorkenwald et al. 2024; Schlegel et al. 2024). Neurotransmitters are machine-learning predictions (Eckstein et al. 2024).</div>
-          <div className="border-t border-ink-700 pt-3"><h3 className="mb-1.5 text-sm font-semibold text-ink-100">What is assumed</h3>Synaptic strength is proportional to synapse count, transmitter predictions set the sign, neurons are point LIF units with one shared parameter set. These follow Shiu et al. (2024) and are not measurements.</div>
-          <div className="border-t border-ink-700 pt-3"><h3 className="mb-1.5 text-sm font-semibold text-ink-100">What is not modelled</h3>The FAFB dataset contains no ventral nerve cord, so leg motor circuits are replaced by FlyGym's walking controller. Gap junctions, neuromodulation, plasticity and internal state are absent.</div>
+          <Section n="03" title="Scientific scope">
+            <dl className="border-t border-rule">
+              {[
+                ["What is real", "Neuron identities, positions, cell-type annotations, synapse counts and reconstructed morphology come from the FlyWire FAFB v783 release (Dorkenwald et al. 2024; Schlegel et al. 2024). Neurotransmitters are machine-learning predictions (Eckstein et al. 2024)."],
+                ["What is assumed", "Synaptic strength is proportional to synapse count, the predicted transmitter sets the sign, and every neuron is a point LIF unit with one shared parameter set. These follow Shiu et al. (2024) and are not measurements."],
+                ["What is not modelled", "The FAFB dataset has no ventral nerve cord, so leg motor circuits are replaced by FlyGym's walking controller. Gap junctions, neuromodulation, plasticity and internal state are absent."],
+              ].map(([h, t]) => (
+                <div key={h} className="grid gap-x-6 gap-y-1 border-b border-rule py-4 md:grid-cols-[11rem_1fr]">
+                  <dt className="t-head !text-[17px] !leading-6">{h}</dt>
+                  <dd className="text-sm leading-6 text-ink-2">{t}</dd>
+                </div>
+              ))}
+            </dl>
+          </Section>
         </div>
-      </section>
 
-      <aside aria-labelledby="not-title" className="rounded-lg border border-ink-700 border-l-[3px] border-l-(color:--warn) bg-ink-900 px-5 py-4">
-        <h2 id="not-title" className="text-sm font-semibold text-ink-100">What FlyMind is not</h2>
-        <p className="mt-1.5 max-w-3xl text-[13px] leading-relaxed text-ink-300">
-          It is not a digital twin or emulation of a living fly. The brain model is a network of point neurons with shared
-          parameters, and its output is simulation, not recorded activity. Walking in the Virtual Fly comes from an external
-          controller driven by a small set of descending neurons, so behaviour should not be read as a prediction of what a real
-          fly would do. The synthetic demonstration fixture is not the connectome of any animal. Use the evidence badges to tell
-          reconstructed data, reproduced results and hypotheses apart.
-        </p>
-      </aside>
+        <div className="col-span-12 space-y-16 lg:col-span-4 lg:col-start-9">
+          <Section n="04" title="This installation">
+            {STATIC_DEMO ? (
+              <p className="text-sm leading-6 text-ink-2">Static demo build: only the synthetic fixture is available, rendered in your browser. Simulation and physics need the local backend.</p>
+            ) : (
+              <KV className="kv-sans border-t border-rule" testId="system-status" rows={[
+                ["Backend", sys.error ? <Status tone="danger">offline; run <code>make dev</code></Status> : sys.data ? <Status tone="ok">online, v{String(sys.data.version)}</Status> : <Status tone="muted">checking</Status>],
+                ["FlyWire v783 brain", fullBrain ? <Status tone="ok">installed, validation {fullBrain.validation_status}</Status> : <Status tone="warn">not installed</Status>],
+                ["Neuron skeletons", caps.skeletons_installed ? <Status tone="ok">installed</Status> : <Status tone="warn">not installed (optional, 5.4 GB)</Status>],
+                ["MuJoCo and FlyGym", caps.flygym ? <Status tone="ok">available</Status> : <Status tone="danger">missing</Status>],
+                ["Brian2 reference engine", caps.brian2 ? <Status tone="ok">available</Status> : <Status tone="muted">missing</Status>],
+              ]} />
+            )}
+            {!STATIC_DEMO && !fullBrain && <p className="mt-3 text-xs text-ink-3">Install the full brain with <code>uv run flymind data fetch flywire-783</code>.</p>}
+          </Section>
+
+          <aside aria-labelledby="not-title" className="border-l-2 border-ink pl-5">
+            <h2 id="not-title" className="t-head">What FlyMind is not</h2>
+            <p className="t-caption mt-3 !text-[15px] !leading-6">
+              It is not a digital twin or an emulation of a living fly. The brain model is a network of point neurons with shared parameters,
+              and its output is simulation, not recorded activity. Walking in the Virtual fly comes from an external controller driven by a
+              small set of descending neurons, so the behaviour is not a prediction of what a real fly would do. The synthetic demonstration
+              fixture is not the connectome of any animal. The evidence marks keep reconstructed data, reproduced results and hypotheses apart.
+            </p>
+          </aside>
+        </div>
+      </div>
     </div>
   );
 }

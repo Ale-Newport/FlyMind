@@ -21,9 +21,9 @@ FlyMind connects three tools that share one dataset representation and one simul
 * **Full-brain speed on a laptop CPU.** FlyMind simulates the whole v783 brain at **0.45× real time** on an Apple M2 Max (one core, Numba) and renders all 139,255 neurons at the display's 120 fps ([benchmarks](docs/evidence/benchmarks.md)).
 * **An honest closed loop.** On FlyWire v783, odour input to DM1 olfactory receptor neurons drives DNa02 but not P9. The neural-controlled fly therefore turns in place instead of approaching food, and FlyMind reports exactly that ([embodied runs](docs/evidence/embodied-flywire.md)).
 
-| Brain Simulator: full brain, sugar GRNs | Virtual Fly: food arena |
-|---|---|
-| ![](docs/evidence/screenshots/simulator-flywire-783-sugar.png) | ![](docs/evidence/screenshots/virtual-fly-food-arena.png) |
+| Brain Simulator: full brain, sugar GRNs | Virtual Fly: food arena | Virtual Fly: flight |
+|---|---|---|
+| ![](docs/evidence/screenshots/simulator-flywire-783-sugar.png) | ![](docs/evidence/screenshots/virtual-fly-food-arena.png) | ![](docs/evidence/screenshots/virtual-fly-flight.png) |
 
 All screenshots are of the running application. They show FlyWire data (Dorkenwald et al. 2024; Schlegel et al. 2024), used with attribution.
 

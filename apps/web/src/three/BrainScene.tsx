@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
 import { GizmoHelper, Html, OrbitControls, OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -148,8 +148,17 @@ function CameraRig({ controls, focus, resetKey, radius }: {
   return null;
 }
 
+/**
+ * drei's <Html> picks its DOM parent from `events.connected || canvas.parentNode`, and that value changes
+ * once the canvas has mounted. The effect then tears down and rebuilds its React root on the same element,
+ * which throws "removeChild ... not a child" when the scene unmounts. Giving every label the same fixed
+ * portal target keeps the parent constant.
+ */
+const HtmlPortal = createContext<React.RefObject<HTMLElement> | null>(null);
+const usePortal = () => useContext(HtmlPortal) ?? undefined;
+
 function AxisLabel({ position, text, color }: { position: [number, number, number]; text: string; color: string }) {
-  return <Html position={position} center><span style={{ color, fontSize: 11, fontWeight: 700 }}>{text}</span></Html>;
+  return <Html position={position} center portal={usePortal()}><span style={{ color, fontSize: 11, fontWeight: 600, fontFamily: "var(--font-mono)" }}>{text}</span></Html>;
 }
 
 function OrientationGizmo({ axis: ax }: { axis: { x: string; y: string; z: string } }) {
@@ -185,9 +194,11 @@ export function BrainScene({ positions, style, pointSize, ortho, onPick, labels,
   radius: number;
 }) {
   const controls = useRef<OrbitImpl | null>(null);
+  const portal = useRef<HTMLDivElement>(null) as React.RefObject<HTMLElement>;
   // Points use normal (alpha) blending, never additive, so they stay visible on the light theme's background.
   const { scene } = useChartColors();
   return (
+    <div ref={portal as React.RefObject<HTMLDivElement>} style={{ position: "relative", width: "100%", height: "100%" }}>
     <Canvas dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }} raycaster={{ params: { Points: { threshold: radius / 250 } } as THREE.RaycasterParameters }} data-testid="brain-canvas">
       <color key={scene.bg} attach="background" args={[scene.bg]} />
       {ortho ? (
@@ -200,13 +211,16 @@ export function BrainScene({ positions, style, pointSize, ortho, onPick, labels,
       <Points positions={positions} style={style} pointSize={pointSize} ortho={ortho} onPick={onPick} radius={radius} />
       <Skeletons segments={skeletons} />
       {labels.map((l) => (
-        <Html key={l.text} position={l.pos} center zIndexRange={[10, 0]}>
-          <span className="pointer-events-none select-none whitespace-nowrap rounded-[3px] bg-ink-950/75 px-1 text-[10px] font-medium text-ink-300">{l.text}</span>
+        <Html key={l.text} position={l.pos} center zIndexRange={[10, 0]} portal={portal}>
+          <span className="pointer-events-none select-none whitespace-nowrap bg-paper/70 px-1 font-mono text-[10px] text-ink-2" style={{ borderRadius: 2 }}>{l.text}</span>
         </Html>
       ))}
-      <GizmoHelper alignment="bottom-left" margin={[70, 70]}>
-        <OrientationGizmo axis={scene.axis} />
-      </GizmoHelper>
+      <HtmlPortal.Provider value={portal}>
+        <GizmoHelper alignment="bottom-left" margin={[70, 70]}>
+          <OrientationGizmo axis={scene.axis} />
+        </GizmoHelper>
+      </HtmlPortal.Provider>
     </Canvas>
+    </div>
   );
 }

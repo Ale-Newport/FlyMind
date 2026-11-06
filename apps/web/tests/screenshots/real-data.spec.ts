@@ -7,7 +7,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const DOCS = path.resolve(here, "../../../../docs/evidence/screenshots");
+// SCREENSHOT_DOCS_DIR lets a dry run write the evidence copies somewhere else (the public/ copies are always refreshed)
+const DOCS = process.env.SCREENSHOT_DOCS_DIR ? path.resolve(process.env.SCREENSHOT_DOCS_DIR) : path.resolve(here, "../../../../docs/evidence/screenshots");
 const PUBLIC = path.resolve(here, "../../public/screenshots");
 const save = async (page: Page, name: string, landing?: string) => {
   await page.screenshot({ path: path.join(DOCS, `${name}.png`) });
@@ -16,12 +17,14 @@ const save = async (page: Page, name: string, landing?: string) => {
 
 test.use({ viewport: { width: 1600, height: 960 } });
 test.beforeEach(async ({ page }) => {
+  // dark theme for the committed figures: the 3D views read best on the charcoal ground
+  await page.addInitScript(() => window.localStorage.setItem("flymind-theme", "dark"));
   await page.addInitScript(() => window.localStorage.setItem("flymind-prefs", JSON.stringify({ state: { datasetId: "flywire_fafb_783", colorField: "super_class", pointSize: 2.2, opacity: 0.55 }, version: 0 })));
 });
 
 test("explorer with real neuron morphology", async ({ page }) => {
   await page.goto("/#/explorer");
-  await expect(page.getByTestId("brain-canvas")).toBeVisible();
+  await expect(page.getByTestId("brain-canvas")).toBeVisible({ timeout: 30_000 }); // 139k points are fetched before the canvas mounts
   await page.waitForTimeout(2500);
   await save(page, "explorer-flywire-783-overview");
   await page.getByLabel("Search neurons").fill("DNa02");
@@ -36,16 +39,16 @@ test("explorer with real neuron morphology", async ({ page }) => {
 test("full-brain simulation of sugar GRN activation", async ({ page, request }) => {
   for (const s of await (await request.get("/api/sim/sessions")).json()) await request.delete(`/api/sim/sessions/${s.id}`);
   await page.goto("/#/simulator");
-  await page.getByRole("radio", { name: "full" }).click();
+  await page.getByRole("radio", { name: "Full" }).click();
   await page.getByRole("button", { name: /Create session|Replace session/ }).click();
   await expect(page.getByTestId("sim-status")).toHaveText("ready", { timeout: 60_000 });
   await page.getByLabel("Neuron group").first().selectOption("sugar_grn_shiu");
   await page.getByLabel("Rate (Hz)").fill("200");
   await page.getByLabel(/^Stop \(ms/).fill(""); // blank = continuous
   await page.getByRole("button", { name: "Add stimulus" }).click();
-  await page.getByRole("button", { name: "▶ Start" }).click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
   await page.waitForTimeout(5000);
-  await page.getByRole("button", { name: "❚❚ Pause" }).click();
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
   await page.waitForTimeout(1500);
   await save(page, "simulator-flywire-783-sugar", "simulator");
   await page.goto("/#/explorer");
@@ -59,12 +62,26 @@ test("virtual fly in the food arena", async ({ page, request }) => {
   await page.goto("/#/fly");
   await page.getByLabel("Arena").selectOption("food");
   await page.getByRole("button", { name: "Create fly session" }).click();
-  await expect(page.getByRole("button", { name: "▶ Start" })).toBeEnabled({ timeout: 60_000 });
-  await page.getByRole("button", { name: "▶ Start" }).click();
+  await expect(page.getByRole("button", { name: "Start", exact: true })).toBeEnabled({ timeout: 60_000 });
+  await page.getByRole("button", { name: "Start", exact: true }).click();
   await page.waitForTimeout(7000);
-  await page.getByRole("button", { name: "❚❚ Pause" }).click();
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
   await page.waitForTimeout(800);
   await save(page, "virtual-fly-food-arena", "fly");
+});
+
+test("virtual fly in flight", async ({ page, request }) => {
+  for (const s of await (await request.get("/api/sim/sessions")).json()) await request.delete(`/api/sim/sessions/${s.id}`);
+  await page.goto("/#/fly");
+  await page.getByLabel("Arena").selectOption("food");
+  await page.getByRole("radio", { name: "Fly", exact: true }).click();
+  await page.getByRole("button", { name: "Create fly session" }).click();
+  await expect(page.getByRole("button", { name: "Start", exact: true })).toBeEnabled({ timeout: 60_000 });
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.waitForTimeout(3500); // mid-flight: a 10 s session would otherwise finish before it is paused
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await page.waitForTimeout(800);
+  await save(page, "virtual-fly-flight", "fly-flight");
 });
 
 test("reproduction result and dataset validation", async ({ page }) => {

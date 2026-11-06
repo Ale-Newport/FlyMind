@@ -1,6 +1,10 @@
 import { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, Route, Routes } from "react-router-dom";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
+import "@fontsource-variable/geist/wght.css";
+import "@fontsource-variable/geist-mono/wght.css";
 import "./index.css";
 import "./lib/theme"; // keeps <html data-theme> in sync with the stored preference / OS setting
 import { Layout } from "./components/Layout";
@@ -14,7 +18,7 @@ const Experiments = lazy(() => import("./pages/Experiments"));
 const Datasets = lazy(() => import("./pages/Datasets"));
 const Docs = lazy(() => import("./pages/Docs"));
 
-const page = (el: React.ReactNode) => <Suspense fallback={<div className="p-6" aria-live="polite"><Loading /></div>}>{el}</Suspense>;
+const page = (el: React.ReactNode) => <Suspense fallback={<div className="p-8" aria-live="polite"><Loading /></div>}>{el}</Suspense>;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
