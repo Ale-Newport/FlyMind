@@ -41,13 +41,15 @@ const DOCS: { group: string; items: [string, string][] }[] = [
 
 export default function Docs() {
   return (
-    <div className="mx-auto max-w-5xl space-y-4 p-6">
-      <h1 className="text-xl font-semibold">Documentation</h1>
-      <p className="text-sm text-ink-300">The full documentation lives in the repository (and builds with <code className="mono">make docs</code>). Key equations are summarised below.</p>
+    <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">Documentation</h1>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ink-300">The full documentation lives in the repository (and builds with <code className="mono">make docs</code>). Key equations are summarised below.</p>
+      </header>
       <Section title="Model in one paragraph">
-        <div className="space-y-2 text-sm text-ink-300">
+        <div className="space-y-3 text-[13px] leading-relaxed text-ink-300">
           <p>Each neuron is a point leaky integrate-and-fire unit with membrane potential <i>v</i> and synaptic drive <i>g</i> (both in mV):</p>
-          <pre className="mono overflow-x-auto rounded-lg bg-ink-950 p-3 text-xs text-ink-100">{`dv/dt = (v_rest − v + g) / τ_m        (frozen while refractory)
+          <pre className="mono overflow-x-auto rounded-md border border-ink-700 bg-ink-850 p-4 text-xs leading-relaxed text-ink-100">{`dv/dt = (v_rest − v + g) / τ_m        (frozen while refractory)
 dg/dt = −g / τ_syn                    (frozen while refractory)
 v > v_th  →  spike;  v := v_reset, g := 0, refractory for t_ref
 presynaptic spike  →  g_post += sign × synapse_count × w_syn   after 1.8 ms
@@ -55,11 +57,19 @@ Poisson stimulus spike  →  v += 250 × w_syn  (stimulated neurons have t_ref =
           <p>v_rest = v_reset = −52 mV, v_th = −45 mV, τ_m = 20 ms, τ_syn = 5 ms, t_ref = 2.2 ms, w_syn = 0.275 mV (a free parameter), dt = 0.1 ms with exact integration. FlyMind's Numba engine reproduces Brian2 spike-for-spike on test networks and reproduces the published sugar-GRN → MN9 rates of Shiu et al. (2024).</p>
         </div>
       </Section>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         {DOCS.map((g) => (
           <Section key={g.group} title={g.group}>
-            <ul className="space-y-1 text-sm">
-              {g.items.map(([t, p]) => <li key={p}><a className="text-accent hover:underline" href={REPO + p} target="_blank" rel="noreferrer">{t}</a> <span className="mono text-[10px] text-ink-400">{p}</span></li>)}
+            <ul className="-mx-2 text-sm">
+              {g.items.map(([t, p]) => (
+                <li key={p}>
+                  <a className="group block rounded-md px-2 py-1.5 no-underline transition-colors duration-150 hover:bg-ink-800" href={REPO + p} target="_blank" rel="noreferrer">
+                    <span className="text-accent group-hover:underline">{t}</span><span aria-hidden className="ml-1 text-ink-400">↗</span>
+                    <span className="sr-only"> (opens in a new tab)</span>
+                    <span className="mono block truncate text-[11px] text-ink-400">{p}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </Section>
         ))}

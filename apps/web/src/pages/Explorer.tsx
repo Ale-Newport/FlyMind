@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, STATIC_DEMO, api, decodeB64 } from "../lib/api";
-import { categoryColor, hexToRgb, rateColor } from "../lib/colors";
+import { hexToRgb, useChartColors } from "../lib/colors";
 import { type ColorField, useApp } from "../lib/store";
 import type { Activity, Attribute, Neuron, NeuronDetail, PartnersResponse, SimSummary } from "../lib/types";
 import { BrainScene, type PointStyle, toDisplay } from "../three/BrainScene";
@@ -24,6 +24,8 @@ export default function Explorer() {
   const navigate = useNavigate();
   const { datasetId, colorField, setColorField, pointSize, setPointSize, opacity, setOpacity, selected, setSelected, highlight, setHighlight, simSessionId, setSimSessionId, setPending } = useApp();
   const datasets = useDatasets();
+  const chart = useChartColors();
+  const sc = chart.scene;
   const meta = datasets.data?.find((d) => d.dataset_id === datasetId);
   const points = useAsync(() => api.points(datasetId), [datasetId]);
   const attrField = colorField === "activity" ? "super_class" : colorField;
@@ -122,25 +124,25 @@ export default function Explorer() {
     const alpha = new Float32Array(n).fill(opacity);
     const size = new Float32Array(n).fill(1);
     const codes = decodeCodes(attr.data);
-    const palette = attr.data.labels.map((l) => hexToRgb(categoryColor(attrField, l)));
+    const palette = attr.data.labels.map((l) => hexToRgb(chart.category(attrField, l)));
     const hiddenCodes = new Set(attr.data.labels.flatMap((l, i) => (hidden.has(l) ? [i] : [])));
     for (let i = 0; i < n; i++) {
-      const c = palette[codes[i]] ?? [0.4, 0.4, 0.5];
+      const c = palette[codes[i]] ?? sc.fallback;
       colors[3 * i] = c[0]; colors[3 * i + 1] = c[1]; colors[3 * i + 2] = c[2];
       if (hiddenCodes.has(codes[i])) alpha[i] = 0;
     }
     if (points.data) for (let i = 0; i < n; i++) if (!Number.isFinite(points.data[3 * i])) alpha[i] = 0;
     if (hemi !== "all" && sideAttr.data) {
-      const sc = decodeCodes(sideAttr.data);
+      const sideCodes = decodeCodes(sideAttr.data);
       const want = sideAttr.data.labels.indexOf(hemi);
-      for (let i = 0; i < n; i++) if (sc[i] !== want) alpha[i] = 0;
+      for (let i = 0; i < n; i++) if (sideCodes[i] !== want) alpha[i] = 0;
     }
     if (colorField === "activity") {
-      for (let i = 0; i < n; i++) { colors[3 * i] = colors[3 * i + 1] = colors[3 * i + 2] = 0.22; alpha[i] = alpha[i] > 0 ? 0.12 : 0; }
+      for (let i = 0; i < n; i++) { colors[3 * i] = sc.inactive[0]; colors[3 * i + 1] = sc.inactive[1]; colors[3 * i + 2] = sc.inactive[2]; alpha[i] = alpha[i] > 0 ? 0.12 : 0; }
       if (activity) {
         const maxRate = Math.max(1, ...activity.rate_hz.slice(0, 5000));
         activity.idx.forEach((idx, k) => {
-          const c = rateColor(Math.log1p(activity.rate_hz[k]) / Math.log1p(maxRate));
+          const c = chart.rate(Math.log1p(activity.rate_hz[k]) / Math.log1p(maxRate));
           colors[3 * idx] = c[0]; colors[3 * idx + 1] = c[1]; colors[3 * idx + 2] = c[2];
           alpha[idx] = 1; size[idx] = 2.4;
         });
@@ -152,13 +154,13 @@ export default function Explorer() {
       const mark = (list: PartnersResponse | null, rgb: [number, number, number]) => list?.partners.forEach((p) => {
         colors.set(rgb, 3 * p.idx); alpha[p.idx] = 0.95; size[p.idx] = 2.2; focusIdx.add(p.idx);
       });
-      mark(partners.up, [0.25, 0.85, 1.0]);
-      mark(partners.down, [1.0, 0.35, 0.7]);
+      mark(partners.up, sc.upstream);
+      mark(partners.down, sc.downstream);
     }
-    if (highlight) highlight.idx.forEach((i) => { colors.set([1, 0.85, 0.2], 3 * i); alpha[i] = 1; size[i] = 3; });
-    if (selected) { colors.set([1, 1, 1], 3 * selected.idx); alpha[selected.idx] = 1; size[selected.idx] = 5; }
+    if (highlight) highlight.idx.forEach((i) => { colors.set(sc.highlight, 3 * i); alpha[i] = 1; size[i] = 3; });
+    if (selected) { colors.set(sc.selected, 3 * selected.idx); alpha[selected.idx] = 1; size[selected.idx] = 5; }
     return { colors, alpha, size };
-  }, [geo, attr.data, attrField, hidden, hemi, sideAttr.data, colorField, activity, selected, partners, focusPartners, highlight, opacity, points.data]);
+  }, [geo, attr.data, attrField, hidden, hemi, sideAttr.data, colorField, activity, selected, partners, focusPartners, highlight, opacity, points.data, chart, sc]);
 
   const onPick = useCallback((idx: number) => {
     api.neuronAt(datasetId, idx).then(setSelected, setErr);
@@ -190,27 +192,29 @@ export default function Explorer() {
   };
 
   return (
-    <div className="flex h-full min-h-[640px]">
-      <aside className="w-80 shrink-0 space-y-3 overflow-y-auto border-r border-ink-800 p-3">
+    <div className="flex h-full min-h-[640px] min-w-[1000px]">
+      <aside aria-label="Display and search" className="w-64 shrink-0 space-y-3 overflow-y-auto border-r border-ink-700 p-3 xl:w-80">
         <SyntheticBanner show={!!meta?.synthetic} />
         <SearchPanel datasetId={datasetId} onSelect={setSelected} />
         <Section title="Display">
-          <div className="space-y-2 text-sm">
+          <div className="space-y-3 text-sm">
+            <div>
             <label className="label" htmlFor="colorby">Colour by</label>
             <select id="colorby" className="input" value={colorField} onChange={(e) => setColorField(e.target.value as ColorField)}>
               {COLOR_FIELDS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
             </select>
-            <div className="flex gap-1" role="group" aria-label="Hemisphere">
+            </div>
+            <div className="seg flex" role="group" aria-label="Hemisphere">
               {(["all", "left", "right"] as const).map((h) => (
-                <button key={h} className={`btn flex-1 py-0.5 text-xs ${hemi === h ? "btn-primary" : ""}`} onClick={() => setHemi(h)}>{h === "all" ? "Both" : `${h[0].toUpperCase()}${h.slice(1)} hemisphere`}</button>
+                <button key={h} aria-pressed={hemi === h} aria-label={h === "all" ? "Both hemispheres" : `${h} hemisphere`} className={`btn flex-1 px-1 py-0.5 text-xs ${hemi === h ? "btn-primary" : ""}`} onClick={() => setHemi(h)}>{h === "all" ? "Both" : `${h[0].toUpperCase()}${h.slice(1)}`}</button>
               ))}
             </div>
-            <label className="label">Point size {pointSize.toFixed(1)}
-              <input type="range" min={0.5} max={8} step={0.1} value={pointSize} onChange={(e) => setPointSize(+e.target.value)} className="w-full" />
-            </label>
-            <label className="label">Opacity {opacity.toFixed(2)}
-              <input type="range" min={0.05} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(+e.target.value)} className="w-full" />
-            </label>
+            <label className="label !mb-0 flex justify-between" htmlFor="point-size"><span>Point size</span><span className="mono text-ink-400">{pointSize.toFixed(1)}</span>
+              </label>
+            <input id="point-size" type="range" min={0.5} max={8} step={0.1} value={pointSize} onChange={(e) => setPointSize(+e.target.value)} className="w-full" />
+            <label className="label !mb-0 flex justify-between" htmlFor="point-opacity"><span>Opacity</span><span className="mono text-ink-400">{opacity.toFixed(2)}</span>
+              </label>
+            <input id="point-opacity" type="range" min={0.05} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(+e.target.value)} className="w-full" />
             <div className="flex flex-wrap gap-1">
               <button className="btn py-0.5 text-xs" onClick={() => setOrtho((o) => !o)}>{ortho ? "Perspective" : "Orthographic"}</button>
               <button className="btn py-0.5 text-xs" onClick={() => setResetKey((k) => k + 1)} title="R">Reset camera</button>
@@ -248,14 +252,14 @@ export default function Explorer() {
         <div className="absolute right-3 top-3 z-10 w-80"><ErrorBox error={points.error ?? attr.error ?? err} /></div>
         {geo && style && (
           <BrainScene positions={geo.positions} style={style} pointSize={pointSize} ortho={ortho} onPick={onPick} labels={labels}
-            skeletons={skeleton ? [{ positions: skeleton.positions, color: "#f8fafc" }] : []} focus={focus} resetKey={resetKey} radius={geo.radius} />
+            skeletons={skeleton ? [{ positions: skeleton.positions, color: sc.skeleton }] : []} focus={focus} resetKey={resetKey} radius={geo.radius} />
         )}
-        <div className="pointer-events-none absolute bottom-3 right-3 rounded-lg bg-ink-950/80 px-2 py-1 text-[11px] text-ink-400">
+        <div className="pointer-events-none absolute bottom-3 right-3 rounded-md border border-ink-700 bg-ink-900/85 px-2.5 py-1 text-[11px] text-ink-400">
           {geo ? `${geo.n.toLocaleString()} neurons as soma/representative points` : ""}
           {geo && geo.missing > 0 ? ` · ${geo.missing} without position` : ""} · µm · click a point to select
         </div>
       </div>
-      <aside className="w-[25rem] shrink-0 space-y-3 overflow-y-auto border-l border-ink-800 p-3">
+      <aside aria-label="Neuron details" className="w-72 shrink-0 space-y-3 overflow-y-auto border-l border-ink-700 p-3 xl:w-[25rem]">
         {!selected ? (
           <Empty title="No neuron selected">Search on the left or click a point in the 3D view.</Empty>
         ) : !detail ? <Loading label="Loading neuron" /> : (
@@ -271,15 +275,16 @@ export default function Explorer() {
 }
 
 function Legend({ attr, field, hidden, onToggle }: { attr: Attribute | null; field: string; hidden: Set<string>; onToggle: (l: string) => void }) {
+  const colors = useChartColors();
   if (!attr) return null;
   const items = attr.labels.map((l, i) => ({ l, n: attr.counts[i] })).sort((a, b) => b.n - a.n);
   return (
     <Section title={`Legend (${items.length})`}>
-      <ul className="max-h-72 space-y-0.5 overflow-y-auto pr-1 text-xs" aria-label="Legend">
+      <ul className="-mx-1 max-h-72 space-y-px overflow-y-auto px-1 text-xs" aria-label="Legend">
         {items.map(({ l, n }) => (
           <li key={l}>
-            <button className={`flex w-full items-center gap-2 rounded px-1 py-0.5 text-left hover:bg-ink-800 ${hidden.has(l) ? "opacity-35" : ""}`} onClick={() => onToggle(l)} aria-pressed={!hidden.has(l)} title="Toggle visibility">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: categoryColor(field, l) }} />
+            <button className={`flex w-full items-center gap-2 rounded px-1.5 py-1 text-left transition-colors duration-150 hover:bg-ink-800 ${hidden.has(l) ? "opacity-40" : ""}`} onClick={() => onToggle(l)} aria-pressed={!hidden.has(l)} title="Toggle visibility">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colors.category(field, l) }} />
               <span className="flex-1 truncate">{l}</span>
               <span className="mono text-ink-400">{n.toLocaleString()}</span>
             </button>
@@ -308,10 +313,10 @@ function SearchPanel({ datasetId, onSelect }: { datasetId: string; onSelect: (n:
       {res && (
         <div className="mt-2">
           <div className="mb-1 text-xs text-ink-400">{res.total.toLocaleString()} matches</div>
-          <ul className="max-h-60 space-y-0.5 overflow-y-auto text-xs" data-testid="search-results">
+          <ul className="-mx-1 max-h-60 space-y-px overflow-y-auto px-1 text-xs" data-testid="search-results">
             {res.results.map((n) => (
               <li key={n.root_id}>
-                <button className="w-full rounded px-1.5 py-1 text-left hover:bg-ink-800" onClick={() => onSelect(n)}>
+                <button className="w-full rounded-md px-2 py-1.5 text-left transition-colors duration-150 hover:bg-ink-800" onClick={() => onSelect(n)}>
                   <span className="font-medium text-ink-100">{n.cell_type ?? "unannotated"}</span>
                   <span className="ml-1 text-ink-400">{n.side ?? ""} · {n.super_class ?? ""}</span>
                   <div className="mono text-[10px] text-ink-400">{n.root_id}</div>
@@ -348,11 +353,11 @@ function NeuronPanel({ detail, partners, minSyn, setMinSyn, focusPartners, setFo
       <Section title="Neuron" right={<button className="btn py-0.5 text-xs" onClick={onClear}>Clear</button>}>
         <div className="space-y-2 text-sm" data-testid="neuron-panel">
           <div>
-            <div className="text-lg font-semibold">{detail.cell_type ?? "unannotated"}</div>
+            <div className="text-lg font-semibold tracking-tight">{detail.cell_type ?? "unannotated"}</div>
             <div className="mono text-xs text-ink-300" data-testid="neuron-root-id">{detail.root_id}</div>
           </div>
           <div className="flex flex-wrap gap-1">
-            {detail.dataset.synthetic ? <span className="chip border-amber-500/50 text-amber-200">synthetic</span> : <span className="chip">FlyWire v{detail.dataset.version}</span>}
+            {detail.dataset.synthetic ? <span className="chip border-amber-500/50 text-amber-300">synthetic</span> : <span className="chip">FlyWire v{detail.dataset.version}</span>}
             {detail.super_class && <span className="chip">{detail.super_class}</span>}
             {detail.side && <span className="chip">{detail.side}</span>}
             {detail.nt_type && <span className="chip" title="Predicted neurotransmitter (Eckstein et al. 2024); an inference, not a measurement">{detail.nt_type}{detail.nt_confidence != null ? ` · p=${detail.nt_confidence.toFixed(2)}` : ""}</span>}
@@ -384,13 +389,13 @@ function NeuronPanel({ detail, partners, minSyn, setMinSyn, focusPartners, setFo
         <label className="flex items-center gap-1 text-[11px] text-ink-400"><input type="checkbox" checked={focusPartners} onChange={(e) => setFocusPartners(e.target.checked)} />Highlight in 3D</label>
       }>
         <div className="mb-2 flex items-center gap-2 text-xs">
-          <div className="flex gap-1" role="tablist">
+          <div className="seg flex" role="tablist" aria-label="Partner direction">
             <button role="tab" aria-selected={tab === "down"} className={`btn py-0.5 text-xs ${tab === "down" ? "btn-primary" : ""}`} onClick={() => setTab("down")}>Outputs ({partners.down?.n_partners ?? "…"})</button>
             <button role="tab" aria-selected={tab === "up"} className={`btn py-0.5 text-xs ${tab === "up" ? "btn-primary" : ""}`} onClick={() => setTab("up")}>Inputs ({partners.up?.n_partners ?? "…"})</button>
           </div>
           <label className="ml-auto flex items-center gap-1">≥<input aria-label="Minimum synapses" type="number" className="input w-14 py-0.5" min={1} value={minSyn} onChange={(e) => setMinSyn(Math.max(1, +e.target.value))} /> syn</label>
         </div>
-        <p className="mb-1 text-[11px] text-ink-400">Counts are reconstructed synapses. Sign follows the presynaptic neuron's predicted transmitter (model assumption). <span className="text-sky-300">Inputs</span> / <span className="text-pink-300">outputs</span> are coloured in 3D; nearby points are not necessarily connected.</p>
+        <p className="mb-2 text-[11px] leading-snug text-ink-400">Counts are reconstructed synapses. Sign follows the presynaptic neuron's predicted transmitter (model assumption). <span className="text-sky-300">Inputs</span> / <span className="text-pink-300">outputs</span> are coloured in 3D; nearby points are not necessarily connected.</p>
         <div className="max-h-80 overflow-y-auto">
           <table className="table" data-testid="partners-table">
             <thead><tr><th>Partner</th><th>Syn</th><th>%</th><th>±</th></tr></thead>

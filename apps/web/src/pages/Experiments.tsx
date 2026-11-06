@@ -4,7 +4,7 @@ import { useApp } from "../lib/store";
 import type { ExperimentListItem, ExperimentSpec, Job, TemplateInfo } from "../lib/types";
 import { Plot } from "../components/Plot";
 import { Empty, ErrorBox, EvidenceBadge, Field, Loading, Section, fmt, useAsync, useInterval } from "../components/ui";
-import { hashColor } from "../lib/colors";
+import { useChartColors } from "../lib/colors";
 
 interface Readout { condition: string; readout: string; n_neurons: number; mean_rate_hz: number; std_hz: number }
 interface ExpDetail {
@@ -22,19 +22,19 @@ export default function Experiments() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [job, setJob] = useState<Job | null>(null);
   const list = useAsync<ExperimentListItem[]>(() => (STATIC_DEMO ? Promise.resolve([]) : api.experiments()), [job?.status]);
-  if (STATIC_DEMO) return <div className="p-6"><Empty title="Experiments run on the local backend">Results are produced by the Python engine; see docs/evidence for the recorded reference runs.</Empty></div>;
+  if (STATIC_DEMO) return <div className="mx-auto max-w-3xl p-8"><Empty title="Experiments run on the local backend">Results are produced by the Python engine; see docs/evidence for the recorded reference runs.</Empty></div>;
   return (
-    <div className="grid h-full grid-cols-[24rem_1fr] gap-3 p-3">
-      <div className="space-y-3 overflow-y-auto">
+    <div className="grid h-full min-w-[860px] grid-cols-[22rem_minmax(0,1fr)] gap-4 p-4">
+      <div className="space-y-4 overflow-y-auto pr-1">
         <TemplatePanel datasetId={datasetId} job={job} setJob={setJob} onDone={(id) => { list.reload(); setOpenId(id); }} />
-        <Section title="Saved experiments" right={<button className="btn px-1.5 py-0 text-[11px]" onClick={list.reload}>↻</button>}>
-          {list.loading ? <Loading /> : (list.data ?? []).length === 0 ? <p className="text-xs text-ink-400">None yet.</p> : (
-            <ul className="space-y-1 text-xs" data-testid="experiment-list">
+        <Section title="Saved experiments" right={<button className="btn px-1.5 py-0 text-[11px]" onClick={list.reload} aria-label="Refresh saved experiments">↻</button>}>
+          {list.loading ? <Loading /> : (list.data ?? []).length === 0 ? <p className="text-xs text-ink-400">No saved experiments yet. Run a template to create one.</p> : (
+            <ul className="space-y-1.5 text-xs" data-testid="experiment-list">
               {(list.data ?? []).map((e) => (
                 <li key={e.experiment_id}>
-                  <button className={`w-full rounded border px-2 py-1 text-left hover:bg-ink-800 ${openId === e.experiment_id ? "border-accent/60" : "border-ink-700"}`} onClick={() => setOpenId(e.experiment_id)}>
+                  <button aria-current={openId === e.experiment_id ? "true" : undefined} className={`w-full rounded-md border px-2.5 py-2 text-left transition-colors duration-150 hover:bg-ink-800 ${openId === e.experiment_id ? "border-accent/60 bg-accent/5" : "border-ink-700"}`} onClick={() => setOpenId(e.experiment_id)}>
                     <div className="flex items-center gap-2"><span className="flex-1 font-medium">{e.name}</span><EvidenceBadge kind={e.evidence} /></div>
-                    <div className="mono text-[10px] text-ink-400">{e.experiment_id} · {e.dataset_id}</div>
+                    <div className="mono mt-0.5 truncate text-[10px] text-ink-400">{e.experiment_id} · {e.dataset_id}</div>
                   </button>
                 </li>
               ))}
@@ -67,14 +67,14 @@ function TemplatePanel({ datasetId, job, setJob, onDone }: { datasetId: string; 
   return (
     <Section title="Run a template">
       {templates.loading ? <Loading /> : avail.length === 0 ? <p className="text-xs text-ink-400">No templates for this dataset.</p> : (
-        <div className="space-y-2 text-sm">
+        <div className="space-y-3 text-sm">
           <select aria-label="Template" className="input" value={key} onChange={(e) => setKey(e.target.value)}>
             {avail.map((t) => <option key={t.key} value={t.key}>{t.title}</option>)}
           </select>
           {spec && (
             <>
               <div className="flex items-center gap-2"><span className="font-medium">{spec.name}</span><EvidenceBadge kind={spec.evidence} /></div>
-              <p className="text-xs text-ink-400">{spec.description}</p>
+              <p className="text-xs leading-relaxed text-ink-400">{spec.description}</p>
               <div className="text-xs text-ink-300">Conditions: {spec.conditions.map((c) => c.name).join(" · ")}</div>
               <div className="text-xs text-ink-300">Readouts: {spec.readouts.map((r) => r.name).join(", ") || "—"}</div>
               <div className="grid grid-cols-3 gap-2">
@@ -88,10 +88,10 @@ function TemplatePanel({ datasetId, job, setJob, onDone }: { datasetId: string; 
           )}
           <ErrorBox error={err} />
           {job && (
-            <div className="rounded border border-ink-700 p-2 text-xs" data-testid="job-status">
-              <div className="flex justify-between"><span>{job.label}</span><span>{job.status}</span></div>
-              <div className="mt-1 h-1.5 rounded bg-ink-800"><div className="h-1.5 rounded bg-accent" style={{ width: `${Math.round(job.progress * 100)}%` }} /></div>
-              <div className="mt-1 text-ink-400">{job.message}</div>
+            <div className="rounded-md border border-ink-700 bg-ink-850 p-3 text-xs" data-testid="job-status">
+              <div className="flex justify-between gap-2"><span>{job.label}</span><span className="mono">{job.status}</span></div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-700" role="progressbar" aria-label="Experiment progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(job.progress * 100)}><div className="h-1.5 rounded-full bg-accent transition-[width] duration-200" style={{ width: `${Math.round(job.progress * 100)}%` }} /></div>
+              <div className="mt-1.5 text-ink-400">{job.message}</div>
               {job.error && <div className="text-rose-300">{job.error}</div>}
               {["queued", "running"].includes(job.status) && <button className="btn mt-1 py-0 text-[11px]" onClick={() => api.cancelJob(job.id).then(setJob)}>Cancel</button>}
             </div>
@@ -104,17 +104,18 @@ function TemplatePanel({ datasetId, job, setJob, onDone }: { datasetId: string; 
 
 function ExperimentView({ id }: { id: string }) {
   const d = useAsync<ExpDetail>(() => api.experiment(id) as unknown as Promise<ExpDetail>, [id]);
+  const { cat } = useChartColors();
   if (d.loading) return <Loading />;
   if (d.error || !d.data) return <ErrorBox error={d.error} />;
   const { record, readouts = [], timecourse = [], regions = [], files, embodied_runs } = d.data;
   const conds = Array.from(new Set(readouts.map((r) => r.condition)));
   const names = Array.from(new Set(readouts.map((r) => r.readout)));
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 pr-1">
       <Section title="Experiment" right={<EvidenceBadge kind={record.evidence} />}>
-        <h1 className="text-lg font-semibold">{record.name ?? id}</h1>
-        <p className="text-sm text-ink-300">{d.data.spec?.description}</p>
-        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs md:grid-cols-4">
+        <h1 className="text-lg font-semibold tracking-tight">{record.name ?? id}</h1>
+        <p className="mt-1 text-[13px] leading-relaxed text-ink-300">{d.data.spec?.description}</p>
+        <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-xs md:grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] [&>span]:min-w-0 [&>span]:break-all">
           <span className="text-ink-400">ID</span><span className="mono">{record.experiment_id}</span>
           <span className="text-ink-400">Dataset</span><span>{record.dataset?.dataset_id} v{record.dataset?.version}{record.dataset?.synthetic ? " (synthetic)" : ""}</span>
           <span className="text-ink-400">Network</span><span>{record.network?.mode} · {fmt.int(record.network?.n_neurons)} neurons</span>
@@ -122,7 +123,7 @@ function ExperimentView({ id }: { id: string }) {
           <span className="text-ink-400">Seeds</span><span className="mono">{record.seeds?.base} (+trial)</span>
           <span className="text-ink-400">Software</span><span className="mono">flymind {record.runtime?.flymind_version} · {String(record.runtime?.git_commit ?? "").slice(0, 10)}</span>
         </div>
-        <div className="mt-2 flex flex-wrap gap-1">
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {files.map((f) => <a key={f} className="btn py-0.5 text-xs" href={api.experimentFileUrl(id, f)}>{f}</a>)}
         </div>
       </Section>
@@ -131,9 +132,9 @@ function ExperimentView({ id }: { id: string }) {
           <Plot testId="readout-bars" height={260} data={names.map((n) => ({
             type: "bar", name: n, x: conds, y: conds.map((c) => readouts.find((r) => r.condition === c && r.readout === n)?.mean_rate_hz ?? 0),
             error_y: { type: "data", array: conds.map((c) => readouts.find((r) => r.condition === c && r.readout === n)?.std_hz ?? 0), visible: true },
-            marker: { color: hashColor(n) },
+            marker: { color: cat(n) },
           }))} layout={{ barmode: "group", yaxis: { title: { text: "Hz per neuron" } } }} />
-          <table className="table mt-2">
+          <table className="table mt-3">
             <thead><tr><th>Condition</th><th>Readout</th><th>Neurons</th><th>Mean (Hz)</th><th>SD</th></tr></thead>
             <tbody>{readouts.map((r, i) => <tr key={i}><td>{r.condition}</td><td>{r.readout}</td><td>{r.n_neurons}</td><td className="mono">{r.mean_rate_hz.toFixed(2)}</td><td className="mono">{r.std_hz.toFixed(2)}</td></tr>)}</tbody>
           </table>
@@ -145,17 +146,17 @@ function ExperimentView({ id }: { id: string }) {
             <thead><tr><th>Readout</th><th>Condition</th><th>Reference</th><th>Observed</th><th>Tolerance</th><th>Status</th></tr></thead>
             <tbody>{record.expected_checks.map((c: Record<string, any>, i: number) => (  // eslint-disable-line @typescript-eslint/no-explicit-any
               <tr key={i}><td>{c.readout}</td><td>{c.condition}</td><td className="mono">{c.value_hz}</td><td className="mono">{c.observed_hz == null ? "–" : c.observed_hz.toFixed(2)}</td><td>±{c.tolerance_hz}</td>
-                <td className={c.status === "pass" ? "text-emerald-300" : "text-rose-300"}>{c.status}</td></tr>
+                <td className={`font-medium ${c.status === "pass" ? "text-emerald-300" : "text-rose-300"}`}>{c.status}</td></tr>
             ))}</tbody>
           </table>
-          <p className="mt-1 text-[11px] text-ink-400">{record.expected_checks[0]?.source}</p>
+          <p className="mt-2 text-[11px] text-ink-400">{record.expected_checks[0]?.source}</p>
         </Section>
       )}
       {timecourse.length > 0 && (
         <Section title="Time course (trial-averaged)">
           <Plot testId="timecourse" height={260} data={Array.from(new Set(timecourse.map((r) => `${r.condition} · ${r.readout}`))).map((k) => {
             const rows = timecourse.filter((r) => `${r.condition} · ${r.readout}` === k);
-            return { type: "scatter", mode: "lines", name: k, x: rows.map((r) => r.t_ms), y: rows.map((r) => r.rate_hz), line: { width: 1.5, color: hashColor(k) } };
+            return { type: "scatter", mode: "lines", name: k, x: rows.map((r) => r.t_ms), y: rows.map((r) => r.rate_hz), line: { width: 1.5, color: cat(k) } };
           })} layout={{ xaxis: { title: { text: "time (ms)" } }, yaxis: { title: { text: "Hz" } } }} />
         </Section>
       )}
@@ -163,14 +164,14 @@ function ExperimentView({ id }: { id: string }) {
         <Section title="Regional activity (top regions)">
           <Plot height={240} data={conds.map((c) => {
             const rows = regions.filter((r) => r.condition === c).slice(0, 15);
-            return { type: "bar", name: c, x: rows.map((r) => r.label), y: rows.map((r) => r.mean_rate_hz), marker: { color: hashColor(c) } };
+            return { type: "bar", name: c, x: rows.map((r) => r.label), y: rows.map((r) => r.mean_rate_hz), marker: { color: cat(c) } };
           })} layout={{ barmode: "group", yaxis: { title: { text: "mean Hz / neuron" } } }} />
         </Section>
       )}
       {embodied_runs.length > 0 && <EmbodiedRuns id={id} runs={embodied_runs} record={record} />}
       {record.assumptions?.length > 0 && (
         <Section title="Model assumptions">
-          <ul className="list-disc space-y-0.5 pl-5 text-xs text-ink-300">{record.assumptions.map((a: string) => <li key={a}>{a}</li>)}</ul>
+          <ul className="list-disc space-y-1 pl-5 text-xs leading-relaxed text-ink-300">{record.assumptions.map((a: string) => <li key={a}>{a}</li>)}</ul>
         </Section>
       )}
     </div>
@@ -178,19 +179,20 @@ function ExperimentView({ id }: { id: string }) {
 }
 
 function EmbodiedRuns({ id, runs, record }: { id: string; runs: string[]; record: Record<string, any> }) {  // eslint-disable-line @typescript-eslint/no-explicit-any
+  const { cat } = useChartColors();
   const [data, setData] = useState<Record<string, Record<string, number>[]>>({});
   useEffect(() => { runs.forEach((r) => api.embodiedTrajectory(id, r).then((t) => setData((d) => ({ ...d, [r]: t.rows })))); }, [id, runs]);
   const metrics = Object.entries(record.resolved_neurons ?? {}).flatMap(([cond, v]) => ((v as { embodied?: { metrics: Record<string, number> } }).embodied ? [[cond, (v as { embodied: { metrics: Record<string, number> } }).embodied.metrics] as const] : []));
   const keys = ["distance_travelled_mm", "net_displacement_mm", "mean_speed_mm_s", "heading_change_deg", "collision_onsets", "min_dist_attractive_source_mm"];
   return (
     <Section title="Embodied runs">
-      <Plot testId="embodied-paths" height={300} data={Object.entries(data).map(([r, rows]) => ({ type: "scatter", mode: "lines", name: r.replace("fly_", ""), x: rows.map((x) => x.x_mm), y: rows.map((x) => x.y_mm), line: { color: hashColor(r) } }))}
+      <Plot testId="embodied-paths" height={300} data={Object.entries(data).map(([r, rows]) => ({ type: "scatter", mode: "lines", name: r.replace("fly_", ""), x: rows.map((x) => x.x_mm), y: rows.map((x) => x.y_mm), line: { color: cat(r) } }))}
         layout={{ xaxis: { title: { text: "x (mm)" } }, yaxis: { title: { text: "y (mm)" }, scaleanchor: "x" } }} />
-      <table className="table mt-2">
+      <table className="table mt-3">
         <thead><tr><th>Condition</th>{keys.map((k) => <th key={k}>{k.replace(/_/g, " ")}</th>)}</tr></thead>
         <tbody>{metrics.map(([c, m]) => <tr key={c}><td>{c}</td>{keys.map((k) => <td key={k} className="mono">{m[k] == null ? "–" : Number(m[k]).toFixed(1)}</td>)}</tr>)}</tbody>
       </table>
-      <p className="mt-1 text-[11px] text-ink-400">Observations: trajectories and metrics. Interpretation (e.g. “approach”) requires comparison with the baseline and across seeds.</p>
+      <p className="mt-2 text-[11px] text-ink-400">Observations: trajectories and metrics. Interpretation (e.g. “approach”) requires comparison with the baseline and across seeds.</p>
     </Section>
   );
 }
@@ -207,7 +209,7 @@ function ComparePanel({ experiments }: { experiments: ExperimentListItem[] }) {
   const exps = experiments.filter((e) => e.conditions.length);
   return (
     <Section title="Compare results">
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-2 text-xs">
         <select aria-label="Experiment A" className="input" value={a} onChange={(e) => setA(e.target.value)}><option value="">A: experiment…</option>{exps.map((e) => <option key={e.experiment_id} value={e.experiment_id}>{e.name} ({e.experiment_id.slice(0, 15)})</option>)}</select>
         {expA && <select aria-label="Condition A" className="input" value={ca} onChange={(e) => setCa(e.target.value)}><option value="">first condition</option>{expA.conditions.map((c) => <option key={c}>{c}</option>)}</select>}
         <select aria-label="Experiment B" className="input" value={b} onChange={(e) => setB(e.target.value)}><option value="">B: experiment…</option>{exps.map((e) => <option key={e.experiment_id} value={e.experiment_id}>{e.name} ({e.experiment_id.slice(0, 15)})</option>)}</select>
@@ -215,7 +217,7 @@ function ComparePanel({ experiments }: { experiments: ExperimentListItem[] }) {
         <button className="btn btn-primary w-full" disabled={!a || !b} onClick={() => api.compare(a, b, ca || undefined, cb || undefined).then(setRes, setErr)}>Compare</button>
         <ErrorBox error={err} />
         {res && (
-          <div data-testid="compare-result" className="space-y-1">
+          <div data-testid="compare-result" className="space-y-2 pt-1">
             {(res.warnings ?? []).map((w: string) => <p key={w} className="text-amber-200">{w}</p>)}
             <div className="text-ink-400">A: {res.a.condition} · B: {res.b.condition}</div>
             <table className="table">

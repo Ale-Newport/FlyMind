@@ -168,6 +168,7 @@ export const api = {
   fly: (id: string) => get<FlySummary>(`/api/fly/sessions/${id}`),
   flyControl: (id: string, action: string) => post<FlySummary>(`/api/fly/sessions/${id}/control`, { action }),
   flyBaseline: (id: string, cmd: { forward: number; turn: number }) => post<FlySummary>(`/api/fly/sessions/${id}/baseline`, cmd),
+  flyLocomotion: (id: string, mode: "walk" | "fly", altitude_mm?: number) => post<FlySummary>(`/api/fly/sessions/${id}/locomotion`, { mode, altitude_mm }),
   flyTrajectory: (id: string) => get<{ rows: Record<string, number>[]; metrics: Record<string, number> }>(`/api/fly/sessions/${id}/trajectory`),
   saveFly: (id: string) => post<{ recording_id: string }>(`/api/fly/sessions/${id}/save`),
   recordings: () => get<{ recording_id: string; created_at: string; controller: string; label: string; arena: string; metrics: Record<string, number>; evidence: string }[]>("/api/fly/recordings"),

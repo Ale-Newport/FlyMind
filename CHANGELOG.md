@@ -4,6 +4,20 @@ All notable changes are documented here (format: Keep a Changelog; versioning: S
 
 ## [Unreleased]
 
+### Added
+- Flight for the Virtual Fly: a reduced-order model (wingbeat-averaged blade-element aerodynamics
+  with Dickinson et al. 1999 coefficients, 6-DoF body, cascaded flight controller) with take-off,
+  hover, forward flight, saccades and landing, hand-over to the FlyGym walking physics, wing
+  flapping drawn on the real NeuroMechFly meshes, legs folding with height. Documented in
+  `docs/scientific/flight.md`; labelled as a FlyMind model, not a FlyGym or connectome result.
+- Autonomous fly-like behaviour policy (demonstration): walking, take-off, flight with saccades,
+  odour tracking, landing on food, feeding, obstacle and aversive-odour avoidance.
+- `/api/fly/sessions/{id}/locomotion` to switch walk/fly while a session runs.
+
+### Changed
+- Web app redesigned ("refined laboratory"): design tokens, dark and light themes with a
+  system/light/dark toggle, themed charts and 3D scenes, restyled pages and components.
+
 ### Fixed
 - CI: use `macos-latest` (the `macos-14` runner is no longer supported); install Mesa EGL
   for headless MuJoCo rendering on Linux and set `MUJOCO_GL`/`PYOPENGL_PLATFORM` only there.

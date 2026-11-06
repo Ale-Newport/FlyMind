@@ -3,6 +3,7 @@ import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
 import { GizmoHelper, Html, OrbitControls, OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitImpl } from "three-stdlib";
+import { useChartColors } from "../lib/colors";
 
 // Dataset coordinates (FlyWire FAFB, nm -> um): +x = fly right, +y = ventral, +z = posterior.
 // Display: X = x (fly right), Y = -y (dorsal up), Z = -z (anterior toward +Z).
@@ -151,7 +152,7 @@ function AxisLabel({ position, text, color }: { position: [number, number, numbe
   return <Html position={position} center><span style={{ color, fontSize: 11, fontWeight: 700 }}>{text}</span></Html>;
 }
 
-function OrientationGizmo() {
+function OrientationGizmo({ axis: ax }: { axis: { x: string; y: string; z: string } }) {
   // Anatomical axes: +X fly right, +Y dorsal, +Z anterior.
   const arm = (dir: [number, number, number], color: string) => (
     <mesh position={dir.map((v) => v * 0.5) as [number, number, number]} rotation={dir[0] ? [0, 0, -Math.PI / 2] : dir[2] ? [Math.PI / 2, 0, 0] : [0, 0, 0]}>
@@ -161,12 +162,12 @@ function OrientationGizmo() {
   );
   return (
     <group scale={40}>
-      {arm([1, 0, 0], "#fb7185")}
-      {arm([0, 1, 0], "#34d399")}
-      {arm([0, 0, 1], "#60a5fa")}
-      <AxisLabel position={[1.25, 0, 0]} text="R" color="#fb7185" />
-      <AxisLabel position={[0, 1.25, 0]} text="D" color="#34d399" />
-      <AxisLabel position={[0, 0, 1.25]} text="A" color="#60a5fa" />
+      {arm([1, 0, 0], ax.x)}
+      {arm([0, 1, 0], ax.y)}
+      {arm([0, 0, 1], ax.z)}
+      <AxisLabel position={[1.25, 0, 0]} text="R" color={ax.x} />
+      <AxisLabel position={[0, 1.25, 0]} text="D" color={ax.y} />
+      <AxisLabel position={[0, 0, 1.25]} text="A" color={ax.z} />
     </group>
   );
 }
@@ -184,9 +185,11 @@ export function BrainScene({ positions, style, pointSize, ortho, onPick, labels,
   radius: number;
 }) {
   const controls = useRef<OrbitImpl | null>(null);
+  // Points use normal (alpha) blending, never additive, so they stay visible on the light theme's background.
+  const { scene } = useChartColors();
   return (
     <Canvas dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }} raycaster={{ params: { Points: { threshold: radius / 250 } } as THREE.RaycasterParameters }} data-testid="brain-canvas">
-      <color attach="background" args={["#070a14"]} />
+      <color key={scene.bg} attach="background" args={[scene.bg]} />
       {ortho ? (
         <OrthographicCamera makeDefault position={[0, 0, radius * 2.2]} near={-radius * 10} far={radius * 10} zoom={1} left={-radius * 1.2} right={radius * 1.2} top={radius * 0.75} bottom={-radius * 0.75} />
       ) : (
@@ -198,11 +201,11 @@ export function BrainScene({ positions, style, pointSize, ortho, onPick, labels,
       <Skeletons segments={skeletons} />
       {labels.map((l) => (
         <Html key={l.text} position={l.pos} center zIndexRange={[10, 0]}>
-          <span className="pointer-events-none select-none whitespace-nowrap rounded bg-ink-950/70 px-1 text-[10px] text-ink-300">{l.text}</span>
+          <span className="pointer-events-none select-none whitespace-nowrap rounded-[3px] bg-ink-950/75 px-1 text-[10px] font-medium text-ink-300">{l.text}</span>
         </Html>
       ))}
       <GizmoHelper alignment="bottom-left" margin={[70, 70]}>
-        <OrientationGizmo />
+        <OrientationGizmo axis={scene.axis} />
       </GizmoHelper>
     </Canvas>
   );

@@ -214,7 +214,7 @@ export interface FlySummary {
   label: string;
   status: string;
   error: string | null;
-  controller: "baseline" | "neural";
+  controller: "baseline" | "neural" | "autonomous";
   arena: ArenaConfig;
   t_s: number;
   duration_s: number;
@@ -226,10 +226,35 @@ export interface FlySummary {
   bridge: BridgeConfig | null;
   missing_groups: string[];
   baseline: { forward: number; turn: number };
-  state: Record<string, number>;
+  state: Record<string, number | string>;
   n_geoms: number;
   evidence: Evidence;
   scene?: SceneObject[];
+  locomotion?: LocomotionState;
+  mode?: LocomotionMode;
+  altitude_mm?: number;
+  behavior?: string;
+  wing_display_hz?: number;
+}
+
+export type LocomotionMode = "walk" | "fly";
+export type LocomotionState = "ground" | "takeoff" | "flight" | "landing";
+
+/** Live flight diagnostics streamed with every frame while the fly is airborne. */
+export interface FlightInfo {
+  altitude_mm: number;
+  speed_mm_s: number;
+  vz_mm_s: number;
+  pitch_deg: number;
+  roll_deg: number;
+  yaw_rate_deg_s: number;
+  wing_amp_deg: [number, number];
+  wing_centre_deg: [number, number];
+  wing_pitch_deg: [number, number];
+  wingbeat_hz: number;
+  wing_display_hz: number;
+  thrust_over_weight: number;
+  engaged: boolean;
 }
 
 export interface SceneObject {
@@ -257,6 +282,9 @@ export interface FlyFrame {
   status?: string;
   error?: string | null;
   wall_s?: number;
+  locomotion?: LocomotionState;
+  behavior?: string;
+  flight?: FlightInfo;
   session?: FlySummary;
   scene?: SceneObject[];
 }
