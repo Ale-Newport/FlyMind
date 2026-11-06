@@ -105,7 +105,7 @@ Node 26, Chromium (Playwright 1.65).
   * Static demo build verified locally.
 * **Blocked**
   * The repository was not pushed (no authorisation to publish), so GitHub Actions and Pages have **not** run.
-  * Fresh-clone setup was exercised through the e2e isolated data root, not on a second machine.
+  * Fresh-clone setup was verified by cloning into a new directory on the same machine (`make setup`, `make test`, `make dev`); this found and fixed a bash 3.2 incompatibility in the launcher. It has not been tried on a second machine.
 
 ## Next steps
 

@@ -37,4 +37,6 @@ echo ""
 echo "  FlyMind is running:  http://127.0.0.1:$WEB_PORT${OPEN_PATH:-/}"
 echo "  API docs:            http://127.0.0.1:$API_PORT/docs"
 echo "  Press Ctrl-C to stop."
-wait -n
+# Portable "wait for the first child to exit" (macOS ships bash 3.2 without `wait -n`).
+while kill -0 "${pids[0]}" 2>/dev/null && kill -0 "${pids[1]}" 2>/dev/null; do sleep 1; done
+echo "A server stopped; shutting down." >&2

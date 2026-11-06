@@ -61,7 +61,7 @@ All verification was done at commit `a4e2bcd` on macOS 27.0.1, Apple M2 Max.
 | Neural outputs reach the motor interface; body movement changes sensors; sensors feed back | verified | `test_sensors_to_neurons_to_motor_and_back` |
 | Saved experiments replay; exports load and analyse | verified | `test_run_persists_reproducible_records` |
 | Fresh-clone demo without credentials | verified | e2e runs against a fresh data root with only the fixture |
-| One-command setup and launch | manual | `make setup`, `make dev` (`scripts/setup/dev.sh`) |
+| One-command setup and launch | verified (fresh clone) | [test results → fresh-clone check](test-results.md) |
 | Pinned dependencies and lockfiles | verified | `uv.lock`, `apps/web/package-lock.json` |
 | CI | configured, **not executed** | `.github/workflows/ci.yml`: workflows have not run because the repository was not pushed |
 | GitHub Pages static demo | built locally | `make pages-build` output inspected in the browser; deployment needs a push |
