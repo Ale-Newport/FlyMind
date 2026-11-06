@@ -26,7 +26,7 @@ jobs:
           sudo apt-get install -y -q --no-install-recommends libegl1 libegl-mesa0 libgl1 libgles2
           echo "MUJOCO_GL=egl" >> "$GITHUB_ENV"
           echo "PYOPENGL_PLATFORM=egl" >> "$GITHUB_ENV"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - run: uv python install 3.13
@@ -54,7 +54,7 @@ jobs:
           sudo apt-get install -y -q --no-install-recommends libegl1 libegl-mesa0 libgl1 libgles2
           echo "MUJOCO_GL=egl" >> "$GITHUB_ENV"
           echo "PYOPENGL_PLATFORM=egl" >> "$GITHUB_ENV"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - uses: actions/setup-node@v4
