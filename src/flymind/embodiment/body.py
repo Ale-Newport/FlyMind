@@ -92,6 +92,7 @@ class FlyBody:
         }
         self._fly_geom_mask = np.isin(m.geom_bodyid, list(fly_bodies))
         self._luminance = (0.0, 0.0)
+        self.vision_error: str | None = None
         self._vision_age = np.inf
         self.reset()
 
@@ -174,7 +175,14 @@ class FlyBody:
         if not self.vision:
             return (0.0, 0.0)
         if self._vision_age >= refresh_s:
-            r = self.sim.get_ommatidia_readouts(FLY_NAME)  # (2 eyes, 721, 2 channels)
+            try:
+                r = self.sim.get_ommatidia_readouts(FLY_NAME)  # (2 eyes, 721, 2 channels)
+            except Exception as exc:  # no OpenGL context (e.g. GPU-less macOS VM, headless Linux)
+                # Degrade explicitly: vision off, reason reported, the session keeps running.
+                self.vision = False
+                self.vision_error = f"{type(exc).__name__}: {exc}"
+                self._luminance = (0.0, 0.0)
+                return self._luminance
             self._luminance = (float(r[0].sum(axis=1).mean()), float(r[1].sum(axis=1).mean()))
             self._vision_age = 0.0
         return self._luminance

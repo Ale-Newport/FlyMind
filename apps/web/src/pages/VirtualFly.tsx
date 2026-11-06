@@ -189,7 +189,9 @@ export default function VirtualFly() {
               <div key={k as string} className="contents"><dt className="text-ink-400">{k}</dt><dd className="mono">{v == null ? "–" : (v as number).toFixed(3)}</dd></div>
             ))}
           </dl>
-          {session && !session.vision && <p className="mt-1 text-[11px] text-ink-400">Vision off (enabled automatically in arenas with light sources).</p>}
+          {session?.vision_error ? (
+            <p className="mt-1 text-[11px] text-amber-200" role="status">Vision unavailable on this machine (no OpenGL context): {session.vision_error}. Luminance inputs are 0.</p>
+          ) : session && !session.vision && <p className="mt-1 text-[11px] text-ink-400">Vision off (enabled automatically in arenas with light sources).</p>}
         </Section>
         {session?.controller === "neural" && (
           <Section title="Neural interface">

@@ -2,7 +2,10 @@ import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SHOTS = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../docs/evidence/screenshots");
+// Routine runs write screenshots to test-results/; set E2E_SCREENSHOT_DIR=docs/evidence/screenshots
+// (relative to the repo root) to refresh the committed evidence images.
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
+const SHOTS = path.resolve(REPO, process.env.E2E_SCREENSHOT_DIR ?? "apps/web/test-results/screenshots");
 const shot = (page: Page, name: string) => page.screenshot({ path: path.join(SHOTS, `e2e-${name}.png`) });
 
 test.beforeEach(async ({ page }) => {
@@ -55,6 +58,8 @@ test("simulator: demo session, stimulation, start/stop, live raster", async ({ p
   await page.getByRole("button", { name: /Create session|Replace session/ }).click();
   await expect(page.getByTestId("sim-status")).toHaveText("ready");
   await page.getByLabel("Neuron group").first().selectOption("orn_attr_l");
+  // continuous stimulus, so the live raster (last 500 ms) has spikes for the whole run
+  await page.getByLabel(/^Stop \(ms/).fill("");
   await page.getByRole("button", { name: "Add stimulus" }).click();
   await expect(page.getByTestId("stimulus-list")).toContainText("orn_attr_l");
   // 1x real time so the live stream is observable; wait until the server applied it
