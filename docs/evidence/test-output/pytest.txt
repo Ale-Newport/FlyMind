@@ -1,0 +1,63 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.16, pytest-9.2.0, pluggy-1.7.0 -- <repo>/.venv/bin/python
+rootdir: <repo>
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0, timeout-2.4.0, jaxtyping-0.3.7, anyio-4.16.0
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 44 items
+
+tests/fulldata/test_flywire783.py::test_published_dataset_statistics PASSED [  2%]
+tests/fulldata/test_flywire783.py::test_sugar_grns_drive_mn9_on_v783 PASSED [  4%]
+tests/fulldata/test_flywire783.py::test_known_pathway_sugar_to_mn9 PASSED [  6%]
+tests/fulldata/test_flywire783.py::test_skeleton_geometry_if_installed PASSED [  9%]
+tests/integration/test_closed_loop.py::test_baseline_walks_and_turns_left_for_positive_turn PASSED [ 11%]
+tests/integration/test_closed_loop.py::test_obstacle_contact_is_sensed PASSED [ 13%]
+tests/integration/test_closed_loop.py::test_zero_neural_output_means_no_walking PASSED [ 15%]
+tests/integration/test_closed_loop.py::test_sensors_to_neurons_to_motor_and_back PASSED [ 18%]
+tests/integration/test_closed_loop.py::test_neural_perturbation_changes_motor_output PASSED [ 20%]
+tests/integration/test_closed_loop.py::test_recording_save_and_replay_files PASSED [ 22%]
+tests/integration/test_explorer_to_simulator.py::test_selected_neuron_drives_downstream_chain PASSED [ 25%]
+tests/unit/test_api.py::test_datasets_and_neuron_queries_keep_ids_exact PASSED [ 27%]
+tests/unit/test_api.py::test_path_traversal_and_unknown_dataset_rejected PASSED [ 29%]
+tests/unit/test_api.py::test_simulation_session_lifecycle_and_stream PASSED [ 31%]
+tests/unit/test_api.py::test_invalid_inputs_are_rejected PASSED          [ 34%]
+tests/unit/test_api.py::test_experiment_job_runs_to_completion PASSED    [ 36%]
+tests/unit/test_architecture.py::test_layering PASSED                    [ 38%]
+tests/unit/test_brian2_equivalence.py::test_identical_spikes_poisson_drive PASSED [ 40%]
+tests/unit/test_brian2_equivalence.py::test_identical_spikes_with_current_silencing_and_scaling PASSED [ 43%]
+tests/unit/test_brian2_equivalence.py::test_subnetwork_mode_equivalence PASSED [ 45%]
+tests/unit/test_experiments.py::test_every_template_builds_for_the_fixture PASSED [ 47%]
+tests/unit/test_experiments.py::test_run_persists_reproducible_records PASSED [ 50%]
+tests/unit/test_fixture_and_import.py::test_fixture_is_flagged_synthetic_and_validates PASSED [ 52%]
+tests/unit/test_fixture_and_import.py::test_root_id_mapping_roundtrip PASSED [ 54%]
+tests/unit/test_fixture_and_import.py::test_codex_import_preserves_ids_and_aggregates PASSED [ 56%]
+tests/unit/test_fixture_and_import.py::test_import_rejects_ids_from_another_release PASSED [ 59%]
+tests/unit/test_fixture_and_import.py::test_detection_is_by_content_not_name PASSED [ 61%]
+tests/unit/test_ids_and_graph.py::test_float64_would_corrupt_flywire_ids PASSED [ 63%]
+tests/unit/test_ids_and_graph.py::test_id_parser_keeps_exact_int64_and_rejects_floats PASSED [ 65%]
+tests/unit/test_ids_and_graph.py::test_float_corruption_detector PASSED  [ 68%]
+tests/unit/test_ids_and_graph.py::test_csr_sorted_and_directed PASSED    [ 70%]
+tests/unit/test_ids_and_graph.py::test_duplicate_edges_rejected PASSED   [ 72%]
+tests/unit/test_ids_and_graph.py::test_subgraph_neighbourhood_and_paths PASSED [ 75%]
+tests/unit/test_lif_dynamics.py::test_constant_drive_threshold_time_matches_analytic[numba] PASSED [ 77%]
+tests/unit/test_lif_dynamics.py::test_constant_drive_threshold_time_matches_analytic[numpy] PASSED [ 79%]
+tests/unit/test_lif_dynamics.py::test_psp_shape_delay_and_sign PASSED    [ 81%]
+tests/unit/test_lif_dynamics.py::test_reset_refractory_and_stimulated_neurons_have_no_refractory_period PASSED [ 84%]
+tests/unit/test_lif_dynamics.py::test_input_during_refractory_is_dropped_like_brian2 PASSED [ 86%]
+tests/unit/test_lif_dynamics.py::test_seeded_determinism_and_chunk_independence PASSED [ 88%]
+tests/unit/test_lif_dynamics.py::test_numba_and_numpy_backends_identical PASSED [ 90%]
+tests/unit/test_lif_dynamics.py::test_float32_precision_close_to_float64 PASSED [ 93%]
+tests/unit/test_lif_dynamics.py::test_silencing_and_reversible_lesions PASSED [ 95%]
+tests/unit/test_lif_dynamics.py::test_inhibition_suppresses_target PASSED [ 97%]
+tests/unit/test_lif_dynamics.py::test_repeated_stimulus_windows PASSED   [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  <repo>/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 44 passed, 1 warning in 25.70s ========================

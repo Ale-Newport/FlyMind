@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+title: "FlyMind: connectome-constrained Drosophila brain simulation, virtual fly and 3D brain explorer"
+message: "If you use FlyMind, please cite it and the data and models it builds on (see references)."
+type: software
+authors:
+  - family-names: Newport Diaz
+    given-names: Alejandro
+version: 0.1.0
+date-released: 2026-11-06
+license: MIT
+repository-code: "https://github.com/Ale-Newport/FlyMind"
+keywords: [Drosophila, connectome, FlyWire, spiking neural network, NeuroMechFly, MuJoCo, computational neuroscience]
+references:
+  - type: article
+    title: "A Drosophila computational brain model reveals sensorimotor processing"
+    authors: [{family-names: Shiu, given-names: Philip K.}, {name: "et al."}]
+    journal: Nature
+    volume: 634
+    start: 210
+    year: 2024
+    doi: 10.1038/s41586-024-07763-9
+  - type: article
+    title: "Neuronal wiring diagram of an adult brain"
+    authors: [{family-names: Dorkenwald, given-names: Sven}, {name: "et al."}]
+    journal: Nature
+    volume: 634
+    start: 124
+    year: 2024
+    doi: 10.1038/s41586-024-07558-y
+  - type: article
+    title: "Whole-brain annotation and multi-connectome cell typing of Drosophila"
+    authors: [{family-names: Schlegel, given-names: Philipp}, {name: "et al."}]
+    journal: Nature
+    volume: 634
+    start: 139
+    year: 2024
+    doi: 10.1038/s41586-024-07686-5
+  - type: article
+    title: "Neurotransmitter classification from electron microscopy images at synaptic sites in Drosophila melanogaster"
+    authors: [{family-names: Eckstein, given-names: Nils}, {family-names: Bates, given-names: Alexander S.}, {name: "et al."}]
+    journal: Cell
+    volume: 187
+    year: 2024
+    doi: 10.1016/j.cell.2024.03.016
+  - type: article
+    title: "NeuroMechFly v2: simulating embodied sensorimotor control in adult Drosophila"
+    authors: [{family-names: Wang-Chen, given-names: Sibo}, {name: "et al."}]
+    journal: Nature Methods
+    volume: 21
+    year: 2024
+    doi: 10.1038/s41592-024-02497-y

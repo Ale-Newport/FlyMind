@@ -1,0 +1,376 @@
+{
+  "dataset_id": "synthetic_demo_v1",
+  "groups": {
+    "orn_attr_l": {
+      "selector": {
+        "cell_types": [
+          "syn_ORN_attr_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_ORN_attr_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "orn_attr_r": {
+      "selector": {
+        "cell_types": [
+          "syn_ORN_attr_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_ORN_attr_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "orn_avers_l": {
+      "selector": {
+        "cell_types": [
+          "syn_ORN_avers_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_ORN_avers_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "orn_avers_r": {
+      "selector": {
+        "cell_types": [
+          "syn_ORN_avers_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_ORN_avers_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "pn_attr_l": {
+      "selector": {
+        "cell_types": [
+          "syn_PN_attr_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_PN_attr_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "pn_attr_r": {
+      "selector": {
+        "cell_types": [
+          "syn_PN_attr_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_PN_attr_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "pn_avers_l": {
+      "selector": {
+        "cell_types": [
+          "syn_PN_avers_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_PN_avers_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "pn_avers_r": {
+      "selector": {
+        "cell_types": [
+          "syn_PN_avers_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_PN_avers_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "ln_l": {
+      "selector": {
+        "cell_types": [
+          "syn_LN_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_LN_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "ln_r": {
+      "selector": {
+        "cell_types": [
+          "syn_LN_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_LN_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "vis_l": {
+      "selector": {
+        "cell_types": [
+          "syn_VIS_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_VIS_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "vis_r": {
+      "selector": {
+        "cell_types": [
+          "syn_VIS_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_VIS_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "vpn_l": {
+      "selector": {
+        "cell_types": [
+          "syn_VPN_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_VPN_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "vpn_r": {
+      "selector": {
+        "cell_types": [
+          "syn_VPN_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_VPN_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "mech_l": {
+      "selector": {
+        "cell_types": [
+          "syn_MECH_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_MECH_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "mech_r": {
+      "selector": {
+        "cell_types": [
+          "syn_MECH_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_MECH_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "lhn_attr_l": {
+      "selector": {
+        "cell_types": [
+          "syn_LHN_attr_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_LHN_attr_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "lhn_attr_r": {
+      "selector": {
+        "cell_types": [
+          "syn_LHN_attr_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_LHN_attr_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "lhn_avers_l": {
+      "selector": {
+        "cell_types": [
+          "syn_LHN_avers_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_LHN_avers_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "lhn_avers_r": {
+      "selector": {
+        "cell_types": [
+          "syn_LHN_avers_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_LHN_avers_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "grn_sugar_l": {
+      "selector": {
+        "cell_types": [
+          "syn_GRN_sugar_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_GRN_sugar_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "grn_sugar_r": {
+      "selector": {
+        "cell_types": [
+          "syn_GRN_sugar_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_GRN_sugar_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "dn_turn_l": {
+      "selector": {
+        "cell_types": [
+          "syn_DN_turn_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_DN_turn_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "dn_turn_r": {
+      "selector": {
+        "cell_types": [
+          "syn_DN_turn_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_DN_turn_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "dn_fwd_l": {
+      "selector": {
+        "cell_types": [
+          "syn_DN_fwd_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_DN_fwd_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "dn_fwd_r": {
+      "selector": {
+        "cell_types": [
+          "syn_DN_fwd_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_DN_fwd_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "dn_back_l": {
+      "selector": {
+        "cell_types": [
+          "syn_DN_back_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_DN_back_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "dn_back_r": {
+      "selector": {
+        "cell_types": [
+          "syn_DN_back_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_DN_back_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "inh_turn_l": {
+      "selector": {
+        "cell_types": [
+          "syn_INH_turn_L"
+        ]
+      },
+      "description": "SYNTHETIC group syn_INH_turn_L",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "inh_turn_r": {
+      "selector": {
+        "cell_types": [
+          "syn_INH_turn_R"
+        ]
+      },
+      "description": "SYNTHETIC group syn_INH_turn_R",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "sez_int": {
+      "selector": {
+        "cell_types": [
+          "syn_SEZ_int"
+        ]
+      },
+      "description": "SYNTHETIC group syn_SEZ_int",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "mn_feed": {
+      "selector": {
+        "cell_types": [
+          "syn_MN_feed"
+        ]
+      },
+      "description": "SYNTHETIC group syn_MN_feed",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "chain_a": {
+      "selector": {
+        "cell_types": [
+          "syn_chain_A"
+        ]
+      },
+      "description": "SYNTHETIC group syn_chain_A",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "chain_b": {
+      "selector": {
+        "cell_types": [
+          "syn_chain_B"
+        ]
+      },
+      "description": "SYNTHETIC group syn_chain_B",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "chain_c": {
+      "selector": {
+        "cell_types": [
+          "syn_chain_C"
+        ]
+      },
+      "description": "SYNTHETIC group syn_chain_C",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "chain_i": {
+      "selector": {
+        "cell_types": [
+          "syn_chain_I"
+        ]
+      },
+      "description": "SYNTHETIC group syn_chain_I",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    },
+    "grn_sugar": {
+      "selector": {
+        "cell_types": [
+          "syn_GRN_sugar_L",
+          "syn_GRN_sugar_R"
+        ]
+      },
+      "description": "SYNTHETIC sugar-like gustatory group",
+      "source": "synthetic fixture",
+      "evidence": "demonstration"
+    }
+  }
+}

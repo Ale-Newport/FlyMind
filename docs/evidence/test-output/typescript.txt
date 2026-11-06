@@ -1,0 +1,1 @@
+tsc -b: no errors (strict mode)
