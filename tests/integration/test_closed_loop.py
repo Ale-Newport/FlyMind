@@ -106,7 +106,7 @@ def test_neural_perturbation_changes_motor_output(store):
 
 
 def test_recording_save_and_replay_files(store, tmp_path):
-    s = FlySession(FlySessionConfig(arena=arena_preset("light"), duration_s=0.2))
+    s = FlySession(FlySessionConfig(arena=arena_preset("empty"), duration_s=0.2))
     s.run_blocking()
     out = s.save(tmp_path)
     import json
@@ -115,4 +115,25 @@ def test_recording_save_and_replay_files(store, tmp_path):
     frames = np.load(out / "frames.npz")
     assert frames["poses"].shape[1] == len(s.body.mesh_geoms) and frames["poses"].shape[2] == 7
     assert rec["components"]["motor_controller"].startswith("FlyGym HybridTurningController")
-    assert s.body.vision and math.isfinite(s.trajectory()["sensor_luminance_left"].iloc[-1])
+    assert (out / "trajectory.parquet").is_file() and (out / "joints.parquet").is_file()
+
+
+def test_compound_eye_vision_reads_luminance(store, rendering):
+    s = FlySession(FlySessionConfig(arena=arena_preset("light"), duration_s=0.2))
+    s.run_blocking()
+    lum = s.trajectory()["sensor_luminance_left"]
+    assert s.body.vision and s.body.vision_error is None
+    assert math.isfinite(lum.iloc[-1]) and lum.iloc[-1] > 0
+
+
+def test_vision_degrades_explicitly_without_opengl(store, monkeypatch):
+    s = FlySession(FlySessionConfig(arena=arena_preset("light"), duration_s=0.1))
+
+    def no_gl(*_a, **_k):
+        raise RuntimeError("invalid pixel format")
+
+    monkeypatch.setattr(s.body.sim, "get_ommatidia_readouts", no_gl)
+    s.run_blocking()  # keeps running instead of failing
+    assert s.status == "finished" and not s.body.vision
+    assert "invalid pixel format" in s.summary()["vision_error"]
+    assert (s.trajectory()["sensor_luminance_left"] == 0).all()

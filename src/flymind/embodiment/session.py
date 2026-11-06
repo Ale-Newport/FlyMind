@@ -478,6 +478,7 @@ class FlySession:
             "wall_s": self.wall_s,
             "sim_wall_ratio": (self.body.t_s / self.wall_s) if self.wall_s else None,
             "vision": self.body.vision,
+            "vision_error": self.body.vision_error,
             "brain_session_id": self.brain.id if self.brain else None,
             "bridge": self.bridge.model_dump() if self.bridge else None,
             "missing_groups": getattr(self, "missing_groups", []),

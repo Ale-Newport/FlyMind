@@ -9,6 +9,10 @@ All notable changes are documented here (format: Keep a Changelog; versioning: S
   for headless MuJoCo rendering on Linux and set `MUJOCO_GL`/`PYOPENGL_PLATFORM` only there.
 - `scripts/setup/e2e_api.sh`: portable `mktemp` template (GNU mktemp rejected `-t name`).
 - Flaky simulator e2e test (stimulus ended before the live raster was checked).
+- Virtual Fly vision degrades explicitly when no OpenGL context exists (GPU-less macOS CI
+  VMs: `CGLError: invalid pixel format`): vision is switched off, the reason is shown in
+  the session and UI, and the session keeps running. The vision test skips with a reason
+  where rendering is unavailable; recording/replay is tested separately.
 
 ### Changed
 - CI failures are published as annotations (readable without signing in).
