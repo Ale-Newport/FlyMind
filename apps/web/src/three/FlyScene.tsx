@@ -97,7 +97,10 @@ function OdorHeatmap({ field }: { field: { x_mm: number[]; y_mm: number[]; attra
       const a = Math.min(1, field.attractive[j][i]);
       const v = Math.min(1, field.aversive[j][i]);
       const k = 4 * (j * n + i);
-      data[k] = 255 * v; data[k + 1] = 220 * a; data[k + 2] = 120 * a; data[k + 3] = 200 * Math.max(a, v);
+      // attractive: the accent teal; aversive: a muted terracotta; both faint so the floor stays readable
+      const w = a + v || 1;
+      data[k] = (94 * a + 214 * v) / w; data[k + 1] = (234 * a + 120 * v) / w; data[k + 2] = (212 * a + 96 * v) / w;
+      data[k + 3] = 120 * Math.max(a, v);
     }
     const t = new THREE.DataTexture(data, n, n);
     t.needsUpdate = true;
@@ -201,8 +204,8 @@ export function FlyScene({ parts, source, objects, odor, trail, follow, ambient 
   const controls = useRef<OrbitImpl | null>(null);
   return (
     <Canvas shadows dpr={[1, 2]} camera={{ position: [-8, 6, 8], fov: 40, near: 0.05, far: 2000 }} gl={{ preserveDrawingBuffer: true }} data-testid="fly-canvas">
-      <color attach="background" args={[ambient < 0.3 ? "#04060c" : "#0b1020"]} />
-      <hemisphereLight args={["#cfd8ff", "#1a1d29", 0.35 + ambient * 0.6]} />
+      <color attach="background" args={[ambient < 0.3 ? "#0a0908" : "#12110f"]} />
+      <hemisphereLight args={["#efe6d4", "#1c1a16", 0.35 + ambient * 0.6]} />
       <directionalLight position={[10, 25, 10]} intensity={0.4 + ambient * 1.2} castShadow shadow-mapSize={[1024, 1024]} />
       <OrbitControls ref={controls} makeDefault enableDamping />
       <Follow source={source} follow={follow} controls={controls} />
@@ -210,7 +213,7 @@ export function FlyScene({ parts, source, objects, odor, trail, follow, ambient 
       <group rotation={[-Math.PI / 2, 0, 0]}>
         <mesh receiveShadow>
           <planeGeometry args={[400, 400]} />
-          <meshStandardMaterial color={ambient < 0.3 ? "#0d0f16" : "#151b2c"} roughness={1} />
+          <meshStandardMaterial color={ambient < 0.3 ? "#100f0d" : "#181715"} roughness={1} />
         </mesh>
         <OdorHeatmap field={odor} />
         <Objects objects={objects} />
@@ -218,7 +221,7 @@ export function FlyScene({ parts, source, objects, odor, trail, follow, ambient 
         <FlightGuide source={source} />
         {parts && <Fly parts={parts} source={source} />}
       </group>
-      <Grid position={[0, 0.005, 0]} args={[200, 200]} cellSize={1} cellColor="#1f2944" sectionSize={10} sectionColor="#2c3859" fadeDistance={120} infiniteGrid />
+      <Grid position={[0, 0.005, 0]} args={[200, 200]} cellSize={1} cellColor="#262420" sectionSize={10} sectionColor="#38352f" fadeDistance={120} infiniteGrid />
     </Canvas>
   );
 }

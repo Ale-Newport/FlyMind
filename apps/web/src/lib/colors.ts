@@ -9,69 +9,77 @@ import { type ResolvedTheme, useTheme } from "./theme";
 export type { ResolvedTheme } from "./theme";
 export { useTheme } from "./theme";
 
+// Chosen palette: warm, slightly desaturated hues with matched lightness per theme, so that categories
+// read as one family on a charcoal or paper ground (not as default web colours).
 export const NT_COLORS: Record<string, string> = {
-  ACH: "#34d399",
-  GABA: "#f43f5e",
-  GLUT: "#60a5fa",
-  DA: "#fb923c",
-  SER: "#c084fc",
-  OCT: "#facc15",
-  HIST: "#2dd4bf",
-  UNKNOWN: "#64748b",
-  unknown: "#64748b",
+  ACH: "#6fbf7f",
+  GABA: "#e5654f",
+  GLUT: "#6c9bd2",
+  DA: "#e89a4a",
+  SER: "#b494dc",
+  OCT: "#e0c040",
+  HIST: "#4fc3b0",
+  UNKNOWN: "#6a655b",
+  unknown: "#6a655b",
 };
 
 export const SUPER_CLASS_COLORS: Record<string, string> = {
-  optic: "#3b82f6",
-  central: "#a3a3a3",
-  sensory: "#22d3ee",
-  visual_projection: "#818cf8",
-  ascending: "#f59e0b",
-  descending: "#f472b6",
-  visual_centrifugal: "#a78bfa",
-  motor: "#ef4444",
-  endocrine: "#84cc16",
-  unknown: "#475569",
+  optic: "#6c9bd2",
+  central: "#a39e92",
+  sensory: "#7fc47a",
+  visual_projection: "#8f8ce0",
+  ascending: "#e0a540",
+  descending: "#e57f9a",
+  visual_centrifugal: "#b494dc",
+  motor: "#e5654f",
+  endocrine: "#b5c24a",
+  unknown: "#6a655b",
 };
 
 export const SIDE_COLORS: Record<string, string> = {
-  left: "#38bdf8",
-  right: "#fb7185",
-  center: "#facc15",
-  na: "#64748b",
-  unknown: "#64748b",
+  left: "#6c9bd2",
+  right: "#e57f9a",
+  center: "#e0a540",
+  na: "#6a655b",
+  unknown: "#6a655b",
 };
 
-// Light-background variants: same hues, lower lightness so points and lines stay visible on white.
+// Light-ground variants: same hues, lower lightness so points and lines stay visible on warm paper.
 const NT_COLORS_LIGHT: Record<string, string> = {
-  ACH: "#059669", GABA: "#e11d48", GLUT: "#2563eb", DA: "#ea580c", SER: "#9333ea", OCT: "#a16207", HIST: "#0d9488",
-  UNKNOWN: "#94a3b8", unknown: "#94a3b8",
+  ACH: "#2f7d44", GABA: "#b3402d", GLUT: "#2f5f9e", DA: "#b0580a", SER: "#6b4a9c", OCT: "#8a7000", HIST: "#0e7c70",
+  UNKNOWN: "#a09a8c", unknown: "#a09a8c",
 };
 const SUPER_CLASS_COLORS_LIGHT: Record<string, string> = {
-  optic: "#2563eb", central: "#737373", sensory: "#0891b2", visual_projection: "#4f46e5", ascending: "#d97706",
-  descending: "#db2777", visual_centrifugal: "#7c3aed", motor: "#dc2626", endocrine: "#65a30d", unknown: "#94a3b8",
+  optic: "#2f5f9e", central: "#7d786c", sensory: "#3b7a3e", visual_projection: "#4f4cb0", ascending: "#9a6a00",
+  descending: "#b02f58", visual_centrifugal: "#6b4a9c", motor: "#b3402d", endocrine: "#6f7a10", unknown: "#a09a8c",
 };
 const SIDE_COLORS_LIGHT: Record<string, string> = {
-  left: "#0284c7", right: "#e11d48", center: "#a16207", na: "#94a3b8", unknown: "#94a3b8",
+  left: "#2f5f9e", right: "#b02f58", center: "#9a6a00", na: "#a09a8c", unknown: "#a09a8c",
 };
 
-// Glasbey-like high-contrast palette for many categories (neuropils, cell types).
-const PALETTE = [
-  "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4", "#46f0f0", "#f032e6",
-  "#bcf60c", "#fabebe", "#008080", "#e6beff", "#9a6324", "#fffac8", "#800000", "#aaffc3",
-  "#808000", "#ffd8b1", "#5b8cff", "#ff6f91", "#00c2a8", "#ffa600", "#7a5195", "#58ff8a",
-  "#ff4d4d", "#4dd2ff", "#c9a227", "#9d4edd", "#2ec4b6", "#ff9f1c",
-];
-// Index-aligned with PALETTE; every entry has >= 2.4:1 contrast against white (they are marks, not text).
-const PALETTE_LIGHT = [
-  "#d1103f", "#2a9d3a", "#b89400", "#3250c0", "#e0650f", "#7e17a0", "#0e9aa7", "#c91fc0",
-  "#6f9400", "#d9728a", "#006b6b", "#a064d6", "#8a5319", "#a09230", "#7a0a0a", "#3fb87a",
-  "#6d6d00", "#d9944f", "#3d6fe6", "#e04a73", "#00907e", "#d98400", "#6a4285", "#23a85a",
-  "#d93030", "#0891c4", "#a8851a", "#8a3bc9", "#1a9c90", "#e07f00",
-];
+/** OKLCH -> sRGB hex (gamut-clamped). Used to build the many-category palette systematically. */
+function oklch(L: number, C: number, hDeg: number): string {
+  const h = (hDeg * Math.PI) / 180;
+  const a = C * Math.cos(h), b = C * Math.sin(h);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const lin = [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s, -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s];
+  return "#" + lin.map((v) => {
+    const c = Math.max(0, Math.min(1, v));
+    const g = c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055;
+    return Math.round(g * 255).toString(16).padStart(2, "0");
+  }).join("");
+}
 
-const UNLABELLED_DARK = "#475569";
-const UNLABELLED_LIGHT = "#94a3b8";
+// 30 categories: hue steps of the golden angle, lightness alternating across three levels so that
+// neighbours in hue are still separable. Index-aligned between themes.
+const PALETTE = Array.from({ length: 30 }, (_, i) => oklch([0.76, 0.68, 0.83][i % 3], 0.115, (i * 137.508 + 28) % 360));
+// Light: every entry has >= 3:1 contrast against white and against the paper tone (they are marks, not text).
+const PALETTE_LIGHT = Array.from({ length: 30 }, (_, i) => oklch([0.52, 0.58, 0.46][i % 3], 0.125, (i * 137.508 + 28) % 360));
+
+const UNLABELLED_DARK = "#6a655b";
+const UNLABELLED_LIGHT = "#a09a8c";
 
 export function hashColor(label: string, theme: ResolvedTheme = "dark"): string {
   let h = 2166136261;
@@ -140,24 +148,28 @@ export interface SceneColors {
 export interface ChartColors {
   theme: ResolvedTheme;
   accent: string;
+  /** second data colour (ochre) */
   accent2: string;
   /** neutral series (baselines, "before" snapshots) */
   neutral: string;
+  /** secondary text (legends) */
   text: string;
   textStrong: string;
+  /** tick labels and axis titles */
   textMuted: string;
   grid: string;
   zeroline: string;
   axisLine: string;
-  /** Plotly paper / plot backgrounds (transparent so panels show through) */
+  /** Plotly paper / plot backgrounds (transparent so the page shows through) */
   paper: string;
   plot: string;
   hoverBg: string;
   hoverBorder: string;
   hoverText: string;
-  /** categorical palette valid on the current background (first entries = accent family) */
+  /** categorical palette valid on the current background (first entry = accent) */
   palette: string[];
   fontFamily: string;
+  monoFamily: string;
   scene: SceneColors;
   /** deterministic colour for an arbitrary label */
   cat: (label: string) => string;
@@ -167,37 +179,38 @@ export interface ChartColors {
   rate: (t: number) => RGB;
 }
 
-const FONT = '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+const FONT = '"Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+const MONO = '"Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace';
 
 const DARK_BASE = {
-  accent: "#5eead4", accent2: "#f472b6", neutral: "#64748b",
-  text: "#aab4c8", textStrong: "#e8ecf5", textMuted: "#8591a8",
-  grid: "#1c2333", zeroline: "#2d3750", axisLine: "#2d3750",
-  hoverBg: "#181e2b", hoverBorder: "#3a4560", hoverText: "#e8ecf5",
-  palette: ["#5eead4", "#f472b6", "#60a5fa", "#fbbf24", "#a78bfa", "#fb923c", "#34d399", "#f87171"],
+  accent: "#5eead4", accent2: "#dcaa52", neutral: "#8d877b",
+  text: "#bdb7aa", textStrong: "#ece8df", textMuted: "#958f83",
+  grid: "#272521", zeroline: "#403d37", axisLine: "#403d37",
+  hoverBg: "#24221e", hoverBorder: "#403d37", hoverText: "#ece8df",
+  palette: ["#5eead4", "#dcaa52", "#86a8d6", "#e5806f", "#b595d9", "#8fc48b", "#e07fa0", "#b9b46a"],
   scene: {
-    bg: "#080b12", inactive: [0.22, 0.22, 0.22], selected: [1, 1, 1], highlight: [1, 0.85, 0.2],
-    upstream: [0.25, 0.85, 1.0], downstream: [1.0, 0.35, 0.7], fallback: [0.4, 0.4, 0.5], skeleton: "#f8fafc",
-    axis: { x: "#fb7185", y: "#34d399", z: "#60a5fa" }, grid: "#232b3c", additiveOk: true,
+    bg: "#121110", inactive: [0.3, 0.29, 0.27], selected: [0.98, 0.96, 0.9], highlight: [0.95, 0.75, 0.25],
+    upstream: [0.42, 0.68, 1.0], downstream: [1.0, 0.45, 0.58], fallback: [0.42, 0.4, 0.37], skeleton: "#f4efe4",
+    axis: { x: "#e5654f", y: "#6fbf7f", z: "#6c9bd2" }, grid: "#2a2824", additiveOk: true,
   } satisfies SceneColors,
 };
 const LIGHT_BASE = {
-  accent: "#0f766e", accent2: "#db2777", neutral: "#64748b",
-  text: "#3b4558", textStrong: "#0e1523", textMuted: "#596377",
-  grid: "#e4e8ef", zeroline: "#c3cad6", axisLine: "#c3cad6",
-  hoverBg: "#ffffff", hoverBorder: "#98a2b3", hoverText: "#0e1523",
-  palette: ["#0f766e", "#db2777", "#2563eb", "#d97706", "#7c3aed", "#ea580c", "#059669", "#dc2626"],
+  accent: "#0b6b63", accent2: "#9a6a00", neutral: "#8c8676",
+  text: "#423e36", textStrong: "#1b1915", textMuted: "#67625a",
+  grid: "#e4dfd2", zeroline: "#c9c2b1", axisLine: "#c9c2b1",
+  hoverBg: "#fbf9f4", hoverBorder: "#8c8676", hoverText: "#1b1915",
+  palette: ["#0b6b63", "#9a6a00", "#2f5f9e", "#b3402d", "#6b4a9c", "#3b7a3e", "#b02f58", "#6f6a10"],
   scene: {
-    bg: "#f5f6f8", inactive: [0.5, 0.55, 0.65], selected: [0.05, 0.08, 0.14], highlight: [0.9, 0.45, 0.0],
-    upstream: [0.0, 0.5, 0.75], downstream: [0.85, 0.1, 0.5], fallback: [0.5, 0.52, 0.6], skeleton: "#0e1523",
-    axis: { x: "#be123c", y: "#047857", z: "#1d4ed8" }, grid: "#dce1e9", additiveOk: false,
+    bg: "#f1ede3", inactive: [0.62, 0.6, 0.55], selected: [0.1, 0.09, 0.08], highlight: [0.8, 0.45, 0.0],
+    upstream: [0.1, 0.38, 0.78], downstream: [0.78, 0.15, 0.35], fallback: [0.55, 0.53, 0.48], skeleton: "#1b1915",
+    axis: { x: "#b3402d", y: "#2f7d44", z: "#2f5f9e" }, grid: "#ddd7c9", additiveOk: false,
   } satisfies SceneColors,
 };
 
 export function chartColors(theme: ResolvedTheme): ChartColors {
   const b = theme === "light" ? LIGHT_BASE : DARK_BASE;
   return {
-    theme, ...b, paper: "rgba(0,0,0,0)", plot: "rgba(0,0,0,0)", fontFamily: FONT,
+    theme, ...b, paper: "rgba(0,0,0,0)", plot: "rgba(0,0,0,0)", fontFamily: FONT, monoFamily: MONO,
     cat: (label) => hashColor(label, theme),
     category: (field, label) => categoryColor(field, label, theme),
     rate: (t) => rateColor(t, theme),
@@ -210,13 +223,5 @@ export function useChartColors(): ChartColors {
   return useMemo(() => chartColors(resolved), [resolved]);
 }
 
-/** Dark-theme Plotly layout defaults. Prefer `useChartColors()` (Plot does this for you). */
-export const PLOT_LAYOUT_BASE = {
-  paper_bgcolor: "rgba(0,0,0,0)",
-  plot_bgcolor: "rgba(0,0,0,0)",
-  font: { color: "#aab4c8", size: 11, family: FONT },
-  margin: { l: 48, r: 12, t: 24, b: 36 },
-  xaxis: { gridcolor: "#1c2333", zerolinecolor: "#2d3750" },
-  yaxis: { gridcolor: "#1c2333", zerolinecolor: "#2d3750" },
-  legend: { orientation: "h" as const, y: -0.25 },
-};
+/** CSS colour string for an rgb triple in 0..1. */
+export const rgbCss = (c: RGB) => `rgb(${Math.round(c[0] * 255)} ${Math.round(c[1] * 255)} ${Math.round(c[2] * 255)})`;

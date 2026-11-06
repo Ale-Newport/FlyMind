@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, STATIC_DEMO, api, decodeB64 } from "../lib/api";
-import { hexToRgb, useChartColors } from "../lib/colors";
+import { hexToRgb, rgbCss, useChartColors } from "../lib/colors";
 import { type ColorField, useApp } from "../lib/store";
 import type { Activity, Attribute, Neuron, NeuronDetail, PartnersResponse, SimSummary } from "../lib/types";
 import { BrainScene, type PointStyle, toDisplay } from "../three/BrainScene";
-import { Empty, ErrorBox, EvidenceBadge, Loading, Section, Stat, SyntheticBanner, fmt, useAsync, useDatasets, useInterval } from "../components/ui";
+import { Block, Empty, ErrorBox, EvidenceBadge, Group, KV, Loading, Seg, Slider, SyntheticBanner, fmt, useAsync, useDatasets, useInterval } from "../components/ui";
+import { Icon } from "../components/Icon";
 
 const COLOR_FIELDS: { key: ColorField; label: string }[] = [
   { key: "super_class", label: "Super class" },
   { key: "primary_neuropil", label: "Neuropil" },
   { key: "nt_type", label: "Neurotransmitter (predicted)" },
-  { key: "cell_type", label: "Cell type (top 254)" },
+  { key: "cell_type", label: "Cell type (254 most common)" },
   { key: "side", label: "Hemisphere" },
   { key: "activity", label: "Simulated activity" },
 ];
@@ -87,7 +88,7 @@ export default function Explorer() {
   useEffect(() => {
     if (!detail || !geo) return;
     if (!detail.has_skeleton) {
-      setSkelError(detail.dataset.synthetic ? "Synthetic neurons have no morphology; their positions are generated." : "No reconstructed skeleton installed for this neuron (run `uv run flymind data fetch skeletons`).");
+      setSkelError(detail.dataset.synthetic ? "Synthetic neurons have no morphology; their positions are generated." : "No reconstructed skeleton is installed for this neuron. Run `uv run flymind data fetch skeletons`.");
       return;
     }
     let alive = true;
@@ -96,7 +97,7 @@ export default function Explorer() {
       const raw = new Float32Array(decodeB64(s.segments_b64));
       const out = new Float32Array(raw.length);
       for (let i = 0; i < raw.length; i += 3) out.set(toDisplay(raw[i], raw[i + 1], raw[i + 2], geo.center), i);
-      setSkeleton({ positions: out, note: `${s.n_segments.toLocaleString()} segments · ${String((s.simplification as { kept_nodes: number }).kept_nodes)} of ${String((s.simplification as { original_nodes: number }).original_nodes)} nodes (LOD ${s.lod})` });
+      setSkeleton({ positions: out, note: `${s.n_segments.toLocaleString()} segments, ${(s.simplification as { kept_nodes: number }).kept_nodes.toLocaleString()} of ${(s.simplification as { original_nodes: number }).original_nodes.toLocaleString()} nodes (LOD ${s.lod})` });
     }, (e: ApiError) => alive && setSkelError(e.message));
     return () => { alive = false; };
   }, [detail, geo, datasetId]);
@@ -192,77 +193,78 @@ export default function Explorer() {
   };
 
   return (
-    <div className="flex h-full min-h-[640px] min-w-[1000px]">
-      <aside aria-label="Display and search" className="w-64 shrink-0 space-y-3 overflow-y-auto border-r border-ink-700 p-3 xl:w-80">
-        <SyntheticBanner show={!!meta?.synthetic} />
-        <SearchPanel datasetId={datasetId} onSelect={setSelected} />
-        <Section title="Display">
-          <div className="space-y-3 text-sm">
+    <div className="tool min-h-[600px] min-w-[1000px]">
+      <h1 className="sr-only">Brain explorer</h1>
+      <aside aria-label="Display and search" className="rail">
+        {meta?.synthetic && <div className="p-4"><SyntheticBanner show /></div>}
+        <Group title="Find a neuron"><SearchPanel datasetId={datasetId} onSelect={setSelected} /></Group>
+        <Group title="Display">
+          <div className="space-y-4">
             <div>
-            <label className="label" htmlFor="colorby">Colour by</label>
-            <select id="colorby" className="input" value={colorField} onChange={(e) => setColorField(e.target.value as ColorField)}>
-              {COLOR_FIELDS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
-            </select>
+              <label className="label" htmlFor="colorby">Colour by</label>
+              <select id="colorby" className="input" value={colorField} onChange={(e) => setColorField(e.target.value as ColorField)}>
+                {COLOR_FIELDS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+              </select>
             </div>
-            <div className="seg flex" role="group" aria-label="Hemisphere">
-              {(["all", "left", "right"] as const).map((h) => (
-                <button key={h} aria-pressed={hemi === h} aria-label={h === "all" ? "Both hemispheres" : `${h} hemisphere`} className={`btn flex-1 px-1 py-0.5 text-xs ${hemi === h ? "btn-primary" : ""}`} onClick={() => setHemi(h)}>{h === "all" ? "Both" : `${h[0].toUpperCase()}${h.slice(1)}`}</button>
-              ))}
+            <div>
+              <span className="label">Hemisphere</span>
+              <Seg kind="pressed" fill label="Hemisphere" value={hemi} onChange={setHemi} options={[
+                { value: "all", label: "Both", ariaLabel: "Both hemispheres" },
+                { value: "left", label: "Left", ariaLabel: "Left hemisphere" },
+                { value: "right", label: "Right", ariaLabel: "Right hemisphere" },
+              ]} />
             </div>
-            <label className="label !mb-0 flex justify-between" htmlFor="point-size"><span>Point size</span><span className="mono text-ink-400">{pointSize.toFixed(1)}</span>
-              </label>
-            <input id="point-size" type="range" min={0.5} max={8} step={0.1} value={pointSize} onChange={(e) => setPointSize(+e.target.value)} className="w-full" />
-            <label className="label !mb-0 flex justify-between" htmlFor="point-opacity"><span>Opacity</span><span className="mono text-ink-400">{opacity.toFixed(2)}</span>
-              </label>
-            <input id="point-opacity" type="range" min={0.05} max={1} step={0.05} value={opacity} onChange={(e) => setOpacity(+e.target.value)} className="w-full" />
-            <div className="flex flex-wrap gap-1">
-              <button className="btn py-0.5 text-xs" onClick={() => setOrtho((o) => !o)}>{ortho ? "Perspective" : "Orthographic"}</button>
-              <button className="btn py-0.5 text-xs" onClick={() => setResetKey((k) => k + 1)} title="R">Reset camera</button>
-              <button className="btn py-0.5 text-xs" onClick={() => setShowLabels((s) => !s)}>{showLabels ? "Hide" : "Show"} labels</button>
+            <div>
+              <span className="label">Projection</span>
+              <Seg kind="radio" fill label="Projection" value={ortho ? "ortho" : "persp"} onChange={(v) => setOrtho(v === "ortho")} options={[
+                { value: "persp", label: "Perspective" }, { value: "ortho", label: "Orthographic" },
+              ]} />
+            </div>
+            <Slider label="Point size" value={pointSize} min={0.5} max={8} step={0.1} onChange={setPointSize} format={(v) => v.toFixed(1)} />
+            <Slider label="Opacity" value={opacity} min={0.05} max={1} step={0.05} onChange={setOpacity} format={(v) => v.toFixed(2)} />
+            <div className="flex items-center justify-between">
+              <label className="check"><input type="checkbox" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} /> Neuropil labels</label>
+              <button className="btn btn-sm" onClick={() => setResetKey((k) => k + 1)} title="Shortcut: R"><Icon name="crosshair" size={14} />Reset camera</button>
             </div>
           </div>
-        </Section>
+        </Group>
         {colorField === "activity" ? (
-          <Section title="Simulated activity">
-            {STATIC_DEMO ? <p className="text-xs text-ink-400">Requires the local simulation backend.</p> : dsSims.length === 0 ? (
-              <Empty title="No simulation session">Start one in the Brain Simulator, then return here.</Empty>
+          <Group title="Simulated activity">
+            {STATIC_DEMO ? <p className="text-xs text-ink-3">Requires the local simulation backend.</p> : dsSims.length === 0 ? (
+              <Empty title="No simulation session." className="!py-0">Start one in the brain simulator, then return here.</Empty>
             ) : (
-              <div className="space-y-2 text-xs">
+              <div className="space-y-4">
                 <select className="input" aria-label="Simulation session" value={activeSim?.id ?? ""} onChange={(e) => setSimSessionId(e.target.value)}>
-                  {dsSims.map((s) => <option key={s.id} value={s.id}>{s.id} · {s.mode} · t={fmt.ms(s.t_ms)} · {s.status}</option>)}
+                  {dsSims.map((s) => <option key={s.id} value={s.id}>{s.id} · {s.mode} · t = {fmt.ms(s.t_ms)} · {s.status}</option>)}
                 </select>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} /> Live (last {window_[1] - window_[0]} ms)</label>
-                <label className="label">Window start {window_[0]} ms
-                  <input type="range" min={0} max={Math.max(100, activeSim?.t_ms ?? 100)} step={10} value={window_[0]} onChange={(e) => { setLive(false); setWindow([+e.target.value, Math.max(+e.target.value + 10, window_[1])]); }} className="w-full" />
-                </label>
-                <label className="label">Window end {window_[1]} ms
-                  <input type="range" min={10} max={Math.max(110, activeSim?.t_ms ?? 110)} step={10} value={window_[1]} onChange={(e) => { setLive(false); setWindow([Math.min(window_[0], +e.target.value - 10), +e.target.value]); }} className="w-full" />
-                </label>
-                {activity && <div className="text-ink-300">{activity.n_active} active neurons in [{fmt.num(activity.t0_ms, 0)}, {fmt.num(activity.t1_ms, 0)}] ms</div>}
+                <label className="check"><input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} /> Follow the latest {window_[1] - window_[0]} ms</label>
+                <Slider label="Window start" unit="ms" value={window_[0]} min={0} max={Math.max(100, activeSim?.t_ms ?? 100)} step={10} onChange={(v) => { setLive(false); setWindow([v, Math.max(v + 10, window_[1])]); }} />
+                <Slider label="Window end" unit="ms" value={window_[1]} min={10} max={Math.max(110, activeSim?.t_ms ?? 110)} step={10} onChange={(v) => { setLive(false); setWindow([Math.min(window_[0], v - 10), v]); }} />
+                {activity && <p className="text-xs text-ink-2"><span className="mono">{activity.n_active.toLocaleString()}</span> active neurons in [{fmt.num(activity.t0_ms, 0)}, {fmt.num(activity.t1_ms, 0)}] ms</p>}
                 <EvidenceBadge kind={activeSim?.evidence} />
               </div>
             )}
-          </Section>
+          </Group>
         ) : (
           <Legend attr={attr.data} field={attrField} hidden={hidden} onToggle={(l) => setHidden((h) => { const n = new Set(h); if (n.has(l)) n.delete(l); else n.add(l); return n; })} />
         )}
       </aside>
-      <div className="relative min-w-0 flex-1">
+      <div className="stage">
         {(points.loading || attr.loading) && <div className="absolute left-4 top-4 z-10"><Loading label="Loading neurons" /></div>}
-        <div className="absolute right-3 top-3 z-10 w-80"><ErrorBox error={points.error ?? attr.error ?? err} /></div>
+        <div className="absolute right-4 top-4 z-10 w-80"><ErrorBox error={points.error ?? attr.error ?? err} /></div>
         {geo && style && (
           <BrainScene positions={geo.positions} style={style} pointSize={pointSize} ortho={ortho} onPick={onPick} labels={labels}
             skeletons={skeleton ? [{ positions: skeleton.positions, color: sc.skeleton }] : []} focus={focus} resetKey={resetKey} radius={geo.radius} />
         )}
-        <div className="pointer-events-none absolute bottom-3 right-3 rounded-md border border-ink-700 bg-ink-900/85 px-2.5 py-1 text-[11px] text-ink-400">
-          {geo ? `${geo.n.toLocaleString()} neurons as soma/representative points` : ""}
-          {geo && geo.missing > 0 ? ` · ${geo.missing} without position` : ""} · µm · click a point to select
+        <div className="overlay pointer-events-none absolute bottom-3 right-3 text-right">
+          {geo ? <><span className="mono">{geo.n.toLocaleString()}</span> neurons, drawn at the soma or a representative point</> : ""}
+          {geo && geo.missing > 0 ? <>; <span className="mono">{geo.missing}</span> without a position</> : ""}. Units µm. Click a point to select it.
         </div>
       </div>
-      <aside aria-label="Neuron details" className="w-72 shrink-0 space-y-3 overflow-y-auto border-l border-ink-700 p-3 xl:w-[25rem]">
+      <aside aria-label="Neuron details" className="inspector">
         {!selected ? (
-          <Empty title="No neuron selected">Search on the left or click a point in the 3D view.</Empty>
-        ) : !detail ? <Loading label="Loading neuron" /> : (
+          <Block><Empty title="No neuron selected.">Search in the left rail, or click a point in the view.</Empty></Block>
+        ) : !detail ? <Block><Loading label="Loading neuron" /></Block> : (
           <NeuronPanel detail={detail} partners={partners} minSyn={minSyn} setMinSyn={setMinSyn}
             focusPartners={focusPartners} setFocusPartners={setFocusPartners} skeletonNote={skeleton?.note ?? null} skelError={skelError}
             onSelectRoot={(rid) => api.neuron(datasetId, rid).then((n) => setSelected(n), setErr)}
@@ -279,19 +281,19 @@ function Legend({ attr, field, hidden, onToggle }: { attr: Attribute | null; fie
   if (!attr) return null;
   const items = attr.labels.map((l, i) => ({ l, n: attr.counts[i] })).sort((a, b) => b.n - a.n);
   return (
-    <Section title={`Legend (${items.length})`}>
-      <ul className="-mx-1 max-h-72 space-y-px overflow-y-auto px-1 text-xs" aria-label="Legend">
+    <Group title="Legend" meta={`${items.length} classes`}>
+      <ul className="-mx-2 max-h-72 overflow-y-auto px-2 text-xs" aria-label="Legend">
         {items.map(({ l, n }) => (
           <li key={l}>
-            <button className={`flex w-full items-center gap-2 rounded px-1.5 py-1 text-left transition-colors duration-150 hover:bg-ink-800 ${hidden.has(l) ? "opacity-40" : ""}`} onClick={() => onToggle(l)} aria-pressed={!hidden.has(l)} title="Toggle visibility">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: colors.category(field, l) }} />
-              <span className="flex-1 truncate">{l}</span>
-              <span className="mono text-ink-400">{n.toLocaleString()}</span>
+            <button className={`flex w-full items-center gap-2 px-1 py-[3px] text-left transition-colors duration-150 hover:bg-paper-3 ${hidden.has(l) ? "opacity-40" : ""}`} onClick={() => onToggle(l)} aria-pressed={!hidden.has(l)} title="Show or hide this class">
+              <span className="h-2 w-2 shrink-0" style={{ background: colors.category(field, l) }} />
+              <span className={`flex-1 truncate ${hidden.has(l) ? "line-through" : ""}`}>{l}</span>
+              <span className="mono text-ink-3">{n.toLocaleString()}</span>
             </button>
           </li>
         ))}
       </ul>
-    </Section>
+    </Group>
   );
 }
 
@@ -304,29 +306,29 @@ function SearchPanel({ datasetId, onSelect }: { datasetId: string; onSelect: (n:
     api.search(datasetId, { q, limit: 50 }).then(setRes, setErr);
   };
   return (
-    <Section title="Find neuron">
-      <form onSubmit={run} className="flex gap-1">
-        <input className="input" aria-label="Search neurons" placeholder="root ID, cell type (e.g. DNa02)…" value={q} onChange={(e) => setQ(e.target.value)} />
+    <>
+      <form onSubmit={run} className="flex gap-2">
+        <input className="input" aria-label="Search neurons" placeholder="Root ID or cell type" value={q} onChange={(e) => setQ(e.target.value)} />
         <button className="btn btn-primary" type="submit">Search</button>
       </form>
-      <ErrorBox error={err} />
+      <div className="mt-2"><ErrorBox error={err} /></div>
       {res && (
-        <div className="mt-2">
-          <div className="mb-1 text-xs text-ink-400">{res.total.toLocaleString()} matches</div>
-          <ul className="-mx-1 max-h-60 space-y-px overflow-y-auto px-1 text-xs" data-testid="search-results">
+        <div className="mt-3">
+          <div className="mb-1 text-xs text-ink-3"><span className="mono">{res.total.toLocaleString()}</span> matches{res.total > res.results.length ? `, showing ${res.results.length}` : ""}</div>
+          <ul className="-mx-2 max-h-60 overflow-y-auto px-2 text-xs" data-testid="search-results">
             {res.results.map((n) => (
               <li key={n.root_id}>
-                <button className="w-full rounded-md px-2 py-1.5 text-left transition-colors duration-150 hover:bg-ink-800" onClick={() => onSelect(n)}>
-                  <span className="font-medium text-ink-100">{n.cell_type ?? "unannotated"}</span>
-                  <span className="ml-1 text-ink-400">{n.side ?? ""} · {n.super_class ?? ""}</span>
-                  <div className="mono text-[10px] text-ink-400">{n.root_id}</div>
+                <button className="w-full border-t border-rule px-1 py-1.5 text-left transition-colors duration-150 hover:bg-paper-3" onClick={() => onSelect(n)}>
+                  <span className="text-ink">{n.cell_type ?? "unannotated"}</span>
+                  <span className="ml-2 text-ink-3">{[n.side, n.super_class].filter(Boolean).join(", ")}</span>
+                  <div className="mono text-[11px] text-ink-3">{n.root_id}</div>
                 </button>
               </li>
             ))}
           </ul>
         </div>
       )}
-    </Section>
+    </>
   );
 }
 
@@ -346,79 +348,84 @@ function NeuronPanel({ detail, partners, minSyn, setMinSyn, focusPartners, setFo
   onClear: () => void;
 }) {
   const [tab, setTab] = useState<"down" | "up">("down");
+  const { scene } = useChartColors();
   const list = tab === "down" ? partners.down : partners.up;
   const label = detail.cell_type ?? detail.root_id;
+  const pos = detail.pos_x != null ? [detail.pos_x, detail.pos_y, detail.pos_z].map((v) => ((v ?? 0) / 1000).toFixed(1)).join(", ") : "–";
   return (
     <>
-      <Section title="Neuron" right={<button className="btn py-0.5 text-xs" onClick={onClear}>Clear</button>}>
-        <div className="space-y-2 text-sm" data-testid="neuron-panel">
-          <div>
-            <div className="text-lg font-semibold tracking-tight">{detail.cell_type ?? "unannotated"}</div>
-            <div className="mono text-xs text-ink-300" data-testid="neuron-root-id">{detail.root_id}</div>
+      <Block>
+        <div data-testid="neuron-panel">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="t-head break-words">{detail.cell_type ?? "Unannotated"}</h2>
+              <div className="mono mt-0.5 text-xs text-ink-3" data-testid="neuron-root-id">{detail.root_id}</div>
+            </div>
+            <button className="btn btn-sm btn-quiet shrink-0" onClick={onClear}><Icon name="close" size={12} />Clear</button>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {detail.dataset.synthetic ? <span className="chip border-amber-500/50 text-amber-300">synthetic</span> : <span className="chip">FlyWire v{detail.dataset.version}</span>}
-            {detail.super_class && <span className="chip">{detail.super_class}</span>}
-            {detail.side && <span className="chip">{detail.side}</span>}
-            {detail.nt_type && <span className="chip" title="Predicted neurotransmitter (Eckstein et al. 2024); an inference, not a measurement">{detail.nt_type}{detail.nt_confidence != null ? ` · p=${detail.nt_confidence.toFixed(2)}` : ""}</span>}
-            {detail.primary_neuropil && <span className="chip" title="Neuropil with the most output synapses">{detail.primary_neuropil}</span>}
-          </div>
-          <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-            {detail.cell_class && <><dt className="text-ink-400">Class</dt><dd>{detail.cell_class}{detail.cell_sub_class ? ` / ${detail.cell_sub_class}` : ""}</dd></>}
-            {detail.hemibrain_type && <><dt className="text-ink-400">Hemibrain type</dt><dd>{detail.hemibrain_type}</dd></>}
-            {detail.flow && <><dt className="text-ink-400">Flow</dt><dd>{detail.flow}</dd></>}
-            <dt className="text-ink-400">Position (µm)</dt>
-            <dd className="mono">{detail.pos_x != null ? [detail.pos_x, detail.pos_y, detail.pos_z].map((v) => ((v ?? 0) / 1000).toFixed(1)).join(", ") : "—"}</dd>
-          </dl>
-          <div className="grid grid-cols-2 gap-2">
-            <Stat label="Upstream partners" value={fmt.int(detail.connectivity.upstream_partners)} />
-            <Stat label="Downstream partners" value={fmt.int(detail.connectivity.downstream_partners)} />
-            <Stat label="Input synapses" value={fmt.int(detail.connectivity.input_synapses)} />
-            <Stat label="Output synapses" value={fmt.int(detail.connectivity.output_synapses)} />
-          </div>
-          <div className="text-xs text-ink-400">{skeletonNote ? <>Skeleton: {skeletonNote}</> : skelError ? <span title="geometry">{skelError}</span> : "Loading geometry…"}</div>
-          <div className="flex flex-wrap gap-1">
-            <button className="btn btn-primary py-1 text-xs" onClick={() => onSend("stimulate", [detail.root_id], label)} disabled={STATIC_DEMO}>Stimulate in simulator</button>
-            <button className="btn py-1 text-xs" onClick={() => onSend("silence", [detail.root_id], label)} disabled={STATIC_DEMO}>Silence</button>
-            <button className="btn py-1 text-xs" onClick={() => onSend("probe", [detail.root_id], label)} disabled={STATIC_DEMO}>Record trace</button>
-            {detail.source_url && <a className="btn py-1 text-xs" href={detail.source_url} target="_blank" rel="noreferrer">Open in Codex ↗</a>}
+          <KV className="mt-4" rows={[
+            ["Dataset", detail.dataset.synthetic ? "Synthetic" : `FlyWire v${detail.dataset.version}`],
+            detail.super_class && ["Super class", detail.super_class],
+            detail.cell_class && ["Class", `${detail.cell_class}${detail.cell_sub_class ? ` / ${detail.cell_sub_class}` : ""}`],
+            detail.side && ["Side", detail.side],
+            detail.nt_type && [<span key="nt" title="Predicted neurotransmitter (Eckstein et al. 2024); an inference, not a measurement">Transmitter, predicted</span>, `${detail.nt_type}${detail.nt_confidence != null ? `  p = ${detail.nt_confidence.toFixed(2)}` : ""}`],
+            detail.primary_neuropil && [<span key="np" title="Neuropil with the most output synapses">Primary neuropil</span>, detail.primary_neuropil],
+            detail.hemibrain_type && ["Hemibrain type", detail.hemibrain_type],
+            detail.flow && ["Flow", detail.flow],
+            ["Position", pos, "µm"],
+          ]} />
+          <p className="mt-3 text-xs text-ink-3">{skeletonNote ? <>Skeleton: {skeletonNote}</> : skelError ? skelError : "Loading geometry…"}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button className="btn btn-primary btn-sm" onClick={() => onSend("stimulate", [detail.root_id], label)} disabled={STATIC_DEMO}>Stimulate in simulator</button>
+            <button className="btn btn-sm" onClick={() => onSend("silence", [detail.root_id], label)} disabled={STATIC_DEMO}>Silence</button>
+            <button className="btn btn-sm" onClick={() => onSend("probe", [detail.root_id], label)} disabled={STATIC_DEMO}>Record trace</button>
+            {detail.source_url && <a className="btn btn-sm no-underline hover:text-ink" href={detail.source_url} target="_blank" rel="noreferrer">Open in Codex <Icon name="external" size={12} /></a>}
           </div>
         </div>
-      </Section>
-      <Section title="Connectivity" right={
-        <label className="flex items-center gap-1 text-[11px] text-ink-400"><input type="checkbox" checked={focusPartners} onChange={(e) => setFocusPartners(e.target.checked)} />Highlight in 3D</label>
-      }>
-        <div className="mb-2 flex items-center gap-2 text-xs">
-          <div className="seg flex" role="tablist" aria-label="Partner direction">
-            <button role="tab" aria-selected={tab === "down"} className={`btn py-0.5 text-xs ${tab === "down" ? "btn-primary" : ""}`} onClick={() => setTab("down")}>Outputs ({partners.down?.n_partners ?? "…"})</button>
-            <button role="tab" aria-selected={tab === "up"} className={`btn py-0.5 text-xs ${tab === "up" ? "btn-primary" : ""}`} onClick={() => setTab("up")}>Inputs ({partners.up?.n_partners ?? "…"})</button>
-          </div>
-          <label className="ml-auto flex items-center gap-1">≥<input aria-label="Minimum synapses" type="number" className="input w-14 py-0.5" min={1} value={minSyn} onChange={(e) => setMinSyn(Math.max(1, +e.target.value))} /> syn</label>
+      </Block>
+      <Block title="Connectivity" right={<label className="check text-xs"><input type="checkbox" checked={focusPartners} onChange={(e) => setFocusPartners(e.target.checked)} />Highlight in 3D</label>}>
+        <KV rows={[
+          ["Upstream partners", fmt.int(detail.connectivity.upstream_partners)],
+          ["Downstream partners", fmt.int(detail.connectivity.downstream_partners)],
+          ["Input synapses", fmt.int(detail.connectivity.input_synapses)],
+          ["Output synapses", fmt.int(detail.connectivity.output_synapses)],
+        ]} />
+        <div className="mt-5">
+          <Seg kind="tab" fill label="Partner direction" value={tab} onChange={setTab} options={[
+            { value: "down", label: `Outputs (${partners.down?.n_partners ?? "…"})` },
+            { value: "up", label: `Inputs (${partners.up?.n_partners ?? "…"})` },
+          ]} />
+          <label className="mt-3 flex items-center justify-between gap-2 text-xs text-ink-3">Minimum synapses per partner
+            <input aria-label="Minimum synapses" type="number" className="input input-sm !w-14" min={1} value={minSyn} onChange={(e) => setMinSyn(Math.max(1, +e.target.value))} />
+          </label>
         </div>
-        <p className="mb-2 text-[11px] leading-snug text-ink-400">Counts are reconstructed synapses. Sign follows the presynaptic neuron's predicted transmitter (model assumption). <span className="text-sky-300">Inputs</span> / <span className="text-pink-300">outputs</span> are coloured in 3D; nearby points are not necessarily connected.</p>
-        <div className="max-h-80 overflow-y-auto">
-          <table className="table" data-testid="partners-table">
-            <thead><tr><th>Partner</th><th>Syn</th><th>%</th><th>±</th></tr></thead>
+        <div className="mt-3 max-h-80 overflow-y-auto">
+          <table className="tbl" data-testid="partners-table">
+            <thead><tr><th>Partner</th><th className="num">Syn</th><th className="num">%</th><th className="num">Sign</th></tr></thead>
             <tbody>
               {(list?.partners ?? []).slice(0, 150).map((p) => (
-                <tr key={p.root_id} className="cursor-pointer hover:bg-ink-800" onClick={() => onSelectRoot(p.root_id)}>
-                  <td><div>{p.cell_type ?? "—"}</div><div className="mono text-[10px] text-ink-400">{p.root_id}</div></td>
-                  <td className="mono">{p.syn_count}</td>
-                  <td className="mono">{(p.fraction_of_total * 100).toFixed(1)}</td>
-                  <td className={p.sign > 0 ? "text-emerald-300" : "text-rose-300"}>{p.sign > 0 ? "+" : "−"}</td>
+                <tr key={p.root_id} className="row-link" onClick={() => onSelectRoot(p.root_id)}>
+                  <td><div>{p.cell_type ?? "–"}</div><div className="mono text-[11px] text-ink-3">{p.root_id}</div></td>
+                  <td className="num">{p.syn_count}</td>
+                  <td className="num">{(p.fraction_of_total * 100).toFixed(1)}</td>
+                  <td className="num" style={{ color: p.sign > 0 ? "var(--ok)" : "var(--danger)" }} aria-label={p.sign > 0 ? "excitatory" : "inhibitory"}>{p.sign > 0 ? "+" : "−"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <p className="mt-3 text-xs leading-5 text-ink-3">
+          Counts are reconstructed synapses. The sign follows the presynaptic neuron's predicted transmitter, a model assumption. In 3D, inputs are
+          drawn <span className="inline-block h-2 w-2 align-baseline" style={{ background: rgbCss(scene.upstream) }} /> blue and outputs <span className="inline-block h-2 w-2 align-baseline" style={{ background: rgbCss(scene.downstream) }} /> rose; nearby points are not necessarily connected.
+        </p>
         {list && list.partners.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            <button className="btn py-0.5 text-xs" disabled={STATIC_DEMO} onClick={() => onSend("stimulate", list.partners.slice(0, 50).map((p) => p.root_id), `${tab === "down" ? "outputs" : "inputs"} of ${label}`)}>Stimulate these partners</button>
-            <button className="btn py-0.5 text-xs" onClick={() => onHighlight({ idx: list.partners.map((p) => p.idx), label: "partners" })}>Pin highlight</button>
-            {!STATIC_DEMO && <a className="btn py-0.5 text-xs" href={api.subgraphCsvUrl(datasetId, detail.root_id, 1, "both", minSyn)}>Export subgraph CSV</a>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button className="btn btn-sm" disabled={STATIC_DEMO} onClick={() => onSend("stimulate", list.partners.slice(0, 50).map((p) => p.root_id), `${tab === "down" ? "outputs" : "inputs"} of ${label}`)}>Stimulate these partners</button>
+            <button className="btn btn-sm" onClick={() => onHighlight({ idx: list.partners.map((p) => p.idx), label: "partners" })}>Pin highlight</button>
+            {!STATIC_DEMO && <a className="btn btn-sm no-underline hover:text-ink" href={api.subgraphCsvUrl(datasetId, detail.root_id, 1, "both", minSyn)}><Icon name="download" size={12} />Subgraph CSV</a>}
           </div>
         )}
-      </Section>
+      </Block>
     </>
   );
 }
@@ -432,26 +439,27 @@ function PathwayPanel({ datasetId, defaultSource, onPath }: { datasetId: string;
   useEffect(() => { if (defaultSource) setSrc(defaultSource); }, [defaultSource]);
   if (STATIC_DEMO) return null;
   return (
-    <Section title="Trace pathway (shortest directed path)">
-      <div className="space-y-1.5 text-xs">
-        <input className="input mono" aria-label="Pathway source" placeholder="source root ID(s)" value={src} onChange={(e) => setSrc(e.target.value)} />
-        <input className="input mono" aria-label="Pathway target" placeholder="target root ID(s)" value={tgt} onChange={(e) => setTgt(e.target.value)} />
+    <Group title="Trace a pathway" defaultOpen={false}>
+      <div className="space-y-2 text-xs">
+        <p className="text-ink-3">Shortest directed path between two neurons.</p>
+        <input className="input mono !text-left" aria-label="Pathway source" placeholder="Source root ID(s)" value={src} onChange={(e) => setSrc(e.target.value)} />
+        <input className="input mono !text-left" aria-label="Pathway target" placeholder="Target root ID(s)" value={tgt} onChange={(e) => setTgt(e.target.value)} />
         <div className="flex items-center gap-2">
-          <label>≥ syn/hop <input type="number" className="input w-16 py-0.5" value={minSyn} min={1} onChange={(e) => setMinSyn(+e.target.value)} /></label>
-          <button className="btn btn-primary ml-auto py-1 text-xs" onClick={() => api.pathways(datasetId, src, tgt, minSyn, 6).then((r) => { setRes(r); setErr(null); if (r.found) onPath(r.path.map((n) => n.idx), "pathway"); }, setErr)}>Trace</button>
+          <label className="flex items-center gap-1.5 text-ink-3">at least <input type="number" className="input input-sm !w-12" value={minSyn} min={1} onChange={(e) => setMinSyn(+e.target.value)} /> syn per hop</label>
+          <button className="btn btn-primary btn-sm ml-auto" onClick={() => api.pathways(datasetId, src, tgt, minSyn, 6).then((r) => { setRes(r); setErr(null); if (r.found) onPath(r.path.map((n) => n.idx), "pathway"); }, setErr)}>Trace</button>
         </div>
         <ErrorBox error={err} />
         {res && (res.found ? (
-          <ol className="space-y-0.5" data-testid="pathway-result">
+          <ol className="pt-1" data-testid="pathway-result">
             {res.path.map((n, i) => (
               <li key={n.root_id}>
-                <span className="text-ink-100">{i + 1}. {n.cell_type ?? "—"}</span> <span className="mono text-[10px] text-ink-400">{n.root_id}</span>
-                {res.edges[i] && <div className="pl-4 text-[10px] text-ink-400">↓ {res.edges[i].syn_count} synapses ({res.edges[i].sign > 0 ? "excitatory" : "inhibitory"} sign)</div>}
+                <span className="text-ink">{i + 1}. {n.cell_type ?? "–"}</span> <span className="mono text-[11px] text-ink-3">{n.root_id}</span>
+                {res.edges[i] && <div className="my-1 ml-1.5 border-l border-rule-strong pl-3 text-[11px] text-ink-3">{res.edges[i].syn_count} synapses, {res.edges[i].sign > 0 ? "excitatory" : "inhibitory"} sign</div>}
               </li>
             ))}
           </ol>
-        ) : <p className="text-ink-400">{res.message}</p>)}
+        ) : <p className="text-ink-3">{res.message}</p>)}
       </div>
-    </Section>
+    </Group>
   );
 }

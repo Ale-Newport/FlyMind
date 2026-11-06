@@ -6,8 +6,8 @@ import { toDisplay } from "../../src/three/BrainScene";
 describe("colours", () => {
   it("are deterministic and consistent across views", () => {
     expect(hashColor("AL_L")).toBe(hashColor("AL_L"));
-    expect(categoryColor("nt_type", "GABA")).toBe("#f43f5e");
-    expect(categoryColor("super_class", "descending")).toBe("#f472b6");
+    expect(categoryColor("nt_type", "GABA")).toBe("#e5654f");
+    expect(categoryColor("super_class", "descending")).toBe("#e57f9a");
     expect(hexToRgb("#ff0000")).toEqual([1, 0, 0]);
   });
   it("rate ramp is clamped and monotonic in brightness", () => {
