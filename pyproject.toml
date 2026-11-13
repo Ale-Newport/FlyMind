@@ -16,7 +16,7 @@ dependencies = [
     "fastapi>=0.115,<0.163",
     "uvicorn[standard]>=0.34,<0.55",
     "pydantic>=2.10,<2.15",
-    "typer>=0.15,<0.29",
+    "typer>=0.15,<0.30",
     "httpx>=0.28,<0.29",
     "flygym==2.1.1",
 ]
