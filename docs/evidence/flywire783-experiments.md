@@ -17,7 +17,7 @@ The response is monotonic with a threshold between 25 and 50 Hz, qualitatively l
 Shiu et al. Fig. 1d (on v630). The v783 values are not directly comparable to the
 published v630 numbers: the network differs, and this readout averages two MN9 neurons.
 
-![Mean MN9 readout rate against sugar GRN stimulation frequency, rising monotonically from 0 Hz to about 76 Hz with the threshold between 25 and 50 Hz](figures/flywire783_sugar_frequency_sweep/readouts.png)
+![Bar chart of the simulated MN9 rate (mean ± SD over trials) for each sugar GRN drive, bars ordered 100, 150, 200, 25 and 50 Hz: about 53, 66 and 76 Hz, then 0 Hz at 25 Hz and about 15 Hz at 50 Hz](figures/flywire783_sugar_frequency_sweep/readouts.png)
 
 ## Silencing two sugar GRNs (`flywire783_sugar_silencing`)
 
@@ -39,4 +39,4 @@ Left DM1 ORNs were driven at 150 Hz from 100 to 300 ms (5 trials, 5 ms bins):
 In this model, unilateral DM1 input reaches the lateral horn and mushroom body
 bilaterally and drives the ipsilateral steering DN, but not the forward-walking DN P9.
 
-![Time courses of the imaged regions after left DM1 stimulation from 100 to 300 ms: DNa02-left becomes active about 25 ms after the ORNs and peaks near 160 Hz, while DNa02-right and P9-left stay silent](figures/flywire783_dm1_propagation/timecourse.png)
+![Simulated firing-rate time courses over 500 ms: left DM1 ORNs fire at about 125 to 165 Hz while driven from 100 to 300 ms; DNa02-left starts firing about 25 ms later, peaks at 160 Hz and keeps firing intermittently after the stimulus ends; DNa02-right and P9-left stay at 0 Hz](figures/flywire783_dm1_propagation/timecourse.png)
