@@ -494,7 +494,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.15,<1.19" },
     { name = "torch", marker = "extra == 'torch'", specifier = ">=2.6,<2.16" },
     { name = "typer", specifier = ">=0.15,<0.30" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34,<0.55" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0,<0.55" },
 ]
 provides-extras = ["anatomy", "torch"]
 
