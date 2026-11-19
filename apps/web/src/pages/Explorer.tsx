@@ -141,7 +141,10 @@ export default function Explorer() {
     if (colorField === "activity") {
       for (let i = 0; i < n; i++) { colors[3 * i] = sc.inactive[0]; colors[3 * i + 1] = sc.inactive[1]; colors[3 * i + 2] = sc.inactive[2]; alpha[i] = alpha[i] > 0 ? 0.12 : 0; }
       if (activity) {
-        const maxRate = Math.max(1, ...activity.rate_hz.slice(0, 5000));
+        // Loop rather than Math.max(...arr): spreading 100k+ values overflows the stack, and
+        // sampling only the first entries (ordered by idx, not rate) mis-scaled the colours.
+        let maxRate = 1;
+        for (const r of activity.rate_hz) if (r > maxRate) maxRate = r;
         activity.idx.forEach((idx, k) => {
           const c = chart.rate(Math.log1p(activity.rate_hz[k]) / Math.log1p(maxRate));
           colors[3 * idx] = c[0]; colors[3 * idx + 1] = c[1]; colors[3 * idx + 2] = c[2];

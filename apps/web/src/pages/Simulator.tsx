@@ -254,7 +254,21 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
   const [saved, setSaved] = useState<string | null>(null);
   const [streamErr, setStreamErr] = useState<string | null>(null);
   const running = session.status === "running";
-  useEffect(() => { setLive((l) => ({ ...l, total: Math.max(l.total, session.n_spikes), t_ms: Math.max(l.t_ms, session.t_ms) })); }, [session.n_spikes, session.t_ms]);
+  // Session time going backwards means Reset: drop the previous run's raster, scrub
+  // position and live counters. Otherwise keep the larger of the polled and streamed values
+  // (the poll can lag the stream).
+  const prevT = useRef(session.t_ms);
+  useEffect(() => {
+    if (session.t_ms < prevT.current) {
+      buf.current = { t: [], idx: [] };
+      setScrubEnd(null);
+      setLive({ t_ms: session.t_ms, ratio: null, wall: 0, total: session.n_spikes, truncated: false });
+      setRasterTick((x) => x + 1);
+    } else {
+      setLive((l) => ({ ...l, total: Math.max(l.total, session.n_spikes), t_ms: Math.max(l.t_ms, session.t_ms) }));
+    }
+    prevT.current = session.t_ms;
+  }, [session.n_spikes, session.t_ms]);
   // When not running, show recorded spikes from the server (scrub through the session).
   useEffect(() => {
     if (running) { setScrubEnd(null); return; }
@@ -287,6 +301,7 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
       const f = JSON.parse(ev.data) as SimFrame;
       if (f.type === "error") { setStreamErr(f.message ?? "stream error"); return; }
       if (f.type === "frame") {
+        if (buf.current.t.length && (f.t_ms ?? 0) < buf.current.t[buf.current.t.length - 1]) buf.current = { t: [], idx: [] }; // a new run after Reset
         const b = buf.current;
         b.t.push(...(f.spike_t_ms ?? []));
         b.idx.push(...(f.spike_idx ?? []));
