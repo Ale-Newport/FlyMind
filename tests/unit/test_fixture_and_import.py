@@ -94,6 +94,19 @@ def test_import_rejects_ids_from_another_release(tmp_path):
         import_directory(src, connectivity="codex", out_root=tmp_path / "p2")
 
 
+def test_import_rejects_unknown_ids_even_without_a_neuropil(tmp_path):
+    """An unassigned-neuropil row used to slip past the neuropil check and attach its
+    synapses to whichever neuron sorted next to the unknown ID."""
+    from flymind.connectome.importer import import_directory
+
+    ids = [720575940629970489, 720575940621014292]
+    src = tmp_path / "unasgd"
+    src.mkdir()
+    _write_codex(src, ids, [(ids[1], ids[0], "AL_L", 5), (ids[0], 720575940625000000, "UNASGD", 7)])
+    with pytest.raises(ValueError, match="outside the dataset"):
+        import_directory(src, connectivity="codex", out_root=tmp_path / "p3")
+
+
 def test_detection_is_by_content_not_name(tmp_path):
     p = tmp_path / "whatever.bin"
     p.write_text(

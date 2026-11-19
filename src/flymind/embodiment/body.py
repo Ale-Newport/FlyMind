@@ -232,12 +232,18 @@ class FlyBody:
         self.wing_phase = 0.0
 
     def fly_step(self, cmd: FlightCommand, duration_s: float) -> None:
-        """Advance the flight model by ``duration_s`` (1 ms sub-steps) and sync the MuJoCo pose."""
-        dt = 1e-3
-        n = max(1, int(round(duration_s / dt)))
+        """Advance the flight model by exactly ``duration_s`` (sub-steps of at most 1 ms)
+        and sync the MuJoCo pose.
+
+        Body time must advance by ``duration_s`` so it stays in step with the brain, which
+        advances by the bridge interval; rounding to whole milliseconds made the two clocks
+        drift for intervals such as 0.5 or 1.4 ms."""
+        n = max(1, math.ceil(duration_s / 1e-3 - 1e-9))
+        dt = duration_s / n
         for _ in range(n):
             self.flight.step(cmd, dt)
-        self.t_s += n * dt
+        self.t_s += duration_s
+        self._vision_age += duration_s  # vision must refresh in flight as well as walking
         self._sync_flight_pose()
 
     def _sync_flight_pose(self) -> None:

@@ -124,7 +124,7 @@ def run_brian2(engine: LIFEngine, n_steps: int, codegen: str = "cython") -> Bria
     wall_build = time.perf_counter() - t_build
     t_run = time.perf_counter()
     for a, b in zip(bounds[:-1], bounds[1:], strict=True):
-        drive = engine._drive_at(a * p.dt_ms)
+        drive = engine._drive_at(a)
         neu.I = np.asarray(drive, dtype=np.float64) * b2.mV
         network.run((b - a) * dt, namespace=ns)
     wall_run = time.perf_counter() - t_run

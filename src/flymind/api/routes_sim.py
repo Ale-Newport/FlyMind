@@ -324,30 +324,42 @@ def save(request: Request, sid: str):
 
 
 # ------------------------------------------------------------------ websocket
-def _merge(frames: list[dict], max_spikes: int) -> dict:
-    last = frames[-1]
+def _merge(frames: list[dict], max_spikes: int) -> dict | None:
+    """Merge queued frames into one message (None when no simulation frame is queued).
+
+    Metadata comes from the newest *frame*: the queue also holds status messages (one
+    always follows a run), which carry no timing or spike totals. Probe traces restart
+    when the probe set changes between frames instead of being silently truncated."""
+    sim = [f for f in frames if f.get("type") == "frame"]
+    if not sim:
+        return None
+    last = sim[-1]
+    status = next((f.get("status") for f in reversed(frames) if f.get("status") is not None), None)
     t, idx, pt, pv = [], [], [], None
-    for f in frames:
-        if f.get("type") != "frame":
-            continue
+    for f in sim:
         t += f["spike_t_ms"]
         idx += f["spike_idx"]
-        pt += f["probe_t_ms"]
-        pv = f["probe_v"] if pv is None else [a + b for a, b in zip(pv, f["probe_v"], strict=False)]
-    truncated = len(t) > max_spikes
+        rows = f["probe_v"]
+        if pv is None or len(rows) != len(pv):
+            pt, pv = list(f["probe_t_ms"]), [list(r) for r in rows]
+        else:
+            pt += f["probe_t_ms"]
+            pv = [a + list(b) for a, b in zip(pv, rows, strict=True)]
+    keep = max(0, int(max_spikes))
+    truncated = len(t) > keep
     return {
         "type": "frame",
         "t_ms": last.get("t_ms"),
-        "status": last.get("status"),
+        "status": status,
         "sim_wall_ratio": last.get("sim_wall_ratio"),
         "wall_running_s": last.get("wall_running_s"),
         "n_spikes_total": last.get("n_spikes_total"),
-        "spike_t_ms": t[-max_spikes:],
-        "spike_idx": idx[-max_spikes:],
+        "spike_t_ms": t[len(t) - keep :] if keep else [],
+        "spike_idx": idx[len(idx) - keep :] if keep else [],
         "truncated": truncated,
         "probe_t_ms": pt,
         "probe_v": pv or [],
-        "n_frames_merged": len(frames),
+        "n_frames_merged": len(sim),
     }
 
 
@@ -388,8 +400,9 @@ async def ws_sim(websocket: WebSocket, sid: str):
             frames = []
             while q:
                 frames.append(q.popleft())
-            if frames:
-                await websocket.send_json(jsonable(_merge(frames, opts["max_spikes"])))
+            merged = _merge(frames, opts["max_spikes"]) if frames else None
+            if merged is not None:
+                await websocket.send_json(jsonable(merged))
             if session.status != last_status:  # status messages only on change
                 last_status = session.status
                 await websocket.send_json(

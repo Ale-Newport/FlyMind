@@ -24,11 +24,23 @@ import uuid
 from typing import Annotated, Literal
 
 import numpy as np
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 def _new_id() -> str:
     return uuid.uuid4().hex[:10]
+
+
+def check_timing(start_ms: float, stop_ms: float | None, repeats: int, interval_ms: float) -> None:
+    """Reject stimulus timings that cannot be scheduled (raised when a stimulus is
+    created, so an invalid request fails up front instead of crashing a running session)."""
+    if stop_ms is not None and stop_ms <= start_ms:
+        raise ValueError("stop_ms must be later than start_ms")
+    if repeats > 1:
+        if stop_ms is None or interval_ms <= 0:
+            raise ValueError("repeated stimuli need a finite stop_ms and interval_ms > 0")
+        if interval_ms < stop_ms - start_ms:
+            raise ValueError("interval_ms (onset to onset) must be at least the window width")
 
 
 class _Timed(BaseModel):
@@ -39,6 +51,11 @@ class _Timed(BaseModel):
     repeats: int = Field(1, ge=1, description="number of repetitions of the on-window")
     interval_ms: float = Field(0.0, ge=0, description="onset-to-onset interval for repeats")
     label: str = ""
+
+    @model_validator(mode="after")
+    def _timing_ok(self):
+        check_timing(self.start_ms, self.stop_ms, self.repeats, self.interval_ms)
+        return self
 
     def windows(self) -> list[tuple[float, float]]:
         stop = self.stop_ms if self.stop_ms is not None else float("inf")

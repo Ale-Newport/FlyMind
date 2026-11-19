@@ -354,8 +354,24 @@ class FlyWireFAFB783Adapter(_FlyWireBase):
                 .aggregate([("syn_count", "sum")])
                 .to_pandas()
             )
-            pre = np.searchsorted(root, agg["pre_root_id"].to_numpy())
-            post = np.searchsorted(root, agg["post_root_id"].to_numpy())
+            pre_id = agg["pre_root_id"].to_numpy().astype(np.int64)
+            post_id = agg["post_root_id"].to_numpy().astype(np.int64)
+            pre = np.searchsorted(root, pre_id)
+            post = np.searchsorted(root, post_id)
+            # searchsorted returns an insertion point even for an unknown ID, which would
+            # silently attach that connection to a neighbouring neuron. Refuse instead
+            # (the same check as the Shiu path).
+            ok = (pre < n) & (post < n)
+            ok &= root[np.minimum(pre, n - 1)] == pre_id
+            ok &= root[np.minimum(post, n - 1)] == post_id
+            if not ok.all():
+                bad = np.concatenate([pre_id[~ok], post_id[~ok]])
+                bad = np.setdiff1d(bad, root)[:3]
+                raise ValueError(
+                    f"{int((~ok).sum())} Codex connections reference neurons outside the "
+                    f"dataset's neuron set (e.g. {', '.join(str(int(x)) for x in bad)}); "
+                    "wrong version or specimen?"
+                )
             nt = (
                 neurons["nt_type"].fillna("UNKNOWN").to_numpy()
                 if "nt_type" in neurons

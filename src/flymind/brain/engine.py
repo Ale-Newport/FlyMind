@@ -188,12 +188,24 @@ class LIFEngine:
                     ref[tgt[tgt >= 0]] = 0
         return ref
 
-    def _drive_at(self, t_ms: float) -> np.ndarray:
+    def _window_steps(self, a: float, b: float) -> tuple[int, float]:
+        """A stimulus window in integer steps, rounded exactly like the Poisson/pulse
+        generators and the segment boundaries (half-open: [start, stop))."""
+        dt = self.params.dt_ms
+        return int(round(a / dt)), (int(round(b / dt)) if np.isfinite(b) else np.inf)
+
+    def _drive_at(self, t_step: int) -> np.ndarray:
+        """Current drive during the segment starting at step ``t_step``.
+
+        Decided in steps, not float milliseconds: comparing ``t_step * dt`` with the
+        window edges in ms switched a drive off (or left it on) for a whole segment
+        whenever rounding put ``k * dt`` a hair below an edge (e.g. 3.3 + 1.0 ms)."""
         drive = np.zeros(self.network.n, dtype=self._dtype)
         lo = self.network.local_of
         for stim in self.stimuli:
             if isinstance(stim, CurrentStimulus):
-                if any(a <= t_ms < b for a, b in stim.windows()):
+                spans = (self._window_steps(a, b) for a, b in stim.windows())
+                if any(a <= t_step < b for a, b in spans):
                     tgt = lo[np.asarray(stim.targets, dtype=np.int64)]
                     drive[tgt[tgt >= 0]] += stim.amplitude_mV
         return drive
@@ -203,9 +215,10 @@ class LIFEngine:
         for stim in self.stimuli:
             if isinstance(stim, CurrentStimulus):
                 for a, b in stim.windows():
-                    out.add(int(round(a / self.params.dt_ms)))
-                    if np.isfinite(b):
-                        out.add(int(round(b / self.params.dt_ms)))
+                    sa, sb = self._window_steps(a, b)
+                    out.add(sa)
+                    if np.isfinite(sb):
+                        out.add(int(sb))
         return sorted(out)
 
     def _events(self, t0: int, n_steps: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -268,7 +281,7 @@ class LIFEngine:
     def _run_segment(self, t0: int, n_steps: int, extra_events: tuple | None = None) -> ChunkResult:
         p, st, net = self.params, self.state, self.network
         a_vv, a_vg, a_gg = p.propagators()
-        drive = self._drive_at(t0 * p.dt_ms)
+        drive = self._drive_at(t0)
         ext_steps, ext_idx, ext_w = self._events(t0, n_steps)
         if extra_events is not None and len(extra_events[0]):
             xs, xi, xw = (np.asarray(a) for a in extra_events)

@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from flymind.brain.engine import LIFEngine
-from flymind.brain.recording import grouped_activity, trial_rates
+from flymind.brain.recording import binned_counts, grouped_activity, trial_rates
 from flymind.brain.session import SessionConfig, build_network
 from flymind.common.logging import get_logger
 from flymind.common.paths import experiments_dir, safe_join, validate_identifier
@@ -192,15 +192,18 @@ def run_experiment(
             cond_sum["readouts"][name] = {
                 k: row[k] for k in ("mean_rate_hz", "std_hz", "n_neurons")
             }
-            edges = np.arange(0, spec.duration_ms + spec.bin_ms * 0.5, spec.bin_ms)
             sel = sp["idx"].isin(members).to_numpy()
-            hist, _ = np.histogram(sp["t_ms"].to_numpy()[sel], bins=edges)
+            centres, hist = binned_counts(
+                sp["t_ms"].to_numpy()[sel], 0.0, spec.duration_ms, spec.bin_ms
+            )
             rate = hist / (len(members) * spec.n_trials * spec.bin_ms / 1000)
             tc_rows += [
                 {"condition": cond.name, "readout": name, "t_ms": float(t), "rate_hz": float(r)}
-                for t, r in zip((edges[:-1] + edges[1:]) / 2, rate, strict=True)
+                for t, r in zip(centres, rate, strict=True)
             ]
-        for reg in grouped_activity(counts, region_col, spec.duration_ms, top=60):
+        for reg in grouped_activity(
+            counts, region_col, spec.duration_ms, top=60, simulated=network.global_idx
+        ):
             region_rows.append({"condition": cond.name, **reg})
         summary[cond.name] = cond_sum
 

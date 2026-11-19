@@ -80,6 +80,25 @@ class SpikeRecord:
 MAX_BINS = 1_000_000
 
 
+def binned_counts(
+    times_ms: np.ndarray, t0_ms: float, t1_ms: float, bin_ms: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """Counts in complete, half-open bins [t0 + k*bin, t0 + (k+1)*bin) up to ``t1``.
+
+    Only whole bins are returned (a trailing partial bin would be divided by the full
+    bin width and read too low), and a spike exactly on an edge belongs to the later
+    bin. A tiny tolerance absorbs float error in step * dt."""
+    if not bin_ms > 0 or (t1_ms - t0_ms) / bin_ms > MAX_BINS:
+        raise ValueError(f"bin_ms={bin_ms} gives more than {MAX_BINS:,} bins")
+    n_bins = int(np.floor((t1_ms - t0_ms) / bin_ms + 1e-9))
+    if n_bins <= 0:
+        return np.zeros(0), np.zeros(0, dtype=np.int64)
+    k = np.floor((np.asarray(times_ms, dtype=np.float64) - t0_ms) / bin_ms + 1e-9).astype(np.int64)
+    k = k[(k >= 0) & (k < n_bins)]
+    centres = t0_ms + bin_ms * (np.arange(n_bins) + 0.5)
+    return centres, np.bincount(k, minlength=n_bins)
+
+
 def population_rate(
     steps: np.ndarray,
     idx: np.ndarray,
@@ -90,21 +109,29 @@ def population_rate(
     dt_ms: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Mean per-neuron rate (Hz) of ``members`` in bins; returns (bin centres ms, rates)."""
-    if not bin_ms > 0 or (t1_ms - t0_ms) / bin_ms > MAX_BINS:
-        raise ValueError(f"bin_ms={bin_ms} gives more than {MAX_BINS:,} bins")
-    edges = np.arange(t0_ms, t1_ms + bin_ms * 0.5, bin_ms)
-    if len(edges) < 2 or len(members) == 0:
-        return np.zeros(0), np.zeros(0)
     sel = np.isin(idx, members)
-    hist, _ = np.histogram(steps[sel] * dt_ms, bins=edges)
-    return (edges[:-1] + edges[1:]) / 2, hist / (len(members) * bin_ms / 1000.0)
+    centres, hist = binned_counts(np.asarray(steps)[sel] * dt_ms, t0_ms, t1_ms, bin_ms)
+    if len(centres) == 0 or len(members) == 0:
+        return np.zeros(0), np.zeros(0)
+    return centres, hist / (len(members) * bin_ms / 1000.0)
 
 
 def grouped_activity(
-    counts: np.ndarray, labels: pd.Series, duration_ms: float, top: int = 40
+    counts: np.ndarray,
+    labels: pd.Series,
+    duration_ms: float,
+    top: int = 40,
+    simulated: np.ndarray | None = None,
 ) -> list[dict]:
-    """Per-label (e.g. neuropil or super class) spike totals and mean rates."""
-    df = pd.DataFrame({"label": labels.fillna("unassigned").to_numpy(), "count": counts})
+    """Per-label (e.g. neuropil or super class) spike totals and mean rates.
+
+    ``simulated`` (dataset idx of the neurons in the network) restricts the groups to
+    neurons that were actually simulated; otherwise, in circuit or region mode, the
+    neuron counts and mean rates would include neurons that cannot spike."""
+    lab = labels.fillna("unassigned").to_numpy()
+    if simulated is not None:
+        counts, lab = np.asarray(counts)[simulated], lab[simulated]
+    df = pd.DataFrame({"label": lab, "count": counts})
     g = df.groupby("label")["count"].agg(["sum", "size"])
     g = g[g["sum"] > 0].sort_values("sum", ascending=False).head(top)
     dur_s = max(duration_ms, 1e-9) / 1000.0

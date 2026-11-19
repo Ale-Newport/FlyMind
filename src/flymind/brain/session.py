@@ -16,7 +16,7 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from flymind.brain.engine import Backend, BrainNetwork, LIFEngine
 from flymind.brain.params import LIFParams
@@ -27,6 +27,7 @@ from flymind.brain.stimulus import (
     PulseTrainStimulus,
     Silencing,
     SynapticScaling,
+    check_timing,
 )
 from flymind.common.concurrency import YieldingLock
 from flymind.common.logging import get_logger
@@ -64,6 +65,11 @@ class StimulusSpec(BaseModel):
     interval_ms: float = Field(0.0, ge=0)
     weight_factor: float | None = Field(None, ge=0, le=10_000)
     label: str = ""
+
+    @model_validator(mode="after")
+    def _timing_ok(self):
+        check_timing(self.start_ms, self.stop_ms, self.repeats, self.interval_ms)
+        return self
 
     def to_stimulus(self, targets: list[int], offset_ms: float = 0.0):
         common = dict(
@@ -483,7 +489,7 @@ class SimulationSession:
                 }
                 for i in order[:top]
             ],
-            "regions": grouped_activity(counts, region_col, dur),
+            "regions": grouped_activity(counts, region_col, dur, simulated=self.network.global_idx),
             "n_active": len(active),
         }
 
