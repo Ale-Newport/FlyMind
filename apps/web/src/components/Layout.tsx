@@ -48,8 +48,10 @@ export function Layout() {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
-      if (e.altKey && /^[1-7]$/.test(e.key)) {
-        const item = NAV.find((n) => n.key === e.key);
+      // e.code, not e.key: on macOS Option+1 produces e.key "¡", not "1".
+      const digit = /^Digit([1-7])$/.exec(e.code)?.[1];
+      if (e.altKey && digit) {
+        const item = NAV.find((n) => n.key === digit);
         if (item) { e.preventDefault(); navigate(item.to); }
       }
       if (e.key === "?") setHelp((h) => !h);
@@ -58,7 +60,23 @@ export function Layout() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [navigate]);
-  useEffect(() => { if (help) closeRef.current?.focus(); }, [help]);
+  const helpButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (help) closeRef.current?.focus();
+    else if (wasOpen.current) helpButtonRef.current?.focus(); // return focus to the trigger
+    wasOpen.current = help;
+  }, [help]);
+  // Keep Tab inside the modal dialog while it is open.
+  const trapFocus = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab" || !dialogRef.current) return;
+    const items = dialogRef.current.querySelectorAll<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+    if (items.length === 0) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  };
   return (
     <div className="flex h-full flex-col">
       {/* HashRouter owns location.hash, so the skip link focuses <main> instead of using an anchor */}
@@ -78,7 +96,7 @@ export function Layout() {
           <div className="ml-auto flex items-center gap-3 py-2 xl:ml-0">
             <div className="w-48 min-[1440px]:w-60"><DatasetPicker compact /></div>
             <ThemeToggle />
-            <button className="btn btn-icon btn-quiet" aria-label="Keyboard shortcuts" data-tip="Keyboard shortcuts (?)" data-tip-align="end" onClick={() => setHelp(true)}>
+            <button ref={helpButtonRef} className="btn btn-icon btn-quiet" aria-label="Keyboard shortcuts" data-tip="Keyboard shortcuts (?)" data-tip-align="end" onClick={() => setHelp(true)}>
               <Icon name="keyboard" />
             </button>
           </div>
@@ -94,7 +112,7 @@ export function Layout() {
         </div>
       </footer>
       {help && (
-        <div role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" className="fixed inset-0 z-50 flex items-center justify-center bg-(--scrim) p-4" onClick={() => setHelp(false)}>
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onKeyDown={trapFocus} className="fixed inset-0 z-50 flex items-center justify-center bg-(--scrim) p-4" onClick={() => setHelp(false)}>
           <div className="w-full max-w-md border border-rule-strong bg-paper p-6 text-sm" style={{ boxShadow: "var(--shadow-pop)", borderRadius: 3 }} onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-baseline justify-between">
               <h2 className="t-head">Keyboard shortcuts</h2>

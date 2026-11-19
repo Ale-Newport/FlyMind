@@ -252,6 +252,7 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
   const [steps, setSteps] = useState(100);
   const [scrubEnd, setScrubEnd] = useState<number | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [streamErr, setStreamErr] = useState<string | null>(null);
   const running = session.status === "running";
   useEffect(() => { setLive((l) => ({ ...l, total: Math.max(l.total, session.n_spikes), t_ms: Math.max(l.t_ms, session.t_ms) })); }, [session.n_spikes, session.t_ms]);
   // When not running, show recorded spikes from the server (scrub through the session).
@@ -278,9 +279,13 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
   useEffect(() => {
     buf.current = { t: [], idx: [] };
     const ws = new WebSocket(wsUrl(`/ws/sim/${session.id}`));
+    let closing = false;
+    setStreamErr(null);
     ws.onopen = () => ws.send(JSON.stringify({ interval_ms: 100, max_spikes: 20000 }));
+    ws.onclose = () => { if (!closing) setStreamErr("The live stream disconnected (the API stopped or the session ended). Reload the page to reconnect."); };
     ws.onmessage = (ev) => {
       const f = JSON.parse(ev.data) as SimFrame;
+      if (f.type === "error") { setStreamErr(f.message ?? "stream error"); return; }
       if (f.type === "frame") {
         const b = buf.current;
         b.t.push(...(f.spike_t_ms ?? []));
@@ -297,7 +302,7 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
         act(() => api.sim(session.id));
       }
     };
-    return () => ws.close();
+    return () => { closing = true; ws.close(); };
   }, [session.id]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = useCallback(() => {
@@ -353,6 +358,7 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
 
         <div className="space-y-10 px-6 pb-12 pt-6">
           <ErrorBox error={err ?? (session.error ? new Error(session.error) : null)} />
+          {streamErr && <Notice tone="warn" role="status">{streamErr}</Notice>}
 
           <Figure n={1} caption={<>Spike raster, {RASTER_WINDOW_MS} ms window, <span className="mono">{raster.n.toLocaleString()}</span> active neurons. Click a spike to select its neuron.{live.truncated && <span style={{ color: "var(--warn)" }}> The live stream was truncated.</span>}</>}>
             {!running && session.t_ms > 0 && (
@@ -418,7 +424,7 @@ function Running({ session, act, err, onPickNeuron }: { session: SimSummary; act
             <a className="btn btn-sm no-underline hover:text-ink" href={api.exportUrl(session.id, "parquet")}><Icon name="download" size={12} />Parquet</a>
             <a className="btn btn-sm no-underline hover:text-ink" href={api.exportUrl(session.id, "csv")}><Icon name="download" size={12} />CSV</a>
             <a className="btn btn-sm no-underline hover:text-ink" href={api.exportUrl(session.id, "json")}><Icon name="download" size={12} />JSON</a>
-            <button className="btn btn-sm" onClick={() => api.saveSim(session.id).then((r) => setSaved(`Saved as experiment ${r.experiment_id}`))}><Icon name="save" size={12} />Save as experiment</button>
+            <button className="btn btn-sm" onClick={() => api.saveSim(session.id).then((r) => setSaved(`Saved as experiment ${r.experiment_id}`), (e: Error) => setSaved(`Could not save: ${e.message}`))}><Icon name="save" size={12} />Save as experiment</button>
           </div>
           {savedNote}
         </Block>

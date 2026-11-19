@@ -48,8 +48,11 @@ export default function VirtualFly() {
   useEffect(() => {
     if (!session) return;
     const ws = new WebSocket(wsUrl(`/ws/fly/${session.id}`));
+    let closing = false;
+    ws.onclose = () => { if (!closing) setErr(new Error("The live stream disconnected (the API stopped or the session ended). Reload the page to reconnect.")); };
     ws.onmessage = (ev) => {
       const f = JSON.parse(ev.data) as FlyFrame;
+      if (f.type === "error") { setErr(new Error(f.message ?? "stream error")); return; }
       if (f.type === "hello" && f.scene) setObjects(f.scene);
       if (f.type === "frame") {
         source.current = { poses: f.poses ?? null, pos: f.pos ?? null };
@@ -58,7 +61,7 @@ export default function VirtualFly() {
       }
       if (f.type === "status" && f.status && f.status !== session.status) api.fly(session.id).then(setSession).catch(() => undefined);
     };
-    return () => ws.close();
+    return () => { closing = true; ws.close(); };
   }, [session?.id]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const pollTraj = useCallback(() => { if (session) api.flyTrajectory(session.id).then(setTraj).catch(() => undefined); }, [session]);

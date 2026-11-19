@@ -404,7 +404,7 @@ function NeuronPanel({ detail, partners, minSyn, setMinSyn, focusPartners, setFo
             <thead><tr><th>Partner</th><th className="num">Syn</th><th className="num">%</th><th className="num">Sign</th></tr></thead>
             <tbody>
               {(list?.partners ?? []).slice(0, 150).map((p) => (
-                <tr key={p.root_id} className="row-link" onClick={() => onSelectRoot(p.root_id)}>
+                <tr key={p.root_id} className="row-link" tabIndex={0} aria-label={`Select ${p.cell_type ?? "neuron"} ${p.root_id}`} onClick={() => onSelectRoot(p.root_id)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelectRoot(p.root_id); } }}>
                   <td><div>{p.cell_type ?? "–"}</div><div className="mono text-[11px] text-ink-3">{p.root_id}</div></td>
                   <td className="num">{p.syn_count}</td>
                   <td className="num">{(p.fraction_of_total * 100).toFixed(1)}</td>

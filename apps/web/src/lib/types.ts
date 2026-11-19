@@ -269,6 +269,7 @@ export interface SceneObject {
 
 export interface FlyFrame {
   type: "frame" | "status" | "hello" | "error";
+  message?: string;
   t_s?: number;
   poses?: number[];
   pos?: number[];
