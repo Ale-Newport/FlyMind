@@ -27,6 +27,7 @@ torch = ["torch>=2.6,<2.16"]
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.16,<3",
     "pytest>=8.3,<9.3",
     "pytest-cov>=6,<8",
     "pytest-timeout>=2.3,<3",

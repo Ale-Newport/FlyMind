@@ -133,11 +133,38 @@ def data_validate(dataset: str | None = typer.Argument(None)):
 
 
 @data.command("info")
-def data_info(dataset: str | None = typer.Argument(None)):
+def data_info(
+    dataset: str | None = typer.Argument(None),
+    as_json: bool = typer.Option(
+        False, "--json", help="print a machine-readable JSON list instead of text"
+    ),
+):
     """Show installed datasets and their provenance."""
     from flymind.connectome.store import list_datasets
 
     ms = list_datasets()
+    if dataset:
+        ms = [m for m in ms if m.dataset_id == dataset]
+        if not ms:
+            typer.echo(f"Dataset '{dataset}' is not installed.", err=True)
+            raise typer.Exit(1)
+    if as_json:
+        out = []
+        for m in ms:
+            row = {
+                "dataset_id": m.dataset_id,
+                "version": m.dataset_version,
+                "synthetic": m.synthetic,
+                "n_neurons": m.n_neurons,
+                "n_edges": m.n_edges,
+                "n_synapses": m.n_synapses,
+                "validation_status": m.validation_status,
+            }
+            if dataset:
+                row["manifest"] = m.model_dump(mode="json")
+            out.append(row)
+        typer.echo(json.dumps(out, indent=2))
+        return
     if not ms:
         typer.echo(
             "No datasets installed. Run `uv run flymind data fixture` or "
@@ -145,8 +172,6 @@ def data_info(dataset: str | None = typer.Argument(None)):
         )
         return
     for m in ms:
-        if dataset and m.dataset_id != dataset:
-            continue
         tag = "SYNTHETIC" if m.synthetic else f"v{m.dataset_version}"
         typer.echo(
             f"{m.dataset_id} [{tag}] neurons={m.n_neurons:,} edges={m.n_edges:,} "
