@@ -158,7 +158,7 @@ These are the most important; see [Limitations](docs/scientific/limitations.md) 
 * **Bridge:** the sensor encodings and descending-neuron readout are FlyMind assumptions.
 * **Senses:** the odour field is analytic, vision is eye-averaged luminance, and FlyVis is not integrated (it requires Python < 3.13).
 * **Datasets:** BANC and male-CNS adapters are planned and refuse imports until they are validated.
-* **Browsers:** automated tests run in Chromium only.
+* **Browsers:** end-to-end tests run in Chromium, Firefox and WebKit; Safari itself and mobile browsers are not tested.
 
 ## Security
 

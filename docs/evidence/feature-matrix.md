@@ -64,7 +64,8 @@ All verification was done at commit `a4e2bcd` on macOS 27.0.1, Apple M2 Max.
 | One-command setup and launch | verified (fresh clone) | [test results → fresh-clone check](test-results.md) |
 | Pinned dependencies and lockfiles | verified | `uv.lock`, `apps/web/package-lock.json` |
 | CI | verified (GitHub Actions) | PR #8 at `6f88593`: Python on ubuntu-latest and macos-latest, and Web (type check, unit, Playwright e2e), all passing. On macOS runners (no OpenGL) the vision test is designed to skip with a reason; the passing job's log was not read |
-| GitHub Pages static demo | built (CI), **not deployed** | the Pages build job succeeds; deployment fails until Pages is enabled in the repository settings |
-| Safari | **not tested** | only Chromium is automated |
+| GitHub Pages static demo | verified (deployed) | https://ale-newport.github.io/FlyMind/ is deployed by the Pages workflow on every push to `main` |
+| Firefox and WebKit (Safari engine) | verified (Playwright) | the six workflow e2e tests run in Chromium, Firefox and WebKit locally and in CI; Safari itself is not tested |
+| Accessibility (WCAG 2.1 A/AA, automated) | verified (axe-core) | `apps/web/tests/e2e/accessibility.spec.ts`: no serious or critical violations on any page, dark and light themes |
 | Linux | verified in CI | ubuntu-latest: full non-data suite including MuJoCo vision via Mesa EGL, and Playwright e2e |
 | BANC / male CNS | planned | adapters refuse imports until validated |

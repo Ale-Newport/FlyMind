@@ -41,4 +41,4 @@ assumptions below and must not be read as measured activity or behaviour.
 * CPU only (no GPU backend is validated); the optional PyTorch extra is not used by
   the engines.
 * Sessions are held in memory; the API has no authentication and binds to localhost.
-* Safari compatibility was not tested (Chromium only in automated tests).
+* Automated browser tests use Playwright's Chromium, Firefox and WebKit builds; Safari itself and mobile browsers were not tested.

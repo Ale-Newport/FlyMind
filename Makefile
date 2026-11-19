@@ -71,7 +71,7 @@ test-fulldata: ## Tests on the real FlyWire datasets (skipped if not installed)
 test-web: ## Frontend unit tests (Vitest) and type check
 	cd $(WEB) && npx tsc -b && $(NPM) test
 
-e2e: ## Browser end-to-end tests (Playwright, Chromium); starts the servers itself
+e2e: ## Browser end-to-end + accessibility tests (Chromium; PW_BROWSERS=chromium,firefox,webkit for all); starts the servers itself
 	cd $(WEB) && npx playwright test
 
 lint: ## Ruff + TypeScript checks

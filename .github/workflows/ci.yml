@@ -48,7 +48,7 @@ jobs:
   web:
     name: Web (type check, unit, e2e)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       FORCE_COLOR: "0"
     steps:
@@ -77,10 +77,12 @@ jobs:
         run: |
           set -o pipefail
           (npx tsc -b && npm test) 2>&1 | tee ../../web-unit.log
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
         working-directory: apps/web
-      - name: Playwright end-to-end (Chromium)
+      - name: Playwright end-to-end (Chromium, Firefox, WebKit) and accessibility (axe)
         working-directory: apps/web
+        env:
+          PW_BROWSERS: chromium,firefox,webkit
         run: |
           set -o pipefail
           npx playwright test 2>&1 | tee ../../e2e.log

@@ -18,7 +18,13 @@ export default defineConfig({
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1500, height: 900 } } }],
+  // Chromium runs everything; Firefox and WebKit run the workflow tests too
+  // (PW_BROWSERS=chromium,firefox,webkit, the default in CI).
+  projects: (process.env.PW_BROWSERS ?? "chromium").split(",").map((name) => {
+    const device = { chromium: "Desktop Chrome", firefox: "Desktop Firefox", webkit: "Desktop Safari" }[name.trim()];
+    if (!device) throw new Error(`unknown browser in PW_BROWSERS: ${name}`);
+    return { name: name.trim(), use: { ...devices[device], viewport: { width: 1500, height: 900 } } };
+  }),
   webServer: [
     {
       command: `bash ../../scripts/setup/e2e_api.sh ${API_PORT}`,
