@@ -4,6 +4,10 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Fixed
+- The three figures in the evidence pages now have alt text describing what each plot shows, so a
+  screen reader announces the figure rather than its file name.
+
 ## [0.2.0] — 2026-11-19
 
 ### Added

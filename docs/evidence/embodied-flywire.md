@@ -24,7 +24,7 @@ the FlyWire LIF model steer the NeuroMechFly body toward an attractive odour.
 | Final distance to source | 23.0 mm | 19.5 mm |
 | Mean readout rates | — | DNa02-L 52.9 Hz, DNa02-R 1.0 Hz, P9-L/R 0 Hz, MDN 0 Hz, MN9 0 Hz |
 
-![](figures/embodied_flywire783_food_baseline_vs_neural/trajectories.png)
+![Top-down walking paths in the food arena for the unstimulated baseline and the neurally controlled fly; the baseline walks straight past the odour source while the stimulated fly circles near its start position](figures/embodied_flywire783_food_baseline_vs_neural/trajectories.png)
 
 **Observation.** Bilateral DM1 input, about 0.8 a.u. on each antenna, drove DNa02-left
 strongly but did not drive P9. The descending command was almost purely a turn, so the
