@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse
 from flymind import __version__
 from flymind.api import routes_data, routes_experiments, routes_fly, routes_sim
 from flymind.api.common import SafeJSONResponse
+from flymind.api.guards import LocalGuardMiddleware, allowed_hosts_from_env, max_body_from_env
 from flymind.api.state import ServiceState
 from flymind.common.logging import configure_logging, get_logger
 from flymind.common.paths import repo_root
@@ -55,6 +56,13 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["Content-Type"],
         expose_headers=["X-Count", "X-Units"],
+    )
+    # Outermost: Host allow-list (DNS rebinding), WebSocket Origin check, body-size cap.
+    app.add_middleware(
+        LocalGuardMiddleware,
+        allowed_hosts=allowed_hosts_from_env(),
+        allowed_origins=origins,
+        max_body_bytes=max_body_from_env(),
     )
 
     @app.get("/api/health")

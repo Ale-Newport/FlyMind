@@ -79,9 +79,7 @@ def run_experiment(
     )
 
     for cond in spec.conditions:
-        params = spec.params.model_copy(
-            update={k: v for k, v in cond.params.items() if k in type(spec.params).model_fields}
-        )
+        params = spec.condition_params(cond)
         stimuli = [
             s.to_stimulus(_targets(store, network.local_of, s.selector)) for s in cond.stimuli
         ]

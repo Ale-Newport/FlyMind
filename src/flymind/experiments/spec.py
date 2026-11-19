@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from flymind.brain.params import LIFParams
 from flymind.brain.session import InterventionSpec, NetworkConfig, StimulusSpec
@@ -27,10 +27,12 @@ class Readout(BaseModel):
 
 class Condition(BaseModel):
     name: str
-    stimuli: list[StimulusSpec] = Field(default_factory=list)
-    interventions: list[InterventionSpec] = Field(default_factory=list)
+    stimuli: list[StimulusSpec] = Field(default_factory=list, max_length=256)
+    interventions: list[InterventionSpec] = Field(default_factory=list, max_length=256)
     params: dict[str, float | bool | str] = Field(
-        default_factory=dict, description="overrides of LIFParams fields for this condition"
+        default_factory=dict,
+        max_length=32,
+        description="overrides of LIFParams fields for this condition",
     )
 
 
@@ -58,10 +60,24 @@ class ExperimentSpec(BaseModel):
     n_trials: int = Field(1, ge=1, le=100)
     seed: int = Field(0, ge=0, le=2**31 - 1)
     backend: Literal["numba", "numpy"] = "numba"
-    bin_ms: float = Field(10.0, gt=0, le=1000)
+    bin_ms: float = Field(10.0, ge=0.1, le=1000)
     embodiment: FlySessionConfig | None = None
-    expected: list[ExpectedResult] = Field(default_factory=list)
+    expected: list[ExpectedResult] = Field(default_factory=list, max_length=64)
     evidence: Literal[
         "published", "reproduced", "simulation_output", "hypothesis", "demonstration"
     ] = "simulation_output"
-    assumptions: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list, max_length=64)
+
+    def condition_params(self, cond: Condition) -> LIFParams:
+        """``params`` with the condition's overrides applied and fully validated."""
+        known = type(self.params).model_fields
+        overrides = {k: v for k, v in cond.params.items() if k in known}
+        return type(self.params).model_validate({**self.params.model_dump(), **overrides})
+
+    @model_validator(mode="after")
+    def _check_condition_params(self) -> ExperimentSpec:
+        # Overrides are validated here so an invalid dt_ms or a wrongly typed value is
+        # rejected when the spec is submitted, not deep inside a worker thread.
+        for cond in self.conditions:
+            self.condition_params(cond)
+        return self

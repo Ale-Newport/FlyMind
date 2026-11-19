@@ -16,3 +16,6 @@
 | Web app shows "backend offline" | Start the API (`make api`) or check the terminal for errors; the web app proxies `/api` and `/ws` to `127.0.0.1:8000`. |
 | Dependency conflicts | Use the lockfiles: `uv sync --frozen`, `npm ci`. Do not mix conda environments. |
 | Playwright cannot start a browser | `cd apps/web && npx playwright install chromium`. |
+| API answers `400 invalid Host header` | The API only answers to loopback host names (DNS-rebinding protection). Open it as `127.0.0.1` or `localhost`; to reach it from another machine on a trusted network, start it with `flymind serve --host <address>` and list extra names in `FLYMIND_ALLOWED_HOSTS`. |
+| Live view stays empty; WebSocket closes with 403 | The page's origin is not allowed. Use the dev server (`make dev`) or the built app served by `flymind serve`, or add your origin to `FLYMIND_CORS_ORIGINS`. |
+| `413 request body too large` | Requests are capped at 4 MiB; raise `FLYMIND_MAX_BODY_BYTES` if you really need larger selections. |

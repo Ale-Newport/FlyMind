@@ -335,8 +335,15 @@ def serve(
     if host not in ("127.0.0.1", "localhost", "::1"):
         _echo(
             f"WARNING: binding to {host} exposes the API beyond this machine. The API has no "
-            "authentication; only do this on a trusted network."
+            "authentication; only do this on a trusted network. Requests are accepted only "
+            "for the Host names in FLYMIND_ALLOWED_HOSTS (comma-separated; loopback names "
+            "are always allowed)."
         )
+        if host not in ("0.0.0.0", "::"):
+            import os
+
+            extra = os.environ.get("FLYMIND_ALLOWED_HOSTS", "")
+            os.environ["FLYMIND_ALLOWED_HOSTS"] = ",".join(x for x in (extra, host) if x)
     uvicorn.run("flymind.api.app:app", host=host, port=port, reload=reload, log_level="info")
 
 

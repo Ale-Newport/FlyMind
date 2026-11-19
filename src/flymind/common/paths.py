@@ -13,7 +13,7 @@ import re
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
-_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}")
 
 
 def repo_root() -> Path:
@@ -48,7 +48,7 @@ def experiments_dir() -> Path:
 
 def validate_identifier(value: str, kind: str = "identifier") -> str:
     """Reject identifiers that could be used for path traversal or injection."""
-    if not isinstance(value, str) or not _ID_RE.match(value) or ".." in value:
+    if not isinstance(value, str) or not _ID_RE.fullmatch(value) or ".." in value:
         raise ValueError(f"invalid {kind}: {value!r}")
     return value
 

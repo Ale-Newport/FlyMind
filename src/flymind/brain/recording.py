@@ -18,6 +18,7 @@ class SpikeRecord:
     _idx: list[np.ndarray] = field(default_factory=list)
     _lock: threading.Lock = field(default_factory=threading.Lock)
     _cache: tuple[np.ndarray, np.ndarray] | None = None
+    _n: int = 0
 
     def append(self, steps: np.ndarray, idx: np.ndarray) -> None:
         if len(steps) == 0:
@@ -25,12 +26,14 @@ class SpikeRecord:
         with self._lock:
             self._steps.append(np.asarray(steps, dtype=np.int64))
             self._idx.append(np.asarray(idx, dtype=np.int64))
+            self._n += len(steps)
             self._cache = None
 
     def clear(self) -> None:
         with self._lock:
             self._steps.clear()
             self._idx.clear()
+            self._n = 0
             self._cache = None
 
     def arrays(self) -> tuple[np.ndarray, np.ndarray]:
@@ -45,7 +48,9 @@ class SpikeRecord:
             return self._cache
 
     def __len__(self) -> int:
-        return len(self.arrays()[0])
+        # A running count: concatenating the whole history here made every
+        # simulation chunk O(total spikes).
+        return self._n
 
     def window(self, t0_ms: float, t1_ms: float) -> tuple[np.ndarray, np.ndarray]:
         steps, idx = self.arrays()
@@ -72,6 +77,9 @@ class SpikeRecord:
         )
 
 
+MAX_BINS = 1_000_000
+
+
 def population_rate(
     steps: np.ndarray,
     idx: np.ndarray,
@@ -82,6 +90,8 @@ def population_rate(
     dt_ms: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Mean per-neuron rate (Hz) of ``members`` in bins; returns (bin centres ms, rates)."""
+    if not bin_ms > 0 or (t1_ms - t0_ms) / bin_ms > MAX_BINS:
+        raise ValueError(f"bin_ms={bin_ms} gives more than {MAX_BINS:,} bins")
     edges = np.arange(t0_ms, t1_ms + bin_ms * 0.5, bin_ms)
     if len(edges) < 2 or len(members) == 0:
         return np.zeros(0), np.zeros(0)

@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from flymind.api.state import JobQueueFull
 from flymind.common.paths import experiments_dir, safe_join, validate_identifier
 from flymind.connectome.store import list_datasets
 from flymind.experiments.compare import compare_experiments
@@ -70,7 +71,10 @@ def run(request: Request, body: RunIn):
         out = run_experiment(body.spec, progress=progress, cancel=job.cancel, experiment_id=exp_id)
         return {"experiment_id": out.name}
 
-    job = jobs.submit("experiment", body.spec.name, task)
+    try:
+        job = jobs.submit("experiment", body.spec.name, task)
+    except JobQueueFull as exc:
+        raise HTTPException(429, str(exc)) from None
     return {"job_id": job.id, "experiment_id": exp_id}
 
 
@@ -105,8 +109,11 @@ def list_experiments():
 
 
 def _exp_dir(eid: str):
-    validate_identifier(eid, "experiment id")
-    d = safe_join(experiments_dir(), eid)
+    try:
+        validate_identifier(eid, "experiment id")
+        d = safe_join(experiments_dir(), eid)
+    except ValueError:
+        raise HTTPException(404, f"no experiment {eid!r}") from None
     if not (d / "record.json").is_file():
         raise HTTPException(404, f"no experiment {eid}")
     return d
@@ -144,8 +151,11 @@ def experiment_file(eid: str, name: str):
 @router.get("/experiments/{eid}/runs/{run}/trajectory")
 def embodied_trajectory(eid: str, run: str):
     d = _exp_dir(eid)
-    validate_identifier(run, "run")
-    p = safe_join(d, run, "trajectory.parquet")
+    try:
+        validate_identifier(run, "run")
+        p = safe_join(d, run, "trajectory.parquet")
+    except ValueError:
+        raise HTTPException(404, f"no run {run!r}") from None
     if not p.is_file():
         raise HTTPException(404, "no trajectory")
     df = pd.read_parquet(p)
@@ -172,7 +182,7 @@ def compare(body: CompareIn):
 
 @router.get("/jobs")
 def jobs(request: Request):
-    return [j.public() for j in request.app.state.service.jobs.jobs.values()]
+    return [j.public() for j in request.app.state.service.jobs.snapshot()]
 
 
 @router.get("/jobs/{job_id}")

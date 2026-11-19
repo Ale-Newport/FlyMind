@@ -10,7 +10,15 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from pydantic import BaseModel, Field
 
 from flymind.api.common import jsonable
@@ -83,13 +91,23 @@ def mesh_data():
 def create(request: Request, cfg: FlySessionConfig):
     service = _state(request)
 
+    brains: list[SimulationSession] = []
+
     def brain_factory(brain_cfg) -> SimulationSession:
-        return service.sims.create(brain_cfg)  # registered: explorer can read its activity
+        # Registered so the Explorer can read its activity; pinned so the simulator
+        # never evicts the brain of a live fly.
+        brain = service.sims.create(brain_cfg, pinned=True)
+        brains.append(brain)
+        return brain
 
     try:
         s = service.flies.create(cfg, brain_factory=brain_factory)
-    except (ValueError, KeyError, RuntimeError) as exc:
-        raise HTTPException(422, str(exc)) from None
+    except Exception as exc:
+        for b in brains:  # do not leave an orphaned brain session behind
+            service.sims.delete(b.id)
+        if isinstance(exc, (ValueError, KeyError, RuntimeError)):
+            raise HTTPException(422, str(exc)) from None
+        raise
     return {**s.summary(), "scene": s.body.scene_objects()}
 
 
@@ -148,7 +166,7 @@ def set_baseline(request: Request, sid: str, body: BaselineCommand):
 
 
 @router.get("/sessions/{sid}/trajectory")
-def trajectory(request: Request, sid: str, max_rows: int = 2000):
+def trajectory(request: Request, sid: str, max_rows: int = Query(2000, ge=2, le=100_000)):
     s = _fly(request, sid)
     df = s.trajectory()
     if len(df) > max_rows:
@@ -192,9 +210,12 @@ def recordings():
 
 @router.get("/recordings/{rid}")
 def recording(rid: str):
-    validate_identifier(rid, "recording id")
-    d = safe_join(experiments_dir(), rid)
-    if not (d / "record.json").is_file():
+    try:
+        validate_identifier(rid, "recording id")
+        d = safe_join(experiments_dir(), rid)
+    except ValueError:
+        raise HTTPException(404, f"no recording {rid!r}") from None
+    if not (d / "record.json").is_file() or not (d / "trajectory.parquet").is_file():
         raise HTTPException(404, f"no recording {rid}")
     rec = json.loads((d / "record.json").read_text())
     traj = pd.read_parquet(d / "trajectory.parquet")

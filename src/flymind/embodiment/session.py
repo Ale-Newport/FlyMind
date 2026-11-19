@@ -606,6 +606,12 @@ class FlySession:
         return prov
 
     def save(self, root: Path | None = None) -> Path:
+        # Hold the session lock so the worker thread cannot append to the recording
+        # buffers while they are written (rows and joints would differ in length).
+        with self._lock:
+            return self._save(root)
+
+    def _save(self, root: Path | None) -> Path:
         name = validate_identifier(f"fly_{self.id}", "session id")
         out = safe_join(root or experiments_dir(), name)
         out.mkdir(parents=True, exist_ok=True)
@@ -674,22 +680,38 @@ def _json(o):
 
 
 class FlySessionManager:
-    def __init__(self, max_sessions: int = 3):
+    def __init__(self, max_sessions: int = 3, on_remove=None):
+        """``on_remove(session)`` is called after a session is deleted or evicted
+        (the service uses it to drop the session's brain from the simulator registry)."""
         self.max_sessions = max_sessions
         self._sessions: dict[str, FlySession] = {}
+        self._pending = 0
         self._lock = threading.Lock()
+        self._on_remove = on_remove
+
+    def _release(self, s: FlySession) -> None:
+        s.stop()
+        if self._on_remove is not None:
+            self._on_remove(s)
 
     def create(self, config: FlySessionConfig, brain_factory=None) -> FlySession:
+        evicted = None
         with self._lock:
-            if len(self._sessions) >= self.max_sessions:
+            if len(self._sessions) + self._pending >= self.max_sessions:
                 for sid, s in list(self._sessions.items()):
                     if s.status != "running":
-                        s.stop()
-                        del self._sessions[sid]
+                        evicted = self._sessions.pop(sid)
                         break
                 else:
                     raise RuntimeError("too many running fly sessions")
-        s = FlySession(config, brain_factory)
+            self._pending += 1
+        if evicted is not None:
+            self._release(evicted)
+        try:
+            s = FlySession(config, brain_factory)
+        finally:
+            with self._lock:
+                self._pending -= 1
         with self._lock:
             self._sessions[s.id] = s
         return s
@@ -707,7 +729,7 @@ class FlySessionManager:
         with self._lock:
             s = self._sessions.pop(sid, None)
         if s:
-            s.stop()
+            self._release(s)
 
     def shutdown(self) -> None:
         for s in self.list():

@@ -29,16 +29,16 @@ class ConnectivityCriterion(BaseModel):
 class NeuronSelector(BaseModel):
     """All given filters are combined with AND; ``root_ids`` and ``group`` add explicitly."""
 
-    root_ids: list[int] = []
+    root_ids: list[int] = Field(default_factory=list, max_length=200_000)
     group: str | None = Field(None, description="named group from the dataset's group file")
-    cell_types: list[str] = []
+    cell_types: list[str] = Field(default_factory=list, max_length=5_000)
     cell_type_regex: str | None = None
-    hemibrain_types: list[str] = []
-    super_class: list[str] = []
-    cell_class: list[str] = []
-    side: list[str] = []
-    nt_type: list[str] = []
-    neuropils: list[str] = []
+    hemibrain_types: list[str] = Field(default_factory=list, max_length=5_000)
+    super_class: list[str] = Field(default_factory=list, max_length=100)
+    cell_class: list[str] = Field(default_factory=list, max_length=500)
+    side: list[str] = Field(default_factory=list, max_length=4)
+    nt_type: list[str] = Field(default_factory=list, max_length=20)
+    neuropils: list[str] = Field(default_factory=list, max_length=200)
     connected: ConnectivityCriterion | None = None
     limit: int | None = Field(None, ge=1, le=200_000)
 

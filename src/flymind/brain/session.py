@@ -108,8 +108,8 @@ class SessionConfig(BaseModel):
     max_duration_ms: float = Field(60_000.0, gt=0, le=600_000)
     chunk_ms: float = Field(10.0, gt=0, le=1000)
     speed: float | None = Field(None, gt=0, le=1000, description="target sim/wall ratio")
-    stimuli: list[StimulusSpec] = Field(default_factory=list)
-    interventions: list[InterventionSpec] = Field(default_factory=list)
+    stimuli: list[StimulusSpec] = Field(default_factory=list, max_length=256)
+    interventions: list[InterventionSpec] = Field(default_factory=list, max_length=256)
     label: str = ""
 
 
@@ -533,22 +533,37 @@ class SessionManager:
     def __init__(self, max_sessions: int = 4):
         self.max_sessions = max_sessions
         self._sessions: dict[str, SimulationSession] = {}
+        self._pinned: set[str] = set()
+        self._pending = 0
         self._lock = threading.Lock()
 
-    def create(self, config: SessionConfig) -> SimulationSession:
+    def create(self, config: SessionConfig, pinned: bool = False) -> SimulationSession:
+        """Create a session, evicting the oldest idle one when the registry is full.
+
+        ``pinned`` sessions (the brains of virtual-fly sessions) are never evicted;
+        their owner deletes them. A slot is reserved under the lock before the
+        (slow) network build, so concurrent creates cannot exceed ``max_sessions``.
+        """
         with self._lock:
-            if len(self._sessions) >= self.max_sessions:
-                # evict the oldest non-running session
+            if len(self._sessions) + self._pending >= self.max_sessions:
+                # evict the oldest session that is idle and not owned by a fly session
                 for sid, s in list(self._sessions.items()):
-                    if s.status != "running":
+                    if s.status not in ("running", "external") and sid not in self._pinned:
                         s.stop()
                         del self._sessions[sid]
                         break
                 else:
                     raise RuntimeError(f"too many running sessions (max {self.max_sessions})")
-        session = SimulationSession(config)
+            self._pending += 1
+        try:
+            session = SimulationSession(config)
+        finally:
+            with self._lock:
+                self._pending -= 1
         with self._lock:
             self._sessions[session.id] = session
+            if pinned:
+                self._pinned.add(session.id)
         return session
 
     def get(self, sid: str) -> SimulationSession:
@@ -563,6 +578,7 @@ class SessionManager:
     def delete(self, sid: str) -> None:
         with self._lock:
             s = self._sessions.pop(sid, None)
+            self._pinned.discard(sid)
         if s is not None:
             s.stop()
 

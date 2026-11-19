@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 def client(store):
     from flymind.api.app import create_app
 
-    with TestClient(create_app()) as c:
+    with TestClient(create_app(), base_url="http://127.0.0.1") as c:
         yield c
 
 
@@ -66,7 +66,7 @@ def test_simulation_session_lifecycle_and_stream(client):
     ).json()
     assert len(sil["interventions"]) == 1
     client.post(f"/api/sim/sessions/{sid}/interventions/clear")
-    with client.websocket_connect(f"/ws/sim/{sid}") as ws:
+    with client.websocket_connect(f"ws://127.0.0.1/ws/sim/{sid}") as ws:
         assert ws.receive_json()["type"] == "hello"
         client.post(f"/api/sim/sessions/{sid}/control", json={"action": "resume"})
         msg = ws.receive_json()

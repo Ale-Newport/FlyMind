@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import io
 import json
+import math
 from typing import Literal
 
 import numpy as np
@@ -205,7 +206,9 @@ def raster(
 
 
 @router.get("/sessions/{sid}/traces")
-def traces(request: Request, sid: str, t0_ms: float = 0.0, max_points: int = Query(4000, le=20000)):
+def traces(
+    request: Request, sid: str, t0_ms: float = 0.0, max_points: int = Query(4000, ge=2, le=20000)
+):
     s = _session(request, sid)
     t, v = s.probe_traces()
     keep = t >= t0_ms
@@ -227,7 +230,7 @@ def population(
     request: Request,
     sid: str,
     groups: str = Query(..., max_length=2000),
-    bin_ms: float = Query(10.0, gt=0, le=1000),
+    bin_ms: float = Query(10.0, ge=0.1, le=1000),
 ):
     s = _session(request, sid)
     steps, idx = s.spikes.arrays()
@@ -244,7 +247,10 @@ def population(
             except KeyError:
                 continue
         members = members[s.network.local_of[members] >= 0]
-        t, r = population_rate(steps, idx, members, 0.0, s.t_ms, bin_ms, s.config.params.dt_ms)
+        try:
+            t, r = population_rate(steps, idx, members, 0.0, s.t_ms, bin_ms, s.config.params.dt_ms)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from None
         out[name] = {"n_neurons": len(members), "t_ms": t.tolist(), "rate_hz": r.tolist()}
     return {"bin_ms": bin_ms, "groups": out}
 
@@ -361,8 +367,17 @@ async def ws_sim(websocket: WebSocket, sid: str):
     async def receiver():
         while True:
             msg = await websocket.receive_json()
-            opts["interval"] = min(max(float(msg.get("interval_ms", 100)) / 1000, 0.03), 2.0)
-            opts["max_spikes"] = int(min(max(msg.get("max_spikes", 20_000), 0), 200_000))
+            if not isinstance(msg, dict):
+                continue
+            try:
+                interval_ms = float(msg.get("interval_ms", 100))
+                max_spikes = float(msg.get("max_spikes", 20_000))
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(interval_ms):
+                opts["interval"] = min(max(interval_ms / 1000, 0.03), 2.0)
+            if math.isfinite(max_spikes):
+                opts["max_spikes"] = int(min(max(max_spikes, 0), 200_000))
 
     rx = asyncio.create_task(receiver())
     last_status = session.status
