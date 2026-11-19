@@ -82,3 +82,40 @@ on the same machine (warm uv/npm caches): `make setup` 19 s; `make test` **31 pa
 synthetic dataset with validation `passed`; `make dev API_PORT=8020 WEB_PORT=5190` serves
 the API directly and through the web proxy. With the default ports occupied, `make dev`
 stops with the documented port-conflict message.
+
+## 0.2.0 verification (2026-11-19)
+
+Local, macOS 27.0 (Apple M2 Max), commit `ba31e51`:
+
+| Suite | Command | Result |
+|---|---|---|
+| Python, everything except full data (MuJoCo and Brian2 included) | `uv run pytest -m "not fulldata" --timeout=600` | **82 passed**, 4 deselected |
+| Frontend unit + type check | `cd apps/web && npx tsc -b && npx vitest run` | **22 passed**, no type errors |
+| Browser end-to-end (Playwright, Chromium) | `cd apps/web && npx playwright test` | **6 passed** |
+| Documentation | `mkdocs build --strict` | built, no warnings |
+| Dependency audit | `pip-audit --strict` on every locked package; `npm audit` | no known vulnerabilities |
+| Secret scan | `gitleaks git .` over the full history | no leaks (one allow-listed false positive: a dataset key) |
+
+GitHub Actions on `ba31e51`: CI (Python on Ubuntu and macOS, web type check/unit/e2e, docs
+and static demo build), CodeQL (Python, TypeScript, Actions), Security (dependency audit,
+TruffleHog history scan), OpenSSF Scorecard and the Pages deployment all succeeded. The
+release workflow published v0.2.0 from the tag.
+
+Fresh clone of `main` into an empty directory (warm uv/npm caches): `make setup` 10 s,
+`make test` **67 passed**, 19 deselected; `flymind data info` lists the synthetic dataset with
+validation `passed`.
+
+### Bugs found in the 0.2.0 audit (all fixed, with regression tests in `tests/unit/test_api_hardening.py`)
+
+1. The API answered any `Host` header, so a DNS-rebinding page could drive it.
+2. WebSocket handshakes from any origin were accepted.
+3. No request-body limit; unbounded list inputs and population bins could exhaust memory.
+4. Per-condition parameter overrides bypassed `LIFParams` validation (`dt_ms=0` crashed a job; `dt_ms=1e-7` ran effectively forever).
+5. Experiment jobs were unbounded and never pruned.
+6. Invalid experiment, run and recording ids returned 500 instead of 404.
+7. `max_points`/`max_rows` ≤ 0 divided by zero or reversed data.
+8. Saving a fly recording while it ran could fail with mismatched row counts.
+9. Fly sessions leaked or lost their brain sessions (failed creation, delete, eviction); session caps were racy.
+10. Spike counting re-concatenated the whole history on every chunk.
+11. Identifiers with a trailing newline passed validation.
+12. Alt+digit shortcuts never fired on macOS; partner rows and the shortcuts dialog were not keyboard accessible (found by review; covered by the e2e suite's navigation checks).

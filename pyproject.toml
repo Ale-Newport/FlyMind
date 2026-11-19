@@ -44,6 +44,19 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/flymind"]
 
+[tool.hatch.build.targets.sdist]
+# Keep the source distribution to source, tests and docs text: images, the demo GIF and
+# web build artefacts are only needed on GitHub.
+exclude = [
+    "docs/media",
+    "docs/evidence/screenshots",
+    "docs/evidence/figures",
+    "apps/web/public",
+    "apps/web/test-results",
+    "*.png",
+    "*.gif",
+]
+
 [tool.uv]
 default-groups = ["dev"]
 # FlyGym 2.1.1 caps pillow<13, but every 12.x release has known CVEs fixed only in 13.0.
