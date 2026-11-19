@@ -13,7 +13,7 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
   (`PW_BROWSERS=chromium,firefox,webkit`) and in CI (#22).
 
 ### Changed
-- TypeScript 7.0, FastAPI 0.163 and hatchling ≥ 1.33 (Dependabot #7, #25, #27).
+- TypeScript 7.0, FastAPI 0.163, uvicorn ≥ 0.54 and hatchling ≥ 1.33 (Dependabot #7, #25, #26, #27).
 
 ### Fixed
 - The three figures in the evidence pages now have alt text describing what each plot shows, so a
@@ -22,6 +22,26 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
   printing nothing.
 - The Starlette test-client deprecation warning is gone: `httpx2` is a development dependency
   (#19). The runtime still uses `httpx` for downloads.
+- **Simulation:** current stimuli are switched on and off on the integer step grid, like Poisson
+  and pulse-train stimuli. Window edges just off the 0.1 ms grid (for example a relative stimulus
+  at 3.3 + 1.0 ms) used to drop the drive for a whole segment or leave it on until the end of the
+  chunk, so results depended on chunk size. The Brian2 reference uses the same rule.
+- **Simulation:** stimuli with repeats but no interval, an open-ended window or overlapping
+  repeats, and windows whose stop precedes their start, are rejected when submitted (422)
+  instead of crashing the running session.
+- **Data import:** Codex connections that reference a neuron outside the release are refused,
+  even when their neuropil is unassigned; they were attached to a neighbouring neuron.
+- **Analysis:** region activity in circuit and region mode counts only simulated neurons (mean
+  rates were diluted by neurons that cannot spike). Full-brain results are unchanged.
+- **Analysis:** population rates and experiment time courses use complete, half-open bins: a spike
+  on a bin edge is no longer counted twice and a partial last bin no longer reads low.
+- **Virtual Fly:** vision keeps refreshing in flight (luminance was frozen at take-off), and body
+  time advances by exactly the bridge interval in flight (it drifted for intervals that are not
+  whole milliseconds).
+- **Live view:** merged stream frames take timing and spike totals from the newest simulation
+  frame, not a trailing status message; `max_spikes=0` sends no spikes; probe traces restart
+  when probes are added. After Reset, the Simulator clears the previous run's raster, time and
+  counters. The Explorer activity colour scale uses the true maximum rate.
 
 ## [0.2.0] — 2026-11-19
 
