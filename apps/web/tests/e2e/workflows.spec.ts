@@ -8,7 +8,11 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.
 const SHOTS = path.resolve(REPO, process.env.E2E_SCREENSHOT_DIR ?? "apps/web/test-results/screenshots");
 const shot = (page: Page, name: string) => page.screenshot({ path: path.join(SHOTS, `e2e-${name}.png`) });
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, request }) => {
+  // The browser projects share one backend; start every test without leftover sessions
+  // (the Simulator restores an existing session for the dataset).
+  for (const s of await (await request.get("/api/sim/sessions")).json()) await request.delete(`/api/sim/sessions/${s.id}`);
+  for (const s of await (await request.get("/api/fly/sessions")).json()) await request.delete(`/api/fly/sessions/${s.id}`);
   await page.addInitScript(() => window.localStorage.setItem("flymind-prefs", JSON.stringify({ state: { datasetId: "synthetic_demo_v1" }, version: 0 })));
 });
 

@@ -119,3 +119,19 @@ validation `passed`.
 10. Spike counting re-concatenated the whole history on every chunk.
 11. Identifiers with a trailing newline passed validation.
 12. Alt+digit shortcuts never fired on macOS; partner rows and the shortcuts dialog were not keyboard accessible (found by review; covered by the e2e suite's navigation checks).
+
+## Post-0.2.0 verification (2026-11-19)
+
+Local, macOS 27.0 (Apple M2 Max), after the fixes listed under *Unreleased* in the changelog:
+
+| Suite | Result |
+|---|---|
+| Python, everything except full data (MuJoCo and Brian2 included) | **94 passed**, 4 deselected |
+| Python, full data (FlyWire v783 installed) | **4 passed** |
+| Browser end-to-end, `PW_BROWSERS=chromium,firefox,webkit` | **32 passed** (6 workflow tests × 3 browsers, 14 axe scans in Chromium; 28 axe runs skipped in Firefox/WebKit by design) |
+| Shiu et al. 2024 reproduction (`make reproduce`, v630, 30 trials) | MN9 **93.40 ± 4.83 Hz** at 200 Hz and **67.60 ± 4.91 Hz** at 100 Hz: identical to the table in [the reproduction record](reproduction-shiu2024.md) |
+
+The current-stimulus timing fix changes results only for current windows whose edges fall
+off the 0.1 ms grid; the published reproduction uses Poisson input and is unchanged, as are
+all full-brain evidence runs (region-rate and binning fixes affect circuit/region mode and
+bin edges only).
