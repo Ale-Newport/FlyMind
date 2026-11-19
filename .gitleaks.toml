@@ -1,0 +1,8 @@
+# gitleaks configuration (used by the pre-commit hook and by `gitleaks git .`).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives"
+# SourceBundle(key="flywire-630-shiu") is a dataset identifier, not a credential.
+regexes = ['''^flywire-[0-9a-z-]+$''']

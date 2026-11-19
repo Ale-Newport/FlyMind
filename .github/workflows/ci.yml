@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -13,12 +14,15 @@ jobs:
   python:
     name: Python (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Headless OpenGL (EGL, Mesa software rendering) for MuJoCo vision
         if: runner.os == 'Linux'
         run: |
@@ -26,7 +30,7 @@ jobs:
           sudo apt-get install -y -q --no-install-recommends libegl1 libegl-mesa0 libgl1 libgles2
           echo "MUJOCO_GL=egl" >> "$GITHUB_ENV"
           echo "PYOPENGL_PLATFORM=egl" >> "$GITHUB_ENV"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
       - run: uv python install 3.13
@@ -44,20 +48,23 @@ jobs:
   web:
     name: Web (type check, unit, e2e)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       FORCE_COLOR: "0"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Headless OpenGL for MuJoCo
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q --no-install-recommends libegl1 libegl-mesa0 libgl1 libgles2
           echo "MUJOCO_GL=egl" >> "$GITHUB_ENV"
           echo "PYOPENGL_PLATFORM=egl" >> "$GITHUB_ENV"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
@@ -82,8 +89,33 @@ jobs:
         run: |
           bash scripts/ci/annotate_failure.sh web-unit.log "type check / unit tests" 60
           bash scripts/ci/annotate_failure.sh e2e.log "Playwright e2e" 80
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: playwright-results
           path: apps/web/test-results
+          retention-days: 14
+
+  docs:
+    name: Docs and static demo build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: uv python install 3.13 && uv sync --frozen --group docs
+      - name: Documentation (strict)
+        run: uv run --group docs mkdocs build --strict --site-dir site
+      - name: Static demo (synthetic data, Pages mode)
+        run: |
+          uv run python scripts/data/export_static_demo.py
+          cd apps/web && npm ci && npm run build:pages

@@ -1,0 +1,28 @@
+# Normalise line endings in the repository; check out with the platform default.
+* text=auto eol=lf
+
+# Scripts must keep LF endings to run on macOS/Linux.
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.npy binary
+*.npz binary
+*.parquet binary
+*.glb binary
+*.stl binary
+
+# Generated lockfiles: hide from diffs and language statistics
+uv.lock linguist-generated=true -diff
+apps/web/package-lock.json linguist-generated=true -diff
+
+# Documentation and evidence data should not count as source languages
+docs/** linguist-documentation

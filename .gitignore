@@ -33,12 +33,32 @@ site/
 
 # OS / editors
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Secrets and local configuration (copy .env.example to .env)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials*.json
+
+# Caches, logs and coverage
+.mypy_cache/
+.cache/
+*.log
+coverage.xml
+requirements-audit.txt
+apps/web/coverage/
+
+# Generated web assets
 apps/web/public/demo/
 apps/web/dist-pages/
-!experiments/README.md
+
+# Local tooling
 .claude/
-site/
+apps/web/*.tsbuildinfo
