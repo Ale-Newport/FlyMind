@@ -42,6 +42,9 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
   frame, not a trailing status message; `max_spikes=0` sends no spikes; probe traces restart
   when probes are added. After Reset, the Simulator clears the previous run's raster, time and
   counters. The Explorer activity colour scale uses the true maximum rate.
+- **Web app:** when the browser cannot create a WebGL context (hardware acceleration off, a
+  GPU-less VM), the 3D panels show "3D view unavailable" and the rest of the page keeps working;
+  the whole app used to go blank. Found by the new Firefox CI run.
 
 ## [0.2.0] — 2026-11-19
 

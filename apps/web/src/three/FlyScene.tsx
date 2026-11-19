@@ -4,6 +4,7 @@ import { Grid, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { OrbitControls as OrbitImpl } from "three-stdlib";
 import type { MeshMeta, SceneObject } from "../lib/types";
+import { WebGLBoundary } from "./WebGLBoundary";
 
 /** Geometry of the official NeuroMechFly meshes, built once from the server mesh pack. */
 export function buildFlyGeometries(meta: MeshMeta, data: ArrayBuffer) {
@@ -203,6 +204,7 @@ export function FlyScene({ parts, source, objects, odor, trail, follow, ambient 
 }) {
   const controls = useRef<OrbitImpl | null>(null);
   return (
+    <WebGLBoundary testId="fly-canvas">
     <Canvas shadows dpr={[1, 2]} camera={{ position: [-8, 6, 8], fov: 40, near: 0.05, far: 2000 }} gl={{ preserveDrawingBuffer: true }} data-testid="fly-canvas">
       <color attach="background" args={[ambient < 0.3 ? "#0a0908" : "#12110f"]} />
       <hemisphereLight args={["#efe6d4", "#1c1a16", 0.35 + ambient * 0.6]} />
@@ -223,5 +225,6 @@ export function FlyScene({ parts, source, objects, odor, trail, follow, ambient 
       </group>
       <Grid position={[0, 0.005, 0]} args={[200, 200]} cellSize={1} cellColor="#262420" sectionSize={10} sectionColor="#38352f" fadeDistance={120} infiniteGrid />
     </Canvas>
+    </WebGLBoundary>
   );
 }

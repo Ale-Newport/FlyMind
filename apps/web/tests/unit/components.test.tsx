@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { EvidenceBadge, ErrorBox, KV, Seg, SyntheticBanner } from "../../src/components/ui";
@@ -75,5 +75,19 @@ describe("key-value list", () => {
     expect(screen.getAllByRole("term").length).toBe(2);
     expect(screen.getByText("mm/s").className).toContain("unit");
     expect(screen.queryByText("mm")).toBeNull(); // no unit after a missing value
+  });
+});
+
+describe("WebGLBoundary", () => {
+  it("shows a notice instead of unmounting the app when WebGL cannot start", async () => {
+    const { WebGLBoundary } = await import("../../src/three/WebGLBoundary");
+    const Boom = () => { throw new Error("THREE.WebGLRenderer: Error creating WebGL context."); };
+    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    render(<div><p>outside</p><WebGLBoundary testId="brain-canvas"><Boom /></WebGLBoundary></div>);
+    expect(screen.getByText("outside")).toBeInTheDocument();
+    expect(screen.getByTestId("brain-canvas")).toHaveTextContent("3D view unavailable");
+    expect(screen.getByTestId("brain-canvas")).toHaveTextContent("WebGL context");
+    spy.mockRestore(); warn.mockRestore();
   });
 });

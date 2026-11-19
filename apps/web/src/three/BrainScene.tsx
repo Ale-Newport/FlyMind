@@ -4,6 +4,7 @@ import { GizmoHelper, Html, OrbitControls, OrthographicCamera, PerspectiveCamera
 import * as THREE from "three";
 import type { OrbitControls as OrbitImpl } from "three-stdlib";
 import { useChartColors } from "../lib/colors";
+import { WebGLBoundary } from "./WebGLBoundary";
 
 // Dataset coordinates (FlyWire FAFB, nm -> um): +x = fly right, +y = ventral, +z = posterior.
 // Display: X = x (fly right), Y = -y (dorsal up), Z = -z (anterior toward +Z).
@@ -199,6 +200,7 @@ export function BrainScene({ positions, style, pointSize, ortho, onPick, labels,
   const { scene } = useChartColors();
   return (
     <div ref={portal as React.RefObject<HTMLDivElement>} style={{ position: "relative", width: "100%", height: "100%" }}>
+    <WebGLBoundary testId="brain-canvas">
     <Canvas dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }} raycaster={{ params: { Points: { threshold: radius / 250 } } as THREE.RaycasterParameters }} data-testid="brain-canvas">
       <color key={scene.bg} attach="background" args={[scene.bg]} />
       {ortho ? (
@@ -221,6 +223,7 @@ export function BrainScene({ positions, style, pointSize, ortho, onPick, labels,
         </GizmoHelper>
       </HtmlPortal.Provider>
     </Canvas>
+    </WebGLBoundary>
     </div>
   );
 }
