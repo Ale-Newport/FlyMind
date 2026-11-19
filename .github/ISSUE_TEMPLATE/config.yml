@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas (Discussions)
+    url: https://github.com/Ale-Newport/FlyMind/discussions
+    about: Ask how to use FlyMind, share results, or discuss modelling choices.
+  - name: Report a security vulnerability
+    url: https://github.com/Ale-Newport/FlyMind/security/advisories/new
+    about: Please report vulnerabilities privately, not in public issues.
+  - name: Documentation
+    url: https://ale-newport.github.io/FlyMind/docs/
+    about: Tutorials, scientific methods, troubleshooting and the API reference.

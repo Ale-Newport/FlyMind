@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose a new capability (a dataset adapter, an experiment template, a visualisation, ...).
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to do that FlyMind cannot do today?
+      description: Describe the scientific or practical goal, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How it could work. Mention the module (connectome, brain, embodiment, visualization, experiments, api, web) if you know it.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Scientific basis
+      description: Papers, datasets or reference implementations this relies on. FlyMind labels every result as published, reproduced, simulation output, hypothesis or demonstration, so say which this would be.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to work on this myself.

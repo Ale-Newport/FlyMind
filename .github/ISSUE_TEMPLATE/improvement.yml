@@ -1,0 +1,30 @@
+name: Improvement
+description: Make something that already exists better (performance, usability, docs, tests, accessibility).
+labels: [improvement, needs-triage]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of improvement
+      options:
+        - Performance
+        - Usability / UI
+        - Accessibility
+        - Documentation
+        - Tests / CI
+        - Code quality / refactoring
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current behaviour
+      description: What is slow, confusing or missing today? Numbers help (e.g. "the v783 import takes 18 s").
+    validations:
+      required: true
+  - type: textarea
+    id: better
+    attributes:
+      label: Suggested improvement
+    validations:
+      required: true

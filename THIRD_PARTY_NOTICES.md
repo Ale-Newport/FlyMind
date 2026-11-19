@@ -1,8 +1,12 @@
 # Third-party notices
 
-FlyMind's own code is MIT-licensed. It depends on, but does not vendor, the components
-below (installed from PyPI/npm via the lockfiles). No third-party source code is copied
-into this repository.
+FlyMind's own code is MIT-licensed ([LICENSE](LICENSE)). That licence covers FlyMind's
+source code only. Connectome data, neuron skeletons and the NeuroMechFly model are
+distributed by their providers under their own terms (below); FlyMind does not
+redistribute them.
+
+FlyMind depends on, but does not vendor, the components below (installed from PyPI/npm
+via the lockfiles). No third-party source code is copied into this repository.
 
 ## Scientific components
 
