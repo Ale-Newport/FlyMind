@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Newsreader"; src: url("../../apps/web/node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2") format("woff2"); font-weight: 200 800; }
+  @font-face { font-family: "Geist"; src: url("../../apps/web/node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "Geist Mono"; src: url("../../apps/web/node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+  html, body { margin: 0; width: 1280px; height: 640px; background: #151412; overflow: hidden; }
+  .card { position: relative; width: 1280px; height: 640px; color: #ece8df; font-family: "Geist", sans-serif; }
+  .brain { position: absolute; right: -120px; top: -40px; width: 900px; height: 720px;
+    background: url("../../docs/evidence/screenshots/explorer-flywire-783-overview.png") no-repeat;
+    background-size: 1150px auto; background-position: -128px 68px;
+    -webkit-mask-image: radial-gradient(ellipse 47% 42% at 48% 53%, #000 62%, transparent 100%); opacity: .95; }
+  .fade { position: absolute; inset: 0; background: linear-gradient(90deg, #151412 0%, #151412 38%, rgba(21,20,18,.6) 55%, rgba(21,20,18,0) 75%); }
+  .text { position: absolute; left: 72px; top: 92px; width: 640px; }
+  .kicker { font-family: "Geist Mono", monospace; font-size: 20px; letter-spacing: .14em; text-transform: uppercase; color: #5eead4; }
+  h1 { font-family: "Newsreader", serif; font-weight: 500; font-size: 112px; line-height: 1; margin: 22px 0 26px; letter-spacing: -.02em; }
+  p { font-size: 30px; line-height: 1.32; color: #bdb7aa; margin: 0; }
+  .facts { position: absolute; left: 72px; bottom: 66px; display: flex; gap: 40px; font-family: "Geist Mono", monospace; font-size: 19px; color: #958f83; }
+  .facts b { display: block; font-family: "Geist", sans-serif; font-size: 30px; color: #ece8df; font-weight: 600; margin-bottom: 4px; }
+  .repo { position: absolute; right: 56px; bottom: 30px; font-family: "Geist Mono", monospace; font-size: 18px; color: #958f83; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brain"></div>
+  <div class="fade"></div>
+  <div class="text">
+    <div class="kicker">Virtual Drosophila lab</div>
+    <h1>FlyMind</h1>
+    <p>Simulate the whole FlyWire fruit-fly connectome, embody it in a physics-based fly, and explore it in 3D.</p>
+  </div>
+  <div class="facts">
+    <div><b>139,255</b>neurons</div>
+    <div><b>54.5 M</b>synapses</div>
+    <div><b>MuJoCo</b>NeuroMechFly body</div>
+  </div>
+  <div class="repo">github.com/Ale-Newport/FlyMind</div>
+</div>
+</body>
+</html>

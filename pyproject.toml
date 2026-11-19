@@ -1,6 +1,6 @@
 [project]
 name = "flymind"
-version = "0.1.0"
+version = "0.2.0"
 description = "FlyMind: connectome-constrained Drosophila brain simulation, embodied virtual fly and 3D brain explorer."
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -16,7 +16,7 @@ dependencies = [
     "fastapi>=0.115,<0.163",
     "uvicorn[standard]>=0.34,<0.55",
     "pydantic>=2.10,<2.15",
-    "typer>=0.15,<0.29",
+    "typer>=0.15,<0.30",
     "httpx>=0.28,<0.29",
     "flygym==2.1.1",
 ]
@@ -46,6 +46,10 @@ packages = ["src/flymind"]
 
 [tool.uv]
 default-groups = ["dev"]
+# FlyGym 2.1.1 caps pillow<13, but every 12.x release has known CVEs fixed only in 13.0.
+# FlyGym only uses Pillow through imageio/matplotlib for rendering; the physics and
+# rendering test suites pass on 13.x. Remove this override once FlyGym lifts the cap.
+override-dependencies = ["pillow>=13.0.0"]
 
 [tool.ruff]
 line-length = 100

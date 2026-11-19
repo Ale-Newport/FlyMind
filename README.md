@@ -1,8 +1,31 @@
-# FlyMind
+<p align="center">
+  <img src="docs/media/flymind-demo.gif" alt="FlyMind running on the real FlyWire connectome: orbiting all 139,255 neurons in the Brain Explorer and selecting DNa02, a whole-brain simulation driven by sugar receptor neurons, and the NeuroMechFly body taking off in the Virtual Fly" width="720">
+</p>
 
-**A virtual *Drosophila* laboratory: simulate the FlyWire connectome, embody it in a physics-based fly, and explore real neuronal anatomy in 3D, with the evidence for every claim kept visible.**
+<h1 align="center">FlyMind</h1>
 
-![Brain Explorer: FlyWire v783 with the reconstructed DNa02 neuron and its input/output partners](docs/evidence/screenshots/explorer-flywire-783-dna02.png)
+<p align="center"><strong>Simulate the complete fruit-fly brain wiring diagram, embody it in a physics-based fly, and explore every neuron in 3D, all on a laptop.</strong></p>
+
+<p align="center">
+  <a href="https://github.com/Ale-Newport/FlyMind/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Ale-Newport/FlyMind/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/Ale-Newport/FlyMind/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/Ale-Newport/FlyMind/actions/workflows/codeql.yml/badge.svg?branch=main"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/Ale-Newport/FlyMind"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/Ale-Newport/FlyMind/badge"></a>
+  <a href="https://github.com/Ale-Newport/FlyMind/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Ale-Newport/FlyMind?sort=semver"></a>
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/github/license/Ale-Newport/FlyMind"></a>
+  <img alt="Python 3.13" src="https://img.shields.io/badge/python-3.13-3776AB?logo=python&amp;logoColor=white">
+  <img alt="TypeScript and React" src="https://img.shields.io/badge/TypeScript-React%2019-3178C6?logo=typescript&amp;logoColor=white">
+  <img alt="MuJoCo" src="https://img.shields.io/badge/physics-MuJoCo%20%2B%20FlyGym-1f6feb">
+</p>
+
+<p align="center">
+  <a href="https://ale-newport.github.io/FlyMind/"><b>Live demo</b></a> ·
+  <a href="https://ale-newport.github.io/FlyMind/docs/"><b>Documentation</b></a> ·
+  <a href="#quickstart"><b>Quickstart</b></a> ·
+  <a href="docs/evidence/reproduction-shiu2024.md"><b>Reproduced result</b></a> ·
+  <a href="CONTRIBUTING.md"><b>Contribute</b></a>
+</p>
+
+FlyMind is a virtual *Drosophila* laboratory. It runs a spiking model of the real FlyWire FAFB v783 connectome (139,255 neurons, 54.5 M synapses), connects it to the NeuroMechFly body in MuJoCo, and lets you explore the anatomy in your browser. The evidence for every claim stays visible.
 
 FlyMind connects three tools that share one dataset representation and one simulation core:
 
@@ -14,6 +37,8 @@ FlyMind connects three tools that share one dataset representation and one simul
 
 > **What FlyMind is not.** A connectome is not a functional brain. Simulated activity is model output, not recorded activity. Walking is produced by FlyGym's controller, because the FAFB connectome contains no ventral nerve cord. FlyMind labels results as *published*, *reproduced*, *simulation output*, *hypothesis* or *demonstration*.
 
+**Try it now, without installing anything:** the [live demo](https://ale-newport.github.io/FlyMind/) runs the Brain Explorer in your browser on a small, clearly labelled synthetic network. The full simulator and physics need the local install below.
+
 ## Highlights (measured)
 
 * **Reproduced a published result.** On the exact v630 network and neuron IDs of Shiu et al. 2024, sugar-GRN stimulation drives MN9 at **93.4 Hz** with 200 Hz input (reference 93.3 Hz) and at **67.6 Hz** with 100 Hz input (reference 67.0 Hz). Each is a mean of 30 trials; see the [evidence](docs/evidence/reproduction-shiu2024.md).
@@ -23,7 +48,9 @@ FlyMind connects three tools that share one dataset representation and one simul
 
 | Brain Simulator: full brain, sugar GRNs | Virtual Fly: food arena | Virtual Fly: flight |
 |---|---|---|
-| ![](docs/evidence/screenshots/simulator-flywire-783-sugar.png) | ![](docs/evidence/screenshots/virtual-fly-food-arena.png) | ![](docs/evidence/screenshots/virtual-fly-flight.png) |
+| ![Brain Simulator: raster and rates of a full-brain run](docs/evidence/screenshots/simulator-flywire-783-sugar.png) | ![Virtual Fly walking in the food arena](docs/evidence/screenshots/virtual-fly-food-arena.png) | ![Virtual Fly in flight](docs/evidence/screenshots/virtual-fly-flight.png) |
+| **Brain Explorer: DNa02 and its partners** | **Explorer: simulated activity overlay** | **Experiments: Shiu et al. 2024 reproduction** |
+| ![Brain Explorer with the reconstructed DNa02 neuron](docs/evidence/screenshots/explorer-flywire-783-dna02.png) | ![Simulated activity drawn on all neurons](docs/evidence/screenshots/explorer-flywire-783-activity-overlay.png) | ![Reproduction of the sugar GRN to MN9 result](docs/evidence/screenshots/experiment-reproduction-shiu2024.png) |
 
 All screenshots are of the running application. They show FlyWire data (Dorkenwald et al. 2024; Schlegel et al. 2024), used with attribution.
 
@@ -36,11 +63,13 @@ Requirements:
 * Node.js ≥ 20
 * a C++ compiler (`xcode-select --install` / `build-essential`)
 
+One command clones, installs and starts everything:
+
 ```bash
-git clone https://github.com/Ale-Newport/FlyMind.git && cd FlyMind
-make setup        # Python 3.13 + locked dependencies, web dependencies, synthetic dataset
-make dev          # API http://127.0.0.1:8000  +  web app http://127.0.0.1:5173
+git clone https://github.com/Ale-Newport/FlyMind.git && cd FlyMind && make setup && make dev
 ```
+
+`make setup` installs Python 3.13 with the locked dependencies, the web dependencies and a synthetic dataset; `make dev` starts the API on http://127.0.0.1:8000 and the web app on http://127.0.0.1:5173.
 
 A fresh clone runs entirely on a small, clearly labelled synthetic network. It needs no credentials and no downloads.
 
@@ -130,6 +159,14 @@ These are the most important; see [Limitations](docs/scientific/limitations.md) 
 * **Senses:** the odour field is analytic, vision is eye-averaged luminance, and FlyVis is not integrated (it requires Python < 3.13).
 * **Datasets:** BANC and male-CNS adapters are planned and refuse imports until they are validated.
 * **Browsers:** automated tests run in Chromium only.
+
+## Security
+
+The API is meant for your own machine: it binds to `127.0.0.1`, rejects foreign `Host` headers (DNS rebinding) and cross-site WebSockets, and bounds every request. See [SECURITY.md](SECURITY.md) for the model and for private vulnerability reporting.
+
+## Contributing
+
+Contributions are welcome, from fixing a typo to adding a dataset adapter. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the issues labelled [`good first issue`](https://github.com/Ale-Newport/FlyMind/labels/good%20first%20issue). Questions and results belong in [Discussions](https://github.com/Ale-Newport/FlyMind/discussions). Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md). Changes are listed in the [CHANGELOG](CHANGELOG.md).
 
 ## Citing and licences
 

@@ -12,4 +12,4 @@ Package layout (layered; lower layers never import higher ones, enforced by
     api / cli     -> FastAPI service and command-line interface
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
