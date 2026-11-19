@@ -4,9 +4,24 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Added
+- `flymind data info --json` prints a machine-readable list of installed datasets (with the full
+  manifest when a dataset is named) (#20).
+- Automated accessibility checks: axe-core scans every page in the dark and light themes for
+  WCAG 2.1 A/AA violations in the Playwright suite (#21).
+- The end-to-end tests run in Firefox and WebKit as well as Chromium, locally
+  (`PW_BROWSERS=chromium,firefox,webkit`) and in CI (#22).
+
+### Changed
+- TypeScript 7.0, FastAPI 0.163 and hatchling ≥ 1.33 (Dependabot #7, #25, #27).
+
 ### Fixed
 - The three figures in the evidence pages now have alt text describing what each plot shows, so a
-  screen reader announces the figure rather than its file name.
+  screen reader announces the figure rather than its file name (#18, thanks @tyza66).
+- `flymind data info <dataset>` exits with an error for a dataset that is not installed instead of
+  printing nothing.
+- The Starlette test-client deprecation warning is gone: `httpx2` is a development dependency
+  (#19). The runtime still uses `httpx` for downloads.
 
 ## [0.2.0] — 2026-11-19
 
