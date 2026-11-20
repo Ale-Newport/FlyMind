@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: Newport Diaz
     given-names: Alejandro
-version: 0.2.0
-date-released: 2026-11-19
+version: 0.2.1
+date-released: 2026-11-20
 license: MIT
 repository-code: "https://github.com/Ale-Newport/FlyMind"
 keywords: [Drosophila, connectome, FlyWire, spiking neural network, NeuroMechFly, MuJoCo, computational neuroscience]

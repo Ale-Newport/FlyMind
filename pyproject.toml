@@ -1,6 +1,6 @@
 [project]
 name = "flymind"
-version = "0.2.0"
+version = "0.2.1"
 description = "FlyMind: connectome-constrained Drosophila brain simulation, embodied virtual fly and 3D brain explorer."
 readme = "README.md"
 requires-python = ">=3.13,<3.14"

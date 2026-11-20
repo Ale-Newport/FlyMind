@@ -4,6 +4,8 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-11-20
+
 ### Added
 - `flymind data info --json` prints a machine-readable list of installed datasets (with the full
   manifest when a dataset is named) (#20).
@@ -135,6 +137,7 @@ All notable changes are documented here (format: [Keep a Changelog](https://keep
 - FastAPI service, React/TypeScript web app, CLI, Makefile, tests (pytest, Vitest,
   Playwright), benchmarks, documentation, CI and GitHub Pages static demo.
 
-[Unreleased]: https://github.com/Ale-Newport/FlyMind/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Ale-Newport/FlyMind/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Ale-Newport/FlyMind/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Ale-Newport/FlyMind/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Ale-Newport/FlyMind/releases/tag/v0.1.0
