@@ -34,7 +34,6 @@ const DOCS: { group: string; items: [string, string][] }[] = [
     ["Reproduction of Shiu et al. 2024", "docs/evidence/reproduction-shiu2024.md"],
     ["FlyWire v783 experiments", "docs/evidence/flywire783-experiments.md"],
     ["Embodied FlyWire runs", "docs/evidence/embodied-flywire.md"],
-    ["Implementation status", "docs/IMPLEMENTATION_STATUS.md"],
     ["Benchmarks", "docs/evidence/benchmarks.md"],
     ["Test results", "docs/evidence/test-results.md"],
   ] },

@@ -10,4 +10,4 @@ NeuroMechFly body in MuJoCo driven through a documented neural–motor interface
 * Read what the model is — and is not — in [Neuron model](scientific/neuron-model.md)
   and [Limitations](scientific/limitations.md).
 * See what has been verified in [Evidence](evidence/index.md) and the
-  [implementation status](IMPLEMENTATION_STATUS.md).
+  [feature matrix](evidence/feature-matrix.md).

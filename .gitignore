@@ -62,3 +62,20 @@ apps/web/dist-pages/
 # Local tooling
 .claude/
 apps/web/*.tsbuildinfo
+
+# Internal notes, AI-agent files and promotional drafts (kept locally, never published)
+docs/IMPLEMENTATION_STATUS.md
+LAUNCH*.md
+**/LAUNCH*.md
+launch/
+docs/launch/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.cursor/
+.aider*
+.codex/
+.windsurf/
+*.bundle
+backups/
+

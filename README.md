@@ -142,7 +142,7 @@ CPU only; no GPU is required. Measured on an Apple M2 Max (12 cores, 64 GB):
 
 * **Scientific:** [neuron model](docs/scientific/neuron-model.md) · [connectome sources & licences](docs/scientific/connectome-sources.md) · [interventions](docs/scientific/interventions.md) · [neural–body interface](docs/scientific/neural-body-interface.md) · [validation](docs/scientific/validation.md) · [limitations](docs/scientific/limitations.md) · [references](docs/scientific/references.md)
 * **Tutorials:** [installation](docs/tutorials/01-installation.md) → [extending](docs/tutorials/10-extending.md)
-* **Evidence:** [feature matrix](docs/evidence/feature-matrix.md) · [test results](docs/evidence/test-results.md) · [implementation status](docs/IMPLEMENTATION_STATUS.md)
+* **Evidence:** [feature matrix](docs/evidence/feature-matrix.md) · [test results](docs/evidence/test-results.md)
 * **Research:** [reference repositories](docs/research/reference-repositories.md) · [troubleshooting](docs/troubleshooting/index.md) · [API](docs/api/index.md)
 
 The public GitHub Pages site serves only a browser-side preview of the **synthetic** network plus the documentation. The brain simulation and MuJoCo physics need the local backend.
